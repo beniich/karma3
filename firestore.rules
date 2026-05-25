@@ -1,0 +1,124 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // --- Phase 3: Primitives ---
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\- \\(\\)]+$'); 
+    }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isSignedIn() { return request.auth != null; }
+    // User email from runtime for bootstrapping if needed: beniich.contact@gmail.com
+    function isAdmin() { return isSignedIn() && request.auth.token.email == 'beniich.contact@gmail.com' && request.auth.token.email_verified == true; }
+
+    // --- Default Deny ---
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Validation Blueprints ---
+    function isValidRisk(data) {
+      return data.keys().hasAll(['id', 'adminId', 'domain', 'desc', 'crit']) &&
+             data.id is string && data.id.size() <= 64 &&
+             data.adminId == request.auth.uid &&
+             data.domain is string && data.domain.size() <= 128 &&
+             data.desc is string && data.desc.size() <= 1000 &&
+             data.crit in ['Critique', 'Élevé', 'Moyen', 'Critical', 'High', 'Medium'];
+    }
+
+    function isValidZone(data) {
+      return data.keys().hasAll(['name', 'adminId', 'claims', 'cause', 'solution', 'prio']) &&
+             data.name is string &&
+             data.adminId == request.auth.uid &&
+             data.claims is number &&
+             data.prio in ['Critique', 'Élevé', 'Moyen', 'Critical', 'High', 'Medium'];
+    }
+
+    function isValidService(data) {
+      return data.keys().hasAll(['id', 'adminId', 'name', 'status', 'efficiency']) &&
+             data.id is string &&
+             data.adminId == request.auth.uid &&
+             data.status in ['Active', 'Warning', 'Maintenance'] &&
+             data.efficiency is number && data.efficiency >= 0 && data.efficiency <= 100;
+    }
+
+    function isValidEmployee(data) {
+      return data.keys().hasAll(['id', 'adminId', 'name', 'role', 'email', 'phone']) &&
+             data.adminId == request.auth.uid &&
+             data.email is string && data.email.size() <= 256;
+    }
+
+    function isValidSubscriber(data) {
+      return data.keys().hasAll(['id', 'adminId', 'name', 'organization', 'email', 'plan', 'status', 'joinedDate']) &&
+             data.id is string && data.id.size() <= 128 &&
+             data.adminId == request.auth.uid &&
+             data.name is string && data.name.size() <= 256 &&
+             data.organization is string && data.organization.size() <= 256 &&
+             data.email is string && data.email.size() <= 256 &&
+             data.plan in ['Expert', 'Corporate', 'Enterprise'] &&
+             data.status in ['Active', 'Pending', 'Expired'] &&
+             data.joinedDate is string && data.joinedDate.size() <= 128;
+    }
+
+    function isOwner() {
+      return isSignedIn() && resource.data.adminId == request.auth.uid;
+    }
+
+    // --- Match Blocks ---
+    match /risks/{riskId} {
+      allow read: if isOwner();
+      allow create: if isSignedIn() && isValidRisk(incoming()) && isValidId(riskId);
+      allow update: if isOwner() && isValidRisk(incoming()) && 
+                    incoming().diff(existing()).affectedKeys().hasOnly(['domain', 'desc', 'crit', 'impact', 'updatedAt']);
+      allow delete: if isOwner();
+    }
+
+    match /zones/{zoneId} {
+      allow read: if isOwner();
+      allow create: if isSignedIn() && isValidZone(incoming()) && isValidId(zoneId);
+      allow update: if isOwner() && isValidZone(incoming());
+      allow delete: if isOwner();
+    }
+
+    match /recommendations/{recId} {
+      allow read: if isSignedIn() && (resource == null || resource.data.adminId == request.auth.uid);
+      allow create: if isSignedIn() && incoming().adminId == request.auth.uid;
+      allow update, delete: if isOwner();
+    }
+
+    match /docs/{docId} {
+      allow read: if isSignedIn() && (resource == null || resource.data.adminId == request.auth.uid);
+      allow create: if isSignedIn() && incoming().adminId == request.auth.uid;
+      allow update, delete: if isOwner();
+    }
+
+    match /services/{serviceId} {
+      allow read: if isOwner();
+      allow create: if isSignedIn() && isValidService(incoming()) && isValidId(serviceId);
+      allow update: if isOwner() && isValidService(incoming());
+      allow delete: if isOwner();
+    }
+
+    match /employees/{employeeId} {
+      allow read: if isOwner();
+      allow create: if isSignedIn() && isValidEmployee(incoming()) && isValidId(employeeId);
+      allow update: if isOwner() && isValidEmployee(incoming());
+      allow delete: if isOwner();
+    }
+
+    match /subscribers/{subId} {
+      allow read: if isOwner();
+      allow create: if isSignedIn() && isValidSubscriber(incoming()) && isValidId(subId);
+      allow update: if isOwner() && isValidSubscriber(incoming()) &&
+                    incoming().id == existing().id &&
+                    incoming().adminId == existing().adminId &&
+                    incoming().joinedDate == existing().joinedDate;
+      allow delete: if isOwner();
+    }
+
+    match /configs/{userId} {
+      allow read: if isSignedIn() && userId == request.auth.uid;
+      allow write: if isSignedIn() && userId == request.auth.uid && (resource == null || resource.data.adminId == request.auth.uid) && incoming().adminId == request.auth.uid;
+    }
+  }
+}

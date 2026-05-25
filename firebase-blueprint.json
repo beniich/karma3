@@ -1,0 +1,179 @@
+{
+  "entities": {
+    "Risk": {
+      "title": "Risk",
+      "description": "Financial and operational risks",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "adminId": { "type": "string" },
+        "domain": { "type": "string" },
+        "desc": { "type": "string" },
+        "crit": { "type": "string", "enum": ["Critique", "Élevé", "Moyen"] },
+        "impact": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "adminId", "domain", "desc", "crit"]
+    },
+    "Zone": {
+      "title": "Zone",
+      "description": "Network status by zone",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "adminId": { "type": "string" },
+        "claims": { "type": "number" },
+        "cause": { "type": "string" },
+        "solution": { "type": "string" },
+        "prio": { "type": "string", "enum": ["Critique", "Élevé", "Moyen"] },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "adminId", "claims", "cause", "solution", "prio"]
+    },
+    "Recommendation": {
+      "title": "Recommendation",
+      "description": "Actionable recommendations",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "adminId": { "type": "string" },
+        "title": { "type": "string" },
+        "icon": { "type": "string" },
+        "color": { "type": "string", "enum": ["red", "orange", "blue"] },
+        "list": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["id", "adminId", "title", "icon", "color", "list"]
+    },
+    "Document": {
+      "title": "Document",
+      "description": "Compliance documents",
+      "type": "object",
+      "properties": {
+        "ref": { "type": "string" },
+        "adminId": { "type": "string" },
+        "title": { "type": "string" },
+        "obj": { "type": "string" },
+        "type": { "type": "string" },
+        "prio": { "type": "string", "enum": ["Critique", "Élevé", "Moyen"] }
+      },
+      "required": ["ref", "adminId", "title", "obj", "type", "prio"]
+    },
+    "Service": {
+      "title": "Service",
+      "description": "Service node status",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "adminId": { "type": "string" },
+        "name": { "type": "string" },
+        "status": { "type": "string", "enum": ["Active", "Warning", "Maintenance"] },
+        "efficiency": { "type": "number" },
+        "lastUpdate": { "type": "string" }
+      },
+      "required": ["id", "adminId", "name", "status", "efficiency"]
+    },
+    "Employee": {
+      "title": "Employee",
+      "description": "Personnel hub",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "adminId": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" }
+      },
+      "required": ["id", "adminId", "name", "role", "email", "phone"]
+    },
+    "DashboardConfig": {
+      "title": "DashboardConfig",
+      "description": "Global performance and org chart config",
+      "type": "object",
+      "properties": {
+        "adminId": { "type": "string" },
+        "performance": {
+          "type": "object",
+          "properties": {
+            "security": { "type": "number" },
+            "material": { "type": "number" },
+            "legal": { "type": "number" },
+            "management": { "type": "number" },
+            "digital": { "type": "number" },
+            "delay": { "type": "number" }
+          }
+        },
+        "orgChart": {
+          "type": "object",
+          "properties": {
+            "director": { "$ref": "OrgNode" },
+            "intermediates": { "type": "array", "items": { "$ref": "OrgNode" } },
+            "supervisors": { "type": "array", "items": { "$ref": "OrgNode" } },
+            "teams": { "type": "array", "items": { "$ref": "OrgNode" } }
+          }
+        }
+      }
+    },
+    "OrgNode": {
+      "title": "OrgNode",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "role": { "type": "string" },
+        "name": { "type": "string" },
+        "sub": { "type": "string" },
+        "isProblematic": { "type": "boolean" }
+      }
+    },
+    "Subscriber": {
+      "title": "Subscriber",
+      "description": "Subscribers list",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "adminId": { "type": "string" },
+        "name": { "type": "string" },
+        "organization": { "type": "string" },
+        "email": { "type": "string" },
+        "plan": { "type": "string", "enum": ["Expert", "Corporate", "Enterprise"] },
+        "status": { "type": "string", "enum": ["Active", "Pending", "Expired"] },
+        "joinedDate": { "type": "string" }
+      },
+      "required": ["id", "adminId", "name", "organization", "email", "plan", "status", "joinedDate"]
+    }
+  },
+  "firestore": {
+    "/subscribers/{subId}": {
+      "schema": "Subscriber",
+      "description": "Subscribers collection"
+    },
+    "/risks/{riskId}": {
+      "schema": "Risk",
+      "description": "Risk collection"
+    },
+    "/zones/{zoneId}": {
+      "schema": "Zone",
+      "description": "Network zones"
+    },
+    "/recommendations/{recId}": {
+      "schema": "Recommendation",
+      "description": "Dashboard recommendations"
+    },
+    "/docs/{docId}": {
+      "schema": "Document",
+      "description": "Compliance documents"
+    },
+    "/services/{serviceId}": {
+      "schema": "Service",
+      "description": "Service nodes"
+    },
+    "/employees/{employeeId}": {
+      "schema": "Employee",
+      "description": "Employee directory"
+    },
+    "/configs/dashboard": {
+      "schema": "DashboardConfig",
+      "description": "Global singleton configuration"
+    }
+  }
+}

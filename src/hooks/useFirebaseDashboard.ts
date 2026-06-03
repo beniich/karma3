@@ -71,13 +71,7 @@ export function useFirebaseDashboard() {
       if (u) {
         setUser(u);
       } else {
-        // Auto sign-in to Demo Guest Mode to show the application immediately with zero barriers
-        setUser({
-          uid: 'demo_user_123',
-          displayName: 'Sovereign Auditor',
-          email: 'auditor-guest@auditax.internal',
-          photoURL: null,
-        } as any);
+        setUser(null);
       }
       setLoading(false);
     });

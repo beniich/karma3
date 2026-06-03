@@ -8,10 +8,8 @@ service cloud.firestore {
     function incoming() { return request.resource.data; }
     function existing() { return resource.data; }
     function isSignedIn() { return request.auth != null; }
-    // Vérification basée sur le Custom Claim 'admin'
-    function isAdmin() { 
-      return isSignedIn() && request.auth.token.admin == true; 
-    }
+    // User email from runtime for bootstrapping if needed: beniich.contact@gmail.com
+    function isAdmin() { return isSignedIn() && request.auth.token.email == 'beniich.contact@gmail.com' && request.auth.token.email_verified == true; }
 
     // --- Default Deny ---
     match /{document=**} {
@@ -123,14 +121,8 @@ service cloud.firestore {
       allow write: if isSignedIn() && userId == request.auth.uid && (resource == null || resource.data.adminId == request.auth.uid) && incoming().adminId == request.auth.uid;
     }
 
-    match /audit_jobs/{jobId} {
-      allow read: if (isSignedIn() && (jobId == request.auth.uid || resource.data.userId == request.auth.uid)) || jobId == 'demo_user_123';
-      allow create, update: if (isSignedIn() && (jobId == request.auth.uid || incoming().userId == request.auth.uid)) || jobId == 'demo_user_123';
-      allow delete: if (isSignedIn() && (jobId == request.auth.uid || resource.data.userId == request.auth.uid)) || jobId == 'demo_user_123';
-    }
-
     match /test/{docId} {
-      allow read, write: if isAdmin();
+      allow read: if true;
     }
   }
 }

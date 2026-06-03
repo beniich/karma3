@@ -133,7 +133,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
     // Set all to scanning at the start
     setChecks(prev => prev.map(c => ({ ...c, status: 'SCANNING', details: language === 'FR' ? 'Séquence d\'audit démarrée...' : 'Audit sequence initiated...' })));
     
-    addLog('SYS_DIAG_ENGINE_START: Initialisation de la routine d\'audit d\'intégrité Karma3...');
+    addLog('SYS_DIAG_ENGINE_START: Initialisation de la routine d\'audit d\'intégrité AuditAX...');
     addLog('STRICT_ISOLATED_SANDBOX: Isolation de la session d\'audit en cours...');
     await new Promise(r => setTimeout(r, 800));
 
@@ -304,7 +304,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
       await new Promise(r => setTimeout(r, 500));
       
       try {
-        const testKey = 'karma3_diagnostic_test_write';
+        const testKey = 'auditax_diagnostic_test_write';
         const payload = `TEST_VECTOR_${Date.now()}`;
         localStorage.setItem(testKey, payload);
         const retrieved = localStorage.getItem(testKey);
@@ -366,7 +366,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
               ...c,
               status: 'WARNING',
               details: language === 'FR'
-                ? 'La variable secrète GEMINI_API_KEY est manquante dans les configurations du serveur. Les analyses souveraines automatiques et les résumés d\'IA d\'Karma3 ne seront pas pleinement disponibles.'
+                ? 'La variable secrète GEMINI_API_KEY est manquante dans les configurations du serveur. Les analyses souveraines automatiques et les résumés d\'IA d\'AuditAX ne seront pas pleinement disponibles.'
                 : 'Private GEMINI_API_KEY key is missing in your system environment. AI summarizer and prediction models are currently limited.',
               resolution: language === 'FR'
                 ? 'Pour activer l\'analyse par IA, configurez GEMINI_API_KEY dans votre fichier .env locale ou via les paramètres AI Studio.'
@@ -379,8 +379,8 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
             ...c,
             status: 'PASS',
             details: language === 'FR'
-              ? 'Le module cognitif de sécurité Karma3 (Gemini Core 2.0 Pipeline) est synchronisé avec les variables d\'environnement.'
-              : 'Karma3 cognitive server (Gemini Core 2.0 Pipeline) is synchronized with variables on active node.'
+              ? 'Le module cognitif de sécurité AuditAX (Gemini Core 2.0 Pipeline) est synchronisé avec les variables d\'environnement.'
+              : 'AuditAX cognitive server (Gemini Core 2.0 Pipeline) is synchronized with variables on active node.'
           } : c));
         } else {
           addLog('WARN [SECURITY]: Clé secrète GEMINI_API_KEY manquante sur le conteneur.');
@@ -486,7 +486,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
                 <span className="text-[8px] font-mono font-bold tracking-[0.2em] text-[#0ea5e9] uppercase">Diagnostic Audit Core</span>
                 <p className="text-xs text-slate-300 leading-relaxed font-medium">
                   {language === 'FR' 
-                    ? "L'audit système d'Karma3 garantit l'alignement des liaisons avec la base Firebase et l'état d'intégrité de l'hôte."
+                    ? "L'audit système d'AuditAX garantit l'alignement des liaisons avec la base Firebase et l'état d'intégrité de l'hôte."
                     : "Sovereign audit verifies operational binding parameters, API latency, and credentials across our nodes."}
                 </p>
               </div>

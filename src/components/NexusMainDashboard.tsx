@@ -27,6 +27,7 @@ import {
   Lock,
   Globe
 } from 'lucide-react';
+import { AuditAXSymbol, AuditAXBrand } from './AuditAXLogo';
 
 // Simple cn helper for classes
 const cn = (...classes: any[]) => classes.filter(Boolean).join(' ');
@@ -51,7 +52,7 @@ const INITIAL_DEVICES: DeviceItem[] = [
   { id: '601', name: 'IN-Mumbai Database-5', type: 'Database Vault', status: 'offline', ip: '10.8.0.42', latency: 0, location: 'Mumbai, India', cpu: 0 },
 ];
 
-export const Karma3MainDashboard = ({ onNotify, theme }: { onNotify: (msg: string) => void; theme?: 'dark' | 'light' | 'high-contrast' }) => {
+export const NexusMainDashboard = ({ onNotify, theme }: { onNotify: (msg: string) => void; theme?: 'dark' | 'light' | 'high-contrast' }) => {
   const [currentSubTab, setCurrentSubTab] = useState<'summary' | 'dashboard' | 'devices' | 'alerts' | 'reports' | 'settings'>('summary');
   const isLight = theme === 'light';
 
@@ -114,7 +115,7 @@ export const Karma3MainDashboard = ({ onNotify, theme }: { onNotify: (msg: strin
   const [cpuVal, setCpuVal] = useState(45);
   const [ramVal, setRamVal] = useState(52);
   const [logs, setLogs] = useState<string[]>([
-    '⚡ Initialisation de la surveillance globale Karma3 réussie.',
+    '⚡ Initialisation de la surveillance globale Nexus réussie.',
     '✓ Flux de paquets MTLS synchronisé avec le nœud central.',
   ]);
 
@@ -339,42 +340,14 @@ export const Karma3MainDashboard = ({ onNotify, theme }: { onNotify: (msg: strin
         
         {/* Logo and App Title */}
         <div className="flex items-center gap-3">
-          {/* Complex intersecting spiral icon logo */}
-          <div className={cn(
-            "w-10 h-10 p-1 flex items-center justify-center rounded-xl border shadow-md select-none",
-            isLight 
-              ? "bg-blue-50 border-blue-100 shadow-[0_4px_12px_rgba(59,130,246,0.08)]" 
-              : "bg-gradient-to-br from-[#10b981]/20 to-[#1e40af]/20 border-white/10 shadow-[0_4px_12px_rgba(16,185,129,0.15)]"
-          )}>
-            <svg viewBox="0 0 100 100" className="w-8 h-8">
-              <defs>
-                <linearGradient id="spiral1" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#10b981" />
-                  <stop offset="100%" stopColor="#2563eb" />
-                </linearGradient>
-              </defs>
-              <path d="M50,15 A12,25 45 0,1 65,35 A12,25 45 0,1 50,55 A12,25 45 0,1 35,35 Z" fill="url(#spiral1)" opacity="0.85" />
-              <path d="M50,45 A12,25 -45 0,1 75,55 A12,25 -45 0,1 50,85 A12,25 -45 0,1 25,55 Z" fill="url(#spiral1)" opacity="0.6" />
-              <circle cx="50" cy="50" r="6" fill={isLight ? "#1e3a8a" : "#ffffff"} />
-            </svg>
-          </div>
+          <AuditAXBrand symbolSize="sm" />
           
           <div className="flex items-center gap-3 flex-wrap">
-            <div className="flex flex-col text-left">
-              <div className="flex items-baseline gap-1">
-                <span className={cn("text-xl font-extrabold tracking-wider leading-none", isLight ? "text-zinc-950" : "text-white")}>Global</span>
-                <span className={cn(
-                  "text-xl font-black tracking-wider leading-none",
-                  isLight ? "text-blue-700 drop-shadow-[0_0_8px_rgba(37,99,235,0.15)]" : "text-[#50b1fd] drop-shadow-[0_0_8px_rgba(56,189,248,0.3)]"
-                )}>Karma3</span>
-              </div>
-            </div>
-            
             <div className={cn("h-6 w-[1.5px] hidden md:block", isLight ? "bg-slate-300" : "bg-white/20")} />
             
             <div className="text-left hidden md:block">
               <span className={cn("text-xs font-semibold font-sans tracking-wide", isLight ? "text-slate-650" : "text-slate-400")}>
-                Sovereign Device Karma3 - Executive Summary
+                Sovereign Device Nexus - Executive Summary
               </span>
             </div>
           </div>
@@ -400,7 +373,7 @@ export const Karma3MainDashboard = ({ onNotify, theme }: { onNotify: (msg: strin
                   key={tab.id}
                   onClick={() => {
                     setCurrentSubTab(tab.id as any);
-                    onNotify(`Rubrique Karma3 : ${tab.label}`);
+                    onNotify(`Rubrique Nexus : ${tab.label}`);
                   }}
                   className={cn(
                     "px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer relative",
@@ -1235,7 +1208,7 @@ export const Karma3MainDashboard = ({ onNotify, theme }: { onNotify: (msg: strin
                   "flex justify-between items-center pb-2 border-b mb-2 font-mono text-[10px] uppercase",
                   isLight ? "border-zinc-200 text-zinc-500" : "border-white/[0.05] text-slate-500"
                 )}>
-                  <span>Journal de Securité Local Karma3 TRACE</span>
+                  <span>Journal de Securité Local Nexus TRACE</span>
                   <div className="flex items-center gap-1.5 font-mono">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-550 animate-pulse" />
                     <span>Synchronisé</span>
@@ -1613,7 +1586,7 @@ export const Karma3MainDashboard = ({ onNotify, theme }: { onNotify: (msg: strin
               >
                 <div>
                   <h4 className={cn("text-sm font-black uppercase tracking-wider flex items-center gap-2", isLight ? "text-zinc-950" : "text-white")}>
-                    <Settings className="w-5 h-5 text-orange-500" /> Administrative Karma3 Variable Settings
+                    <Settings className="w-5 h-5 text-orange-500" /> Administrative Nexus Variable Settings
                   </h4>
                   <p className={cn("text-xs mt-1 font-medium italic", isLight ? "text-slate-705 font-semibold" : "text-slate-400")}>
                     Configurez dynamiquement les paramètres d'habilitation réseau et les rythmes de rafraîchissement des échos.

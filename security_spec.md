@@ -1,4 +1,4 @@
-# Security Specification - Karma3
+# Security Specification - AuditAX Nexus Hub
 
 ## Data Invariants
 1. Risks must have a valid ID and domain.

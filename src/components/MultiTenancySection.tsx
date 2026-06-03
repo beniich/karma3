@@ -71,7 +71,7 @@ const INITIAL_TENANTS: Tenant[] = [
   },
   { 
     id: 'DEV-SAND-07', 
-    name: 'Karma3 Public Sandbox', 
+    name: 'AuditAX Public Sandbox', 
     tag: 'Environnement de Qualification', 
     tier: 'Corporate', 
     keyStatus: 'Generating', 
@@ -712,7 +712,7 @@ export const MultiTenancySection = ({ onNotify }: { onNotify: (msg: string) => v
                 </div>
                 
                 <p className="text-slate-600 text-xs leading-relaxed italic">
-                  To guarantee leak tightness, the Karma3 architecture relies on systematic isolation at two levels:
+                  To guarantee leak tightness, the AuditAX architecture relies on systematic isolation at two levels:
                 </p>
 
                 <div className="space-y-4">
@@ -737,7 +737,7 @@ export const MultiTenancySection = ({ onNotify }: { onNotify: (msg: string) => v
                  <p className="text-[11px] italic font-medium leading-relaxed text-slate-300">
                    "The absence of automatic regression during isolation tests ensures continuous compliance of our sovereign certification."
                  </p>
-                 <span className="text-[9px] font-black uppercase text-sunset-orange tracking-widest block mt-4">— Karma3 Core Architects</span>
+                 <span className="text-[9px] font-black uppercase text-sunset-orange tracking-widest block mt-4">— AuditAX Core Architects</span>
               </div>
             </div>
 
@@ -756,7 +756,7 @@ export const MultiTenancySection = ({ onNotify }: { onNotify: (msg: string) => v
 {`import { Prisma } from '@prisma/client';
 
 /**
- * Karma3 Security Middleware - Sprint 1 Multi-Tenancy Engine
+ * AuditAX Security Middleware - Sprint 1 Multi-Tenancy Engine
  * Ensures that each Prisma query is automatically filtered by tenantId
  * retrieved exclusively from the decrypted session security token.
  */

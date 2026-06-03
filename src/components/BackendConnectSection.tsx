@@ -184,7 +184,7 @@ export const BackendConnectSection = ({ onNotify }: { onNotify: (msg: string) =>
         },
         body: JSON.stringify({
           prompt: aiPrompt,
-          systemInstruction: "You are Karma3 Full-Stack Security Evaluator. Explain key features and security strategies simply with maximum 2-3 short, clean bullet points. Return pure text, no markdown block syntax."
+          systemInstruction: "You are AuditAX Full-Stack Security Evaluator. Explain key features and security strategies simply with maximum 2-3 short, clean bullet points. Return pure text, no markdown block syntax."
         })
       });
 

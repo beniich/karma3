@@ -18,7 +18,7 @@ import { DashboardData, INITIAL_DATA, Risk, Zone, Recommendation, Document, Serv
 
 export function useFirebaseDashboard() {
   const [data, setData] = useState<DashboardData>(() => {
-    const saved = localStorage.getItem('karma3_local_data');
+    const saved = localStorage.getItem('auditax_local_data');
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -35,7 +35,7 @@ export function useFirebaseDashboard() {
   const updateLocalStateAndStorage = useCallback((updater: (prev: DashboardData) => DashboardData) => {
     setData(prev => {
       const next = updater(prev);
-      localStorage.setItem('karma3_local_data', JSON.stringify(next));
+      localStorage.setItem('auditax_local_data', JSON.stringify(next));
       return next;
     });
   }, []);
@@ -82,7 +82,7 @@ export function useFirebaseDashboard() {
     setUser({
       uid: 'demo_user_123',
       displayName: 'Sovereign Auditor',
-      email: 'auditor-guest@karma3.internal',
+      email: 'auditor-guest@auditax.internal',
       photoURL: null,
     } as any);
     setLoading(false);

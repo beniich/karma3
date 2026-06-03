@@ -87,7 +87,7 @@ export const DeviceInventoryList = ({ onNotify }: { onNotify: (msg: string) => v
             DEVICE INVENTORY LIST
           </h2>
           <p className="text-slate-400 text-xs mt-1.5 font-medium">
-            Sovereign Device Karma3 - Comprehensive Device Management.
+            Sovereign Device Nexus - Comprehensive Device Management.
           </p>
         </div>
 

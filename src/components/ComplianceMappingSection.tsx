@@ -45,7 +45,7 @@ export const ComplianceMappingSection = ({ onNotify }: ComplianceMappingSectionP
 
   const handleManualScan = () => {
     setIsRefreshing(true);
-    onNotify("🛰️ Lancement du scan régulateur global Karma3 Militaires...");
+    onNotify("🛰️ Lancement du scan régulateur global Auditax Militaires...");
     setTimeout(() => {
       setIsRefreshing(false);
       onNotify("🎖️ Tous les nœuds de la forteresse HSM sont opérationnels - Score mTLS à 100%.");
@@ -85,7 +85,7 @@ export const ComplianceMappingSection = ({ onNotify }: ComplianceMappingSectionP
           Military-Grade Security Framework
         </h2>
         <p className="text-xs md:text-sm text-slate-400 font-bold tracking-wider font-mono">
-          Karma3 Compliance and HSM hardware containment.
+          AuditAX Compliance and HSM hardware containment.
         </p>
       </div>
 

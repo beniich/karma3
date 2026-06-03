@@ -165,7 +165,7 @@ export const FleetMonitoring = ({ onNotify }: { onNotify: (msg: string) => void 
             HIGH-IMPACT FLEET MONITORING
           </h2>
           <p className="text-slate-400 text-xs mt-1.5 font-medium">
-            Sovereign Device Karma3 - Real-time fleet monitoring.
+            Sovereign Device Nexus - Real-time fleet monitoring.
           </p>
         </div>
 

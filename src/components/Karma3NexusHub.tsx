@@ -42,7 +42,7 @@ import {
   Legend
 } from 'recharts';
 
-interface Karma3HubProps {
+interface Karma3NexusHubProps {
   onNotify: (message: string) => void;
   theme?: 'dark' | 'light' | 'high-contrast';
 }
@@ -126,7 +126,7 @@ const HISTORICAL_THERMAL_CURVE = [
   { time: '23:00', temperature: 89.1, gridStability: 69, threatLevel: 84 },
 ];
 
-export const Karma3Hub = ({ onNotify, theme = 'dark' }: Karma3HubProps) => {
+export const Karma3NexusHub = ({ onNotify, theme = 'dark' }: Karma3NexusHubProps) => {
   const isLight = theme === 'light' || theme === 'high-contrast';
 
   // State controls for Sprint 7 Metrics and Slider
@@ -703,7 +703,7 @@ export const Karma3Hub = ({ onNotify, theme = 'dark' }: Karma3HubProps) => {
           <div className="mt-4 pt-3.5 border-t border-slate-200 dark:border-teal-800/25 flex gap-3 text-left">
             <Info className="w-4 h-4 shrink-0 text-teal-500 mt-0.5 animate-pulse" />
             <p className="text-[9.5px] leading-snug text-slate-450 dark:text-slate-400 font-medium">
-              Conformément à l'architecture **Karma3 multi-stream**, ce moteur compare de façon continue le courant physique sous-jacent et les signatures d'authentification IP de la suite anti-abus afin d'éviter les menaces de sabotage industriel sur les transformateurs locataires.
+              Conformément à l'architecture **AuditAX multi-stream**, ce moteur compare de façon continue le courant physique sous-jacent et les signatures d'authentification IP de la suite anti-abus afin d'éviter les menaces de sabotage industriel sur les transformateurs locataires.
             </p>
           </div>
 
@@ -1007,7 +1007,7 @@ export const Karma3Hub = ({ onNotify, theme = 'dark' }: Karma3HubProps) => {
       <footer id="karma3-footer" className={`px-4.5 py-4 border-t flex flex-col md:flex-row justify-between items-center text-[8.5px] font-mono uppercase tracking-widest gap-4 mt-6 ${
         isLight ? 'border-slate-200 text-slate-500 font-medium' : 'border-teal-800/15 text-slate-500'
       }`}>
-        <span>© 2026 Karma3 Sovereign Ledger. Module de corrélation de grille Karma3.</span>
+        <span>© 2026 AuditAX Sovereign Ledger. Module de corrélation de grille Karma3.</span>
         <div className="flex flex-wrap gap-4 items-center">
           <span className="hover:text-teal-400 cursor-pointer transition-colors">Norme CCPA / RGPD ISO AUX</span>
           <span className={`cursor-pointer font-bold animate-pulse transition-colors ${

@@ -36,7 +36,7 @@ interface ComponentDetail {
   detailsEN: string;
 }
 
-export const Karma3ArchitectureOverview = ({ onNotify }: { onNotify: (msg: string) => void }) => {
+export const NexusArchitectureOverview = ({ onNotify }: { onNotify: (msg: string) => void }) => {
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [isTrafficActive, setIsTrafficActive] = useState(true);
   const [activeTunnel, setActiveTunnel] = useState<string | null>(null);
@@ -162,7 +162,7 @@ export const Karma3ArchitectureOverview = ({ onNotify }: { onNotify: (msg: strin
     },
     'webapp': {
       id: 'webapp',
-      name: 'Karma3 Admin Portal App',
+      name: 'Nexus Admin Portal App',
       status: 'ONLINE',
       rate: '0.04s Load',
       load: '15%',
@@ -185,7 +185,7 @@ export const Karma3ArchitectureOverview = ({ onNotify }: { onNotify: (msg: strin
     setSelectedElement(elementId);
     const item = componentsData[elementId];
     if (item) {
-      onNotify(`⚙️ Inspecteur Karma3 : Éléments cryptographiques "${item.name}" activé.`);
+      onNotify(`⚙️ Inspecteur Nexus : Éléments cryptographiques "${item.name}" activé.`);
     }
   };
 
@@ -254,7 +254,7 @@ export const Karma3ArchitectureOverview = ({ onNotify }: { onNotify: (msg: strin
           {/* Header titles */}
           <div className="text-center space-y-2 mb-10">
             <h3 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight leading-none">
-              Karma3 Infrastructure Architecture
+              Nexus Infrastructure Architecture
             </h3>
             <p className="text-xs text-slate-400 font-bold tracking-wider font-mono">
               Technical infrastructure details.

@@ -7,6 +7,7 @@ import {
   updateDoc, 
   deleteDoc, 
   getDocs, 
+  getDoc,
   serverTimestamp,
   writeBatch,
   query,
@@ -30,6 +31,25 @@ export function useFirebaseDashboard() {
   });
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
+  const [activeJob, setActiveJob] = useState<any>(null);
+
+  useEffect(() => {
+    if (!user) {
+      setActiveJob(null);
+      return;
+    }
+    const jobRef = doc(db, 'audit_jobs', user.uid);
+    const unsub = onSnapshot(jobRef, (docSnap) => {
+      if (docSnap.exists()) {
+        setActiveJob(docSnap.data());
+      } else {
+        setActiveJob(null);
+      }
+    }, (err) => {
+      console.error("Error listening to audit job:", err);
+    });
+    return () => unsub();
+  }, [user]);
 
   // Helper helper to update local storage
   const updateLocalStateAndStorage = useCallback((updater: (prev: DashboardData) => DashboardData) => {
@@ -71,7 +91,13 @@ export function useFirebaseDashboard() {
       if (u) {
         setUser(u);
       } else {
-        setUser(null);
+        // Auto sign-in to Demo Guest Mode to show the application immediately with zero barriers
+        setUser({
+          uid: 'demo_user_123',
+          displayName: 'Sovereign Auditor',
+          email: 'auditor-guest@auditax.internal',
+          photoURL: null,
+        } as any);
       }
       setLoading(false);
     });
@@ -101,66 +127,57 @@ export function useFirebaseDashboard() {
       const initAndListen = async () => {
         await syncInitialData();
 
-        const qRisks = query(collection(db, 'risks'), where('adminId', '==', user.uid));
-        const unsubRisks = onSnapshot(qRisks, (snapshot) => {
-          const risks = snapshot.docs.map(d => ({ ...d.data() } as Risk));
-          setData(prev => ({ ...prev, risks }));
-        }, (err) => handleFirestoreError(err, OperationType.LIST, 'risks'));
-        unsubscribes.push(unsubRisks);
+        // --- 1. CHARGEMENT PONCTUEL (Données Statiques) ---
+        // On récupère tout d'un coup pour éviter 5 listeners inutiles
+        try {
+          const staticCollections = [
+            { col: 'zones', key: 'zones' },
+            { col: 'docs', key: 'complianceDocs' },
+            { col: 'services', key: 'services' },
+            { col: 'employees', key: 'employees' },
+          ];
 
-        const qZones = query(collection(db, 'zones'), where('adminId', '==', user.uid));
-        const unsubZones = onSnapshot(qZones, (snapshot) => {
-          const zones = snapshot.docs.map(d => ({ ...d.data() } as Zone));
-          setData(prev => ({ ...prev, zones }));
-        }, (err) => handleFirestoreError(err, OperationType.LIST, 'zones'));
-        unsubscribes.push(unsubZones);
+          const staticDataUpdates: any = {};
 
-        const qRecs = query(collection(db, 'recommendations'), where('adminId', '==', user.uid));
-        const unsubRecs = onSnapshot(qRecs, (snapshot) => {
-          const recommendations = snapshot.docs.map(d => ({ ...d.data() } as Recommendation));
-          setData(prev => ({ ...prev, recommendations }));
-        }, (err) => handleFirestoreError(err, OperationType.LIST, 'recommendations'));
-        unsubscribes.push(unsubRecs);
+          await Promise.all(staticCollections.map(async ({ col, key }) => {
+            const q = query(collection(db, col), where('adminId', '==', user.uid));
+            const snap = await getDocs(q);
+            staticDataUpdates[key] = snap.docs.map(d => ({ ...d.data() } as any));
+          }));
 
-        const qDocs = query(collection(db, 'docs'), where('adminId', '==', user.uid));
-        const unsubDocs = onSnapshot(qDocs, (snapshot) => {
-          const complianceDocs = snapshot.docs.map(d => ({ ...d.data() } as Document));
-          setData(prev => ({ ...prev, complianceDocs }));
-        }, (err) => handleFirestoreError(err, OperationType.LIST, 'docs'));
-        unsubscribes.push(unsubDocs);
-
-        const qServices = query(collection(db, 'services'), where('adminId', '==', user.uid));
-        const unsubServices = onSnapshot(qServices, (snapshot) => {
-          const services = snapshot.docs.map(d => ({ ...d.data() } as Service));
-          setData(prev => ({ ...prev, services }));
-        }, (err) => handleFirestoreError(err, OperationType.LIST, 'services'));
-        unsubscribes.push(unsubServices);
-
-        const qEmployees = query(collection(db, 'employees'), where('adminId', '==', user.uid));
-        const unsubEmployees = onSnapshot(qEmployees, (snapshot) => {
-          const employees = snapshot.docs.map(d => ({ ...d.data() } as Employee));
-          setData(prev => ({ ...prev, employees }));
-        }, (err) => handleFirestoreError(err, OperationType.LIST, 'employees'));
-        unsubscribes.push(unsubEmployees);
-
-        const qSubscribers = query(collection(db, 'subscribers'), where('adminId', '==', user.uid));
-        const unsubSubscribers = onSnapshot(qSubscribers, (snapshot) => {
-          const subscribers = snapshot.docs.map(d => ({ ...d.data() } as Subscriber));
-          setData(prev => ({ ...prev, subscribers }));
-        }, (err) => handleFirestoreError(err, OperationType.LIST, 'subscribers'));
-        unsubscribes.push(unsubSubscribers);
-
-        const unsubConfig = onSnapshot(doc(db, 'configs', user.uid), (snapshot) => {
-          if (snapshot.exists()) {
-            const config = snapshot.data();
-            setData(prev => ({ 
-              ...prev, 
-              performance: config.performance || prev.performance,
-              orgChart: config.orgChart || prev.orgChart
-            }));
+          // On récupère aussi la config (un seul document)
+          const configSnap = await getDoc(doc(db, 'configs', user.uid));
+          if (configSnap.exists()) {
+            const config = configSnap.data();
+            staticDataUpdates.performance = config.performance;
+            staticDataUpdates.orgChart = config.orgChart;
           }
-        }, (err) => handleFirestoreError(err, OperationType.GET, `configs/${user.uid}`));
-        unsubscribes.push(unsubConfig);
+
+          // On met à jour le state UNE SEULE FOIS pour toutes les données statiques
+          setData(prev => ({ ...prev, ...staticDataUpdates }));
+
+        } catch (err) {
+          handleFirestoreError(err, OperationType.LIST, 'static-data-fetch');
+        }
+
+        // --- 2. LISTENERS TEMPS RÉEL (Données Critiques) ---
+        // On ne garde que le strict nécessaire pour la réactivité
+        
+        const liveCollections = [
+          { col: 'risks', key: 'risks' },
+          { col: 'recommendations', key: 'recommendations' },
+          { col: 'subscribers', key: 'subscribers' },
+        ];
+
+        liveCollections.forEach(({ col, key }) => {
+          const q = query(collection(db, col), where('adminId', '==', user.uid));
+          const unsub = onSnapshot(q, (snapshot) => {
+            const items = snapshot.docs.map(d => ({ ...d.data() } as any));
+            setData(prev => ({ ...prev, [key]: items }));
+          }, (err) => handleFirestoreError(err, OperationType.LIST, col));
+          
+          unsubscribes.push(unsub);
+        });
 
         setLoading(false);
       };
@@ -388,6 +405,7 @@ export function useFirebaseDashboard() {
     data, 
     loading, 
     user, 
+    activeJob,
     syncInitialData,
     enableDemoMode,
     updateRisk,

@@ -1,5 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import * as Sentry from '@sentry/react';
 import { motion, AnimatePresence } from 'motion/react';
+
+if (import.meta.env.VITE_SENTRY_DSN) {
+  Sentry.init({
+    dsn: import.meta.env.VITE_SENTRY_DSN,
+    integrations: [
+      Sentry.browserTracingIntegration(),
+      Sentry.replayIntegration(),
+    ],
+    replaysSessionSampleRate: 0.1,
+    replaysOnErrorSampleRate: 1.0,
+    tracesSampleRate: 1.0,
+  });
+  console.log("🛡️ Sentry initialized successfully on React Dashboard");
+}
 import { 
   AlertTriangle, 
   BarChart3, 
@@ -88,7 +103,8 @@ import remarkGfm from 'remark-gfm';
 import { type Risk, type Zone, type Recommendation, type Document, type DashboardData, type OrgNode, type Service, type Employee, type Subscriber } from './types';
 import { useFirebaseDashboard } from './hooks/useFirebaseDashboard';
 import { useSocket } from './hooks/useSocket';
-import { signInWithGoogle, auth } from './firebase';
+import { signInWithGoogle, auth, db } from './firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { MultiTenancySection } from './components/MultiTenancySection';
 import { StripeMonetizationSection } from './components/StripeMonetizationSection';
@@ -100,8 +116,6 @@ import { ComplianceMappingSection } from './components/ComplianceMappingSection'
 import { Karma3NexusHub } from './components/Karma3NexusHub';
 import { SanteConnectSection } from './components/SanteConnectSection';
 import { BackendConnectSection } from './components/BackendConnectSection';
-import { HighFidelityIcon } from './components/HighFidelityIcon';
-import { SystemIntegrityModal } from './components/SystemIntegrityModal';
 
 // --- New Sovereign Device Nexus V2 Layout Components ---
 import { NexusMainDashboard } from './components/NexusMainDashboard';
@@ -116,6 +130,11 @@ import { DeviceInventoryList } from './components/DeviceInventoryList';
 import { SovereignSubscribersRegistry } from './components/SovereignSubscribersRegistry';
 import { NexusAIAnalysisStudio } from './components/NexusAIAnalysisStudio';
 import { SovereignReportsSection } from './components/SovereignReportsSection';
+
+import { UserSettings } from './components/dashboard/UserSettings';
+import { AIControlCenter } from './features/ai-config/AIControlCenter';
+import { BillingPanel } from './features/billing/BillingPanel';
+
 
 // --- Types ---
 type TabType = 'summary' | 'compliance' | 'risk' | 'org' | 'services' | 'intelligence' | 'profile' | 'config' | 'handbook' | 'subscribers' | 'license' | 'bastion' | 'roadmap' | 'academy' | 'admin' | 'multitenancy' | 'monetization' | 'dirtydozen' | 'integrations' | 'gmail' | 'sheets' | 'karma3' | 'sante' | 'fleet' | 'inventory' | 'security' | 'rule-engine' | 'scripts' | 'architecture' | 'support' | 'connect';
@@ -149,7 +168,7 @@ const CREDIT_RISK_DATA = [
 
 // --- Components ---
 
-const Badge = ({ children, variant = 'default', className }: { children: React.ReactNode; variant?: 'default' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'crit'; className?: string }) => {
+export const Badge = ({ children, variant = 'default', className }: { children: React.ReactNode; variant?: 'default' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'crit'; className?: string }) => {
   const variants = {
     default: "bg-slate-100 text-slate-600 border-slate-200",
     red: "bg-red-50 text-red-600 border-red-100 shadow-[0_0_15px_rgba(239,68,68,0.1)]",
@@ -168,7 +187,7 @@ const Badge = ({ children, variant = 'default', className }: { children: React.R
   );
 };
 
-interface CardProps {
+export interface CardProps {
   children: React.ReactNode;
   className?: string;
   title?: string;
@@ -177,7 +196,7 @@ interface CardProps {
   key?: string | number;
 }
 
-const Card = ({ children, className, title, icon: Icon, tag }: CardProps) => (
+export const Card = ({ children, className, title, icon: Icon, tag }: CardProps) => (
   <motion.div 
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
@@ -188,9 +207,9 @@ const Card = ({ children, className, title, icon: Icon, tag }: CardProps) => (
       <div className="px-5 py-4 md:px-8 md:py-6 border-b border-slate-100/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-4">
           {Icon && (
-            <HighFidelityIcon variant="neutral" size="sm" className="group-hover:scale-105 transition-transform duration-300">
-              <Icon />
-            </HighFidelityIcon>
+            <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl md:rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:sunset-gradient group-hover:text-white transition-all duration-500 shadow-inner">
+              <Icon className="w-4.5 h-4.5 md:w-5 md:h-5" />
+            </div>
           )}
           {title && <h3 className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-slate-800">{title}</h3>}
         </div>
@@ -299,7 +318,7 @@ const KPI = ({ icon: Icon, value, label, sub, color = 'blue', chart }: { icon: a
   );
 };
 
-const DownloadPDFButton = ({ targetId, fileName, className, iconOnly = false, onEmailSent }: { targetId: string; fileName: string; className?: string; iconOnly?: boolean; onEmailSent?: (msg: string) => void }) => {
+export const DownloadPDFButton = ({ targetId, fileName, className, iconOnly = false, onEmailSent }: { targetId: string; fileName: string; className?: string; iconOnly?: boolean; onEmailSent?: (msg: string) => void }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isEmailing, setIsEmailing] = useState(false);
 
@@ -565,19 +584,9 @@ const GenerativeWidget = ({
             "bg-blue-50/80 border-blue-200 border-l-blue-500 text-blue-800"
           )}
         >
-          {isError ? (
-            <HighFidelityIcon variant="danger" size="sm" className="mt-0.5 shrink-0 animate-bounce">
-              <ShieldAlert />
-            </HighFidelityIcon>
-          ) : isWarning ? (
-            <HighFidelityIcon variant="warning" size="sm" className="mt-0.5 shrink-0">
-              <ShieldAlert />
-            </HighFidelityIcon>
-          ) : (
-            <HighFidelityIcon variant="info" size="sm" className="mt-0.5 shrink-0">
-              <Info />
-            </HighFidelityIcon>
-          )}
+          {isError ? <ShieldAlert className="w-5 h-5 shrink-0 mt-0.5 text-red-500 animate-bounce" /> :
+           isWarning ? <ShieldAlert className="w-5 h-5 shrink-0 mt-0.5 text-amber-500" /> :
+           <Info className="w-5 h-5 shrink-0 mt-0.5 text-blue-500" />}
           <div>
             <div className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-1">
               {severity === 'error' ? 'CRITICAL DISCREPANCY' : severity === 'warning' ? 'ANOMALY DETECTED' : 'SYSTEM METRIC NOTICE'}
@@ -845,7 +854,7 @@ const TypewriterText = ({
 const CommandPalette = ({ isOpen, onClose, onSelect, fieldGroups }: { isOpen: boolean, onClose: () => void, onSelect: (f: string) => void, fieldGroups: any[] }) => {
   const [query, setQuery] = useState('');
   
-  const allFields = fieldGroups.flatMap(g => g.fields.map(f => ({ group: g.name, field: f })));
+  const allFields = fieldGroups.flatMap(g => g.fields.map((f: string) => ({ group: g.name, field: f })));
   const filtered = allFields.filter(f => f.field.toLowerCase().includes(query.toLowerCase()) || f.group.toLowerCase().includes(query.toLowerCase()));
 
   useEffect(() => {
@@ -920,7 +929,7 @@ const CommandPalette = ({ isOpen, onClose, onSelect, fieldGroups }: { isOpen: bo
 
 // --- Sections ---
 
-const NexusAISection = ({ data, onNotify, onExit }: { data: DashboardData; onNotify: (m: string) => void; onExit?: () => void }) => {
+const NexusAISection = ({ data, onNotify, onExit, user }: { data: DashboardData; onNotify: (m: string) => void; onExit?: () => void; user: any }) => {
   const [messages, setMessages] = useState<{ role: 'user' | 'ai'; content: string }[]>([
     {
       role: 'ai',
@@ -1109,7 +1118,12 @@ COMMERCE & STYLE:
 
       if (toolName === 'Harmonize Standards') {
         endpoint = '/api/audit/harmonize';
-        payload = { fields: selectedFields.length > 0 ? selectedFields : ['All Active Nodes'] };
+        payload = { 
+          fields: selectedFields.length > 0 ? selectedFields : ['All Active Nodes'],
+          userId: user?.uid || 'demo_user_123'
+        };
+      } else {
+        payload.userId = user?.uid || 'demo_user_123';
       }
 
       const response = await fetch(endpoint, {
@@ -1125,26 +1139,47 @@ COMMERCE & STYLE:
         return;
       }
       
-      if (toolName === 'Harmonize Standards' && resData.mapping) {
-        setMessages([...newMessages, { role: 'ai', content: `### 🔄 Harmonization Sync Complete\n\n**Status:** ${resData.status}\n\n${resData.mapping}` }]);
-      } else if (resData.text) {
-        // Run reactive actions first
-        scanForMentions(resData.text);
-        const { actions } = parseUIResponse(resData.text);
-        actions.forEach(action => {
-          if (action.type === 'SELECT_FIELD' && action.fieldId) {
-            selectFieldExplicitly(action.fieldId);
-          }
-          if (action.type === 'TRIGGER_ALERT' && action.message) {
-            onNotify(action.message);
-          }
+      if (resData.jobId) {
+        // Await the job completion in Firestore
+        const jobResult: string = await new Promise((resolve, reject) => {
+          const unsub = onSnapshot(doc(db, 'audit_jobs', resData.jobId), (docSnap) => {
+            if (docSnap.exists()) {
+              const jobData = docSnap.data();
+              if (jobData.status === 'completed') {
+                unsub();
+                resolve(jobData.result || '');
+              } else if (jobData.status === 'failed') {
+                unsub();
+                reject(new Error(jobData.error || 'Job failed on the server'));
+              }
+            }
+          }, (err) => {
+            unsub();
+            reject(err);
+          });
         });
-        setMessages([...newMessages, { role: 'ai', content: resData.text }]);
+
+        if (toolName === 'Harmonize Standards') {
+          setMessages([...newMessages, { role: 'ai', content: `### 🔄 Harmonization Sync Complete\n\n**Status:** SYNC_COMPLETE\n\n${jobResult}` }]);
+        } else {
+          // Run reactive actions first
+          scanForMentions(jobResult);
+          const { actions } = parseUIResponse(jobResult);
+          actions.forEach(action => {
+            if (action.type === 'SELECT_FIELD' && action.fieldId) {
+              selectFieldExplicitly(action.fieldId);
+            }
+            if (action.type === 'TRIGGER_ALERT' && action.message) {
+              onNotify(action.message);
+            }
+          });
+          setMessages([...newMessages, { role: 'ai', content: jobResult }]);
+        }
       } else {
         setMessages([...newMessages, { role: 'ai', content: "ERROR: Data node returned null or unexpected format." }]);
       }
-    } catch (err) {
-      setMessages([...newMessages, { role: 'ai', content: "SYSTEM ERROR: Nexus connection severed. Please re-authenticate." }]);
+    } catch (err: any) {
+      setMessages([...newMessages, { role: 'ai', content: `SYSTEM ERROR: Nexus connection severed. ${err.message || "Please re-authenticate."}` }]);
     } finally {
       setLoading(false);
       setActiveAnalysis(null);
@@ -1889,95 +1924,6 @@ COMMERCE & STYLE:
   );
 };
 
-const ProfileSection = ({ user, onNotify }: { user: any; onNotify: (m: string) => void }) => {
-  const initials = user?.displayName
-    ? user.displayName.split(' ').map((n: string) => n[0]).join('').toUpperCase()
-    : user?.email?.substring(0, 2).toUpperCase() || '??';
-
-  return (
-    <div id="profile-view" className="space-y-8">
-      <div className="flex justify-end">
-        <DownloadPDFButton targetId="profile-view" fileName="AuditAX-Profile-Officer" iconOnly onEmailSent={onNotify} />
-      </div>
-      <Card title="Elite Officer Profile" icon={Users}>
-        <div className="flex flex-col md:flex-row gap-12 items-start">
-          <div className="w-48 h-48 rounded-[3rem] p-1 sunset-gradient shadow-2xl shrink-0 overflow-hidden">
-            <div className="w-full h-full bg-white rounded-[2.8rem] flex items-center justify-center font-black text-6xl text-sunset-orange italic overflow-hidden">
-              {user?.photoURL ? (
-                <img src={user.photoURL} alt={user.displayName} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-              ) : (
-                initials
-              )}
-            </div>
-          </div>
-          <div className="space-y-8 flex-1">
-            <div className="space-y-2">
-              <Badge variant="crit" className="mb-4">Active Clearance</Badge>
-              <h2 className="text-4xl font-black italic text-slate-900 uppercase tracking-tighter">{user?.displayName || 'Elite User'}</h2>
-              <p className="text-xl font-bold text-slate-400 uppercase tracking-widest italic">{user?.email || 'NEXUS Agent'}</p>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-8 border-t border-slate-100">
-              <div className="p-8 bg-slate-50 rounded-3xl border border-slate-100 group hover:bg-white hover:shadow-xl transition-all duration-500">
-                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 italic">Division Vector</div>
-                <div className="text-lg font-black text-slate-900 tracking-tight italic">Audit & Global Integrity</div>
-              </div>
-              <div className="p-8 bg-slate-50 rounded-3xl border border-slate-100 group hover:bg-white hover:shadow-xl transition-all duration-500">
-                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 italic">Security Node ID</div>
-                <div className="text-lg font-black text-slate-900 font-mono tracking-tight">{user?.uid?.substring(0, 8).toUpperCase() || 'NODE-PENDING'}</div>
-              </div>
-              <div className="p-8 bg-slate-50 rounded-3xl border border-slate-100 group hover:bg-white hover:shadow-xl transition-all duration-500">
-                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 italic">Last Login Axis</div>
-                <div className="text-lg font-black text-slate-900 tracking-tight italic">Authenticated Session</div>
-              </div>
-              <div className="p-8 bg-slate-50 rounded-3xl border border-slate-100 group hover:bg-white hover:shadow-xl transition-all duration-500">
-                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 italic">Neural Sync Status</div>
-                <div className="text-lg font-black text-emerald-600 tracking-tight italic">Optimized (99.8%)</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-         <Card title="Activity Stream" icon={Clock} className="md:col-span-2">
-            <div className="space-y-6">
-              {[
-                { time: '09:42', action: 'Compliance matrix updated', node: 'Node-7' },
-                { time: '08:15', action: 'Risk exposure recalibrated', node: 'Core' },
-                { time: 'Yesterday', action: 'New service deployment authorized', node: 'Vector-H' },
-              ].map((activity, i) => (
-                <div key={i} className="flex items-center justify-between p-5 rounded-2xl bg-slate-50 border border-slate-100 hover:border-sunset-orange/20 transition-all">
-                  <div className="flex items-center gap-4">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest w-16">{activity.time}</span>
-                    <span className="text-sm font-bold text-slate-700 italic">{activity.action}</span>
-                  </div>
-                  <Badge variant="blue">{activity.node}</Badge>
-                </div>
-              ))}
-            </div>
-         </Card>
-         <Card title="System Credentials" icon={ShieldAlert}>
-            <div className="space-y-4">
-              <div className="h-40 w-full rounded-2xl sunset-gradient p-1">
-                 <div className="w-full h-full bg-slate-950 rounded-[0.9rem] flex flex-col items-center justify-center p-6 text-center">
-                    <div className="text-[8px] font-black text-sunset-orange uppercase tracking-[0.4em] mb-2">Nexus Certificate</div>
-                    <div className="w-12 h-1 bg-sunset-orange/30 rounded-full mb-4" />
-                    <div className="text-[10px] font-medium text-white/40 leading-relaxed italic">Encryption layers active. Digital signature verified. Access persistent.</div>
-                 </div>
-              </div>
-              <button 
-                onClick={() => onNotify("Certificate renewal request dispatched.")}
-                className="w-full py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border border-slate-200 rounded-2xl hover:bg-slate-50 transition-all text-center"
-              >
-                Renew Credentials
-              </button>
-            </div>
-         </Card>
-      </div>
-    </div>
-  );
-};
 
 const ServicesSection = ({ data, updateService, removeService, onNotify }: { data: DashboardData; updateService: any; removeService: any; onNotify: (m: string) => void }) => {
   const [newServiceName, setNewServiceName] = useState('');
@@ -2636,22 +2582,9 @@ const SummarySection = ({ data, onNotify, onSettings }: { data: DashboardData; o
               <kpi.icon className="w-24 h-24" />
             </div>
             <div className="relative z-10 space-y-4">
-              <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1">
-                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic leading-none">{kpi.label}</span>
-                   <h4 className={cn("text-5xl font-black italic tracking-tighter leading-none", kpi.color)}>{kpi.value}</h4>
-                </div>
-                <HighFidelityIcon 
-                  variant={
-                    kpi.color.includes('text-red-500') ? 'danger' : 
-                    kpi.color.includes('orange') ? 'warning' :
-                    kpi.color.includes('blue') ? 'info' : 'success'
-                  } 
-                  size="md"
-                  className="mt-1 shadow-sm"
-                >
-                  <kpi.icon />
-                </HighFidelityIcon>
+              <div className="space-y-1">
+                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic leading-none">{kpi.label}</span>
+                 <h4 className={cn("text-5xl font-black italic tracking-tighter leading-none", kpi.color)}>{kpi.value}</h4>
               </div>
               <div className="flex items-center gap-2">
                  <div className={cn("w-1.5 h-1.5 rounded-full", kpi.color)} />
@@ -3398,457 +3331,6 @@ const DocumentsSection = ({ data, onNotify }: { data: DashboardData; onNotify: (
 
 // --- Config Section ---
 
-const ConfigSection = ({ data, actions, onNotify }: { data: DashboardData; actions: any; onNotify: (m: string) => void }) => {
-  const { 
-    updateRisk, 
-    updateZone, 
-    updateEmployee, 
-    removeEmployee, 
-    updateConfig,
-    updateRecommendation,
-    updateDocument
-  } = actions;
-
-  const handleEditRisk = (id: string, field: keyof Risk, value: string) => {
-    updateRisk(id, { [field]: value });
-  };
-
-  const handleEditZone = (name: string, field: keyof Zone, value: string | number) => {
-    updateZone(name, { [field]: value });
-  };
-
-  const handleEditPerf = (field: keyof DashboardData['performance'], value: number) => {
-    updateConfig({ performance: { ...data.performance, [field]: value } });
-  };
-
-  const updateOrgNode = (group: keyof DashboardData['orgChart'], id: string, field: keyof OrgNode, value: any) => {
-    const chart = { ...data.orgChart };
-    if (group === 'director') {
-      chart.director = { ...chart.director, [field]: value };
-    } else {
-      const nodes = [...(chart[group] as OrgNode[])];
-      chart[group] = nodes.map(n => n.id === id ? { ...n, [field]: value } : n) as any;
-    }
-    updateConfig({ orgChart: chart });
-  };
-
-  const addOrgNode = (group: keyof DashboardData['orgChart']) => {
-    if (group === 'director') return;
-    const chart = { ...data.orgChart };
-    const newNode: OrgNode = {
-      id: Math.random().toString(36).substring(2, 9),
-      role: 'Nouveau Poste',
-      name: 'Nouveau Membre',
-      ...(group === 'supervisors' ? { isProblematic: false } : {})
-    };
-    (chart[group] as OrgNode[]).push(newNode);
-    updateConfig({ orgChart: chart });
-  };
-
-  const removeOrgNode = (group: keyof DashboardData['orgChart'], id: string) => {
-    if (group === 'director') return;
-    const chart = { ...data.orgChart };
-    chart[group] = (chart[group] as OrgNode[]).filter(n => n.id !== id) as any;
-    updateConfig({ orgChart: chart });
-  };
-
-  const moveOrgNode = (group: keyof DashboardData['orgChart'], id: string, direction: 'up' | 'down') => {
-    if (group === 'director') return;
-    const chart = { ...data.orgChart };
-    const nodes = [...(chart[group] as OrgNode[])];
-    const index = nodes.findIndex(n => n.id === id);
-    if (index === -1) return;
-    
-    const newIndex = direction === 'up' ? index - 1 : index + 1;
-    if (newIndex < 0 || newIndex >= nodes.length) return;
-    
-    const [movedNode] = nodes.splice(index, 1);
-    nodes.splice(newIndex, 0, movedNode);
-    
-    chart[group] = nodes as any;
-    updateConfig({ orgChart: chart });
-  };
-
-  const handleEditEmployee = (id: string, field: keyof Employee, value: string) => {
-    updateEmployee(id, { [field]: value });
-  };
-
-  const addEmployee = () => {
-    const newEmployee: Employee = {
-      id: `E${Math.floor(Math.random() * 1000)}`,
-      name: 'New Employee',
-      role: 'Staff',
-      email: 'new@auditax.com',
-      phone: '+1 555-0000'
-    };
-    updateEmployee(newEmployee.id, newEmployee);
-  };
-
-  return (
-    <div id="config-hub-view" className="space-y-8 pb-16">
-      <div className="flex justify-end">
-        <DownloadPDFButton targetId="config-hub-view" fileName="AuditAX-Setup-Configuration" iconOnly onEmailSent={onNotify} />
-      </div>
-      <Card title="Employee Directory Management" icon={Users}>
-        <div className="space-y-6">
-          <div className="flex justify-between items-center bg-slate-50 p-6 rounded-2xl border border-slate-100">
-             <div className="flex flex-col">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Nexus Personnel Hub</span>
-                <span className="text-sm font-black text-slate-900 uppercase italic">Configure project staff & contact vectors</span>
-             </div>
-             <motion.button 
-               whileHover={{ scale: 1.05 }}
-               whileTap={{ scale: 0.95 }}
-               onClick={addEmployee}
-               className="sunset-gradient text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-sunset-orange/20 flex items-center gap-2"
-             >
-               <Plus className="w-4 h-4" /> Add Personnel
-             </motion.button>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4">
-            {data.employees.map((emp) => (
-              <div key={emp.id} className="glass-card p-6 rounded-3xl border border-slate-100 group relative hover:border-sunset-orange/30 transition-all">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Full Name</label>
-                    <input 
-                      value={emp.name} 
-                      onChange={e => handleEditEmployee(emp.id, 'name', e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-xs font-black italic outline-none focus:border-sunset-orange transition-all"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Role / Designation</label>
-                    <input 
-                      value={emp.role} 
-                      onChange={e => handleEditEmployee(emp.id, 'role', e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-xs font-black italic outline-none focus:border-sunset-orange transition-all"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Email Vector</label>
-                    <input 
-                      value={emp.email} 
-                      onChange={e => handleEditEmployee(emp.id, 'email', e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-xs font-black italic outline-none focus:border-sunset-orange transition-all"
-                    />
-                  </div>
-                  <div className="flex gap-4 items-end">
-                    <div className="space-y-2 flex-1">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Phone Link</label>
-                      <input 
-                        value={emp.phone} 
-                        onChange={e => handleEditEmployee(emp.id, 'phone', e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-xs font-black italic outline-none focus:border-sunset-orange transition-all"
-                      />
-                    </div>
-                    <button 
-                      onClick={() => removeEmployee(emp.id)}
-                      className="w-10 h-10 flex items-center justify-center text-red-300 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all border border-transparent hover:border-red-100 mb-0.5"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </Card>
-
-      <Card title="Nexus Node Management" icon={Users}>
-        <div className="space-y-10">
-          {/* Director Edit */}
-          <div className="wrapper bg-slate-50/50 p-4 sm:p-8 rounded-[2rem] border border-slate-100 shadow-inner">
-            <h4 className="text-[10px] font-black uppercase text-slate-400 mb-6 tracking-[0.3em] flex items-center gap-3">
-              <div className="w-1.5 h-1.5 rounded-full sunset-gradient" /> CORE COMMAND
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Role</label>
-                <input value={data.orgChart.director.role} onChange={e => updateOrgNode('director', 'dir', 'role', e.target.value)} className="w-full text-xs font-black p-4 rounded-2xl bg-white border border-slate-100 outline-none focus:border-sunset-orange shadow-sm transition-all" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Name</label>
-                <input value={data.orgChart.director.name} onChange={e => updateOrgNode('director', 'dir', 'name', e.target.value)} className="w-full text-xs font-black p-4 rounded-2xl bg-white border border-slate-100 outline-none focus:border-sunset-orange shadow-sm transition-all" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sub-header</label>
-                <input value={data.orgChart.director.sub} onChange={e => updateOrgNode('director', 'dir', 'sub', e.target.value)} className="w-full text-xs font-black p-4 rounded-2xl bg-white border border-slate-100 outline-none focus:border-sunset-orange shadow-sm transition-all" />
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-            {/* Intermediates Edit */}
-            <div className="bg-slate-50/50 p-4 sm:p-8 rounded-[2rem] border border-slate-100 shadow-inner">
-              <div className="flex justify-between items-center mb-8">
-                <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.3em] flex items-center gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-slate-300" /> MID-LAYER MGMT
-                </h4>
-                <button onClick={() => addOrgNode('intermediates')} className="w-8 h-8 sunset-gradient rounded-xl flex items-center justify-center text-white shadow-lg hover:rotate-90 transition-transform">
-                  <Plus className="w-4 h-4" />
-                </button>
-              </div>
-              <div className="space-y-6">
-                {data.orgChart.intermediates.map((node, index) => (
-                  <div key={node.id} className="grid grid-cols-[1fr_1fr_auto] gap-4 pb-6 border-b border-slate-200/50 last:border-0 last:pb-0 items-end group">
-                    <div className="space-y-2">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Role</label>
-                      <input value={node.role} onChange={e => updateOrgNode('intermediates', node.id, 'role', e.target.value)} className="w-full text-xs font-black p-3 rounded-xl bg-white border border-slate-100 focus:border-sunset-orange outline-none transition-all" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Name</label>
-                      <input value={node.name} onChange={e => updateOrgNode('intermediates', node.id, 'name', e.target.value)} className="w-full text-xs font-black p-3 rounded-xl bg-white border border-slate-100 focus:border-sunset-orange outline-none transition-all" />
-                    </div>
-                    <div className="flex gap-1">
-                      <div className="flex flex-col gap-1">
-                        <button onClick={() => moveOrgNode('intermediates', node.id, 'up')} disabled={index === 0} className="p-1 hover:text-sunset-orange disabled:opacity-20"><ChevronRight className="-rotate-90 w-4 h-4" /></button>
-                        <button onClick={() => moveOrgNode('intermediates', node.id, 'down')} disabled={index === data.orgChart.intermediates.length - 1} className="p-1 hover:text-sunset-orange disabled:opacity-20"><ChevronRight className="rotate-90 w-4 h-4" /></button>
-                      </div>
-                      <button onClick={() => removeOrgNode('intermediates', node.id)} className="w-10 h-10 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-white rounded-xl transition-all border border-transparent hover:border-red-100">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-              <div className="bg-red-50/30 p-4 sm:p-8 rounded-[2.5rem] border border-red-100/50 shadow-inner">
-              <div className="flex justify-between items-center mb-8">
-                <h4 className="text-[10px] font-black uppercase text-red-400 tracking-[0.3em] flex items-center gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" /> AUDIT TARGETS
-                </h4>
-                <button onClick={() => addOrgNode('supervisors')} className="w-8 h-8 bg-red-600 rounded-xl flex items-center justify-center text-white shadow-lg hover:rotate-90 transition-transform">
-                  <Plus className="w-4 h-4" />
-                </button>
-              </div>
-              <div className="space-y-6">
-                {data.orgChart.supervisors.map((node, index) => (
-                  <div key={node.id} className="grid grid-cols-[1fr_auto] gap-4 pb-6 border-b border-red-100/50 last:border-0 last:pb-0 items-start">
-                    <div className="space-y-4">
-                       <div className="flex gap-3">
-                          <input value={node.name} onChange={e => updateOrgNode('supervisors', node.id, 'name', e.target.value)} className="flex-1 text-xs font-black p-4 rounded-2xl border border-red-100 bg-white focus:border-red-500 outline-none" placeholder="Supervisor Name" />
-                          <div className="flex items-center gap-3 px-4 bg-white rounded-2xl border border-red-100 shrink-0">
-                             <input type="checkbox" checked={node.isProblematic} onChange={e => updateOrgNode('supervisors', node.id, 'isProblematic', e.target.checked)} id={`node-${node.id}`} className="accent-red-600 w-4 h-4" />
-                             <label htmlFor={`node-${node.id}`} className="text-[10px] font-black uppercase text-red-600 cursor-pointer tracking-widest italic">FLAGGED</label>
-                          </div>
-                       </div>
-                       <div className="grid grid-cols-2 gap-4">
-                          <input value={node.role || ''} onChange={e => updateOrgNode('supervisors', node.id, 'role', e.target.value)} className="w-full text-[10px] font-black p-3 rounded-xl bg-slate-50 border border-transparent focus:border-red-200 outline-none uppercase tracking-widest italic" placeholder="Supervisor Role" />
-                          <input value={node.teamName || ''} onChange={e => updateOrgNode('supervisors', node.id, 'teamName', e.target.value)} className="w-full text-[10px] font-black p-3 rounded-xl bg-slate-50 border border-transparent focus:border-red-200 outline-none uppercase tracking-widest italic text-sunset-orange placeholder:text-sunset-orange/40" placeholder="Team Name" />
-                       </div>
-                    </div>
-                    <div className="flex gap-1">
-                      <div className="flex flex-col gap-1">
-                        <button onClick={() => moveOrgNode('supervisors', node.id, 'up')} disabled={index === 0} className="p-1 hover:text-red-600 disabled:opacity-20"><ChevronRight className="-rotate-90 w-4 h-4" /></button>
-                        <button onClick={() => moveOrgNode('supervisors', node.id, 'down')} disabled={index === data.orgChart.supervisors.length - 1} className="p-1 hover:text-red-600 disabled:opacity-20"><ChevronRight className="rotate-90 w-4 h-4" /></button>
-                      </div>
-                      <button onClick={() => removeOrgNode('supervisors', node.id)} className="w-10 h-10 flex items-center justify-center bg-white text-red-400 hover:text-red-700 rounded-2xl shadow-sm border border-red-100">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      <Card title="Nexus Performance Core Editor" icon={BarChart3}>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {Object.entries(data.performance).map(([key, val]) => (
-            <div key={key} className="space-y-3 p-6 glass-card rounded-[2rem] border-slate-100">
-              <label className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] italic flex items-center gap-2">
-                 <div className="w-1.5 h-1.5 rounded-full sunset-gradient" /> {key}
-              </label>
-              <div className="relative group">
-                 <input 
-                  type="number" 
-                  value={val} 
-                  onChange={(e) => handleEditPerf(key as any, parseInt(e.target.value) || 0)}
-                  className="w-full bg-slate-50/50 border border-slate-100 rounded-2xl px-6 py-4 text-2xl font-black text-slate-900 outline-none focus:border-sunset-orange focus:bg-white transition-all shadow-inner italic"
-                 />
-                 <span className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 font-black">%</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      <Card title="Crisis Intel Matrix" icon={ShieldAlert}>
-        <div className="overflow-x-auto no-scrollbar custom-scrollbar">
-          <table className="w-full text-left text-[10px] uppercase tracking-[0.2em] border-collapse">
-            <thead className="bg-slate-50/50 text-slate-400 border-b border-slate-100 italic">
-              <tr>
-                <th className="px-6 py-4 font-black">#</th>
-                <th className="px-6 py-4 font-black">Domain</th>
-                <th className="px-6 py-4 font-black">Core Intel</th>
-                <th className="px-6 py-4 font-black">Criticité</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {data.risks.map((risk) => (
-                <tr key={risk.id} className="group hover:bg-slate-50/50 transition-colors">
-                  <td className="px-6 py-4 font-black text-slate-300 group-hover:text-sunset-orange transition-colors">{risk.id}</td>
-                  <td className="px-6 py-4">
-                    <input 
-                      value={risk.domain} 
-                      onChange={(e) => handleEditRisk(risk.id, 'domain', e.target.value)}
-                      className="w-full bg-transparent border-none outline-none focus:text-sunset-orange font-black italic uppercase transition-colors"
-                    />
-                  </td>
-                  <td className="px-6 py-4 text-slate-600">
-                    <input 
-                      value={risk.desc} 
-                      onChange={(e) => handleEditRisk(risk.id, 'desc', e.target.value)}
-                      className="w-full bg-transparent border-none outline-none focus:text-sunset-orange font-medium italic"
-                    />
-                  </td>
-                  <td className="px-6 py-4">
-                    <select 
-                      value={risk.crit} 
-                      onChange={(e) => handleEditRisk(risk.id, 'crit', e.target.value as any)}
-                      className="bg-white border border-slate-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest shadow-sm outline-none focus:border-sunset-orange transition-all cursor-pointer"
-                    >
-                      <option value="Critique">Critical</option>
-                      <option value="Élevé">High</option>
-                      <option value="Moyen">Medium</option>
-                    </select>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-
-      <Card title="Operational Recommendations" icon={Zap}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {data.recommendations.map((rec) => (
-            <div key={rec.id} className="p-6 bg-slate-50 border border-slate-100 rounded-3xl space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{rec.id} Vector</span>
-                <Badge variant={rec.color === 'red' ? 'crit' : 'orange'}>{rec.color}</Badge>
-              </div>
-              <div className="space-y-2">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Title</label>
-                <input 
-                  value={rec.title} 
-                  onChange={e => updateRecommendation(rec.id, { title: e.target.value })}
-                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs font-black italic outline-none focus:border-sunset-orange transition-all"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Action Items (comma separated)</label>
-                <textarea 
-                  value={rec.list.join(', ')} 
-                  onChange={e => updateRecommendation(rec.id, { list: e.target.value.split(',').map(s => s.trim()).filter(s => s !== '') })}
-                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs font-medium italic outline-none focus:border-sunset-orange transition-all min-h-[100px]"
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      <Card title="Document Registry Management" icon={FileText}>
-        <div className="overflow-x-auto no-scrollbar custom-scrollbar">
-          <table className="w-full text-left text-[10px] uppercase tracking-[0.2em] border-collapse">
-            <thead className="bg-slate-50/50 text-slate-400 border-b border-slate-100 italic">
-              <tr>
-                <th className="px-6 py-4 font-black">Ref</th>
-                <th className="px-6 py-4 font-black">Title</th>
-                <th className="px-6 py-4 font-black">Type</th>
-                <th className="px-6 py-4 font-black">Priority</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {data.complianceDocs.map((doc) => (
-                <tr key={doc.ref} className="group hover:bg-slate-50/50 transition-colors">
-                  <td className="px-6 py-4 font-black text-slate-300 italic">{doc.ref}</td>
-                  <td className="px-6 py-4">
-                    <input 
-                      value={doc.title} 
-                      onChange={e => updateDocument(doc.ref, { title: e.target.value })}
-                      className="w-full bg-transparent border-none outline-none focus:text-sunset-orange font-black italic transition-colors"
-                    />
-                  </td>
-                  <td className="px-6 py-4">
-                    <input 
-                      value={doc.nature} 
-                      onChange={e => updateDocument(doc.ref, { nature: e.target.value })}
-                      className="w-full bg-transparent border-none outline-none focus:text-sunset-orange font-bold uppercase tracking-widest transition-colors"
-                    />
-                  </td>
-                  <td className="px-6 py-4">
-                    <select 
-                      value={doc.priority} 
-                      onChange={e => updateDocument(doc.ref, { priority: e.target.value as any })}
-                      className="bg-white border border-slate-100 rounded-xl px-4 py-2 text-[10px] font-black outline-none focus:border-sunset-orange"
-                    >
-                      <option value="Critical">Critical</option>
-                      <option value="High">High</option>
-                      <option value="Medium">Medium</option>
-                      <option value="Low">Low</option>
-                    </select>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-
-      <Card title="Solar Expansion Nodes" icon={Zap}>
-        <div className="overflow-x-auto no-scrollbar custom-scrollbar">
-          <table className="w-full text-left text-[10px] uppercase tracking-[0.2em] border-collapse">
-            <thead className="bg-slate-50/50 text-slate-400 border-b border-slate-100 italic">
-              <tr>
-                <th className="px-6 py-4 font-black">Node Name</th>
-                <th className="px-6 py-4 text-center font-black">Claims</th>
-                <th className="px-6 py-4 font-black">Cause</th>
-                <th className="px-6 py-4 font-black">Nexus Vector</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {data.zones.map((zone) => (
-                <tr key={zone.name} className="group hover:bg-slate-50/50 transition-colors">
-                  <td className="px-6 py-4 font-black text-slate-800 group-hover:text-sunset-orange transition-colors italic">{zone.name}</td>
-                  <td className="px-6 py-4 text-center">
-                    <input 
-                      type="number"
-                      value={zone.claims} 
-                      onChange={(e) => handleEditZone(zone.name, 'claims', parseInt(e.target.value) || 0)}
-                      className="w-20 bg-white border border-slate-100 rounded-xl px-2 py-4 text-center outline-none focus:border-sunset-orange font-black text-2xl italic tracking-tighter shadow-sm"
-                    />
-                  </td>
-                  <td className="px-6 py-4">
-                    <input 
-                      value={zone.cause} 
-                      onChange={(e) => handleEditZone(zone.name, 'cause', e.target.value)}
-                      className="w-full bg-transparent border-none outline-none focus:text-sunset-orange italic font-medium"
-                    />
-                  </td>
-                  <td className="px-6 py-4">
-                    <input 
-                      value={zone.solution} 
-                      onChange={(e) => handleEditZone(zone.name, 'solution', e.target.value)}
-                      className="w-full bg-transparent border-none outline-none focus:text-sunset-orange font-black italic text-xs"
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-    </div>
-  );
-};
 
 const GuideSection = ({ onNotify }: { onNotify: (m: string) => void }) => {
   const [currentPage, setCurrentPage] = useState(0);
@@ -4526,132 +4008,6 @@ const PAMRoadmapSection = ({ onNotify }: { onNotify: (m: string) => void }) => {
   );
 };
 
-const PricingSection = ({ onNotify }: { onNotify: (m: string) => void }) => {
-  const plans = [
-    { 
-      name: "SaaS Expert", 
-      price: "$99", 
-      period: "/ mo",
-      badge: "Individual",
-      description: "Individual command post for high-value experts.",
-      features: ["Cognitive AI Assistant", "Unlimited Nodes", "Basic RAG Storage", "Community Support"],
-      cta: "Initialize Proxy",
-      color: "bg-slate-900"
-    },
-    { 
-      name: "Corporate", 
-      price: "$299", 
-      period: "/ user / mo",
-      badge: "Team",
-      description: "Standardization of analysis intelligence within your critical departments.",
-      features: ["Priority Neural Link", "Team Synchronization", "Advanced RAG Storage (1TB)", "Dedicated Relay Hub"],
-      cta: "Sync Team",
-      color: "sunset-gradient",
-      highlight: true
-    },
-    { 
-      name: "Enterprise", 
-      price: "Custom", 
-      period: "/ annual",
-      badge: "Elite",
-      description: "The complete neural operating system for institutions and governments.",
-      features: ["On-Premise Deployment", "Unlimited RAG Context", "White Label Interface", "SLA: 99.99% Neural Uptime"],
-      cta: "Establish Link",
-      color: "bg-black"
-    }
-  ];
-
-  return (
-    <div className="space-y-16 py-8">
-      <div className="text-center space-y-6 max-w-3xl mx-auto">
-        <div className="inline-block px-4 py-1.5 bg-sunset-orange/10 border border-sunset-orange/20 rounded-full text-[10px] font-black text-sunset-orange uppercase tracking-widest italic animate-pulse">
-          Elite Licensing Models
-        </div>
-        <h2 className="text-5xl md:text-7xl font-black text-slate-900 italic tracking-tighter uppercase leading-[0.9]">
-          The Price of <br /><span className="text-sunset-orange">Certainty</span>
-        </h2>
-        <p className="text-slate-400 text-lg font-medium italic leading-relaxed">
-          Nexus AI is not a tool; it is an instrument of decision. We don't sell code; we sell time, clarity, and the power of immediate insight.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {plans.map((plan, i) => (
-          <motion.div 
-            key={plan.name}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-            className={cn(
-              "p-5 md:p-10 rounded-3xl md:rounded-[3rem] border relative overflow-hidden flex flex-col group transition-all duration-500",
-              plan.highlight ? "border-sunset-orange/30 shadow-2xl shadow-sunset-orange/10 bg-white" : "border-slate-100 bg-white hover:border-slate-300"
-            )}
-          >
-            {plan.highlight && (
-              <div className="absolute top-0 left-0 w-full h-2 sunset-gradient" />
-            )}
-            <div className="space-y-8 flex-1">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">{plan.badge}</span>
-                  {plan.highlight && <Zap className="w-5 h-5 text-sunset-orange animate-pulse" />}
-                </div>
-                <h3 className="text-3xl font-black italic tracking-tighter text-slate-900 uppercase leading-none">{plan.name}</h3>
-                <p className="text-[11px] text-slate-400 font-medium leading-relaxed italic">{plan.description}</p>
-              </div>
-
-              <div className="flex items-baseline gap-1">
-                <span className="text-5xl font-black italic tracking-tighter text-slate-900">{plan.price}</span>
-                <span className="text-xs font-black text-slate-300 uppercase tracking-widest italic">{plan.period}</span>
-              </div>
-
-              <div className="space-y-4">
-                <div className="text-[9px] font-black text-slate-900 uppercase tracking-[0.3em] italic mb-4">Neural Capabilities</div>
-                {plan.features.map(f => (
-                  <div key={f} className="flex items-center gap-3">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
-                    <span className="text-[11px] font-bold text-slate-600 italic">{f}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <button 
-              onClick={() => onNotify(`${plan.name} license request initiated.`)}
-              className={cn(
-                "mt-12 w-full py-5 rounded-2xl text-[11px] font-black uppercase tracking-[0.4em] transition-all active:scale-95",
-                plan.highlight ? "sunset-gradient text-white shadow-xl shadow-sunset-orange/20" : "bg-slate-900 text-white"
-              )}
-            >
-              {plan.cta}
-            </button>
-          </motion.div>
-        ))}
-      </div>
-
-      <div className="max-w-4xl mx-auto p-6 md:p-12 bg-slate-900 rounded-3xl md:rounded-[3rem] text-center space-y-8 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(rgba(255,77,0,0.1)_1px,transparent_1px)] [background-size:20px_20px]" />
-        <div className="relative z-10 space-y-6">
-          <h4 className="text-3xl font-black italic tracking-tighter text-white uppercase">The "Early Vector" Advantage</h4>
-          <p className="text-white/40 text-sm max-w-2xl mx-auto italic font-medium">
-            Be one of the first 100 officers to establish a neural link and lock in our foundation pricing. Exclusivity is a feature, not a choice.
-          </p>
-          <div className="flex items-center justify-center gap-8">
-            <div className="text-center">
-              <div className="text-2xl font-black text-white italic tracking-tighter">74 / 100</div>
-              <div className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] mt-1 italic">Nodes Claimed</div>
-            </div>
-            <div className="w-px h-10 bg-white/10" />
-            <div className="text-center">
-              <div className="text-2xl font-black text-sunset-orange italic tracking-tighter">ESTABLISHED</div>
-              <div className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] mt-1 italic">SLA Confidence</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const SubscribersManagementSection = ({ 
   data, 
@@ -4684,7 +4040,6 @@ const SubscribersManagementSection = ({
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('summary');
-  const [isDiagnosticModalOpen, setIsDiagnosticModalOpen] = useState(false);
   const [isLandingPortal, setIsLandingPortal] = useState(true);
   const [portalTab, setPortalTab] = useState<'home' | 'solutions' | 'orchestration' | 'architecture' | 'compliance' | 'fleet' | 'security' | 'tarifs' | 'rapports'>('home');
   const [language, setLanguage] = useState<'FR' | 'EN'>('FR');
@@ -4693,89 +4048,6 @@ export default function App() {
   });
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
   const [isSolutionsMenuOpen, setIsSolutionsMenuOpen] = useState(false);
-
-  // New States for secure Credentials Authentication & Registration
-  const [authTab, setAuthTab] = useState<'login' | 'register'>('login');
-  const [authEmail, setAuthEmail] = useState('');
-  const [authPassword, setAuthPassword] = useState('');
-  const [authConfirmPassword, setAuthConfirmPassword] = useState('');
-  const [authName, setAuthName] = useState('');
-  const [authLoading, setAuthLoading] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
-  const [authSuccess, setAuthSuccess] = useState<string | null>(null);
-
-  const handleEmailRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAuthError(null);
-    setAuthSuccess(null);
-    if (!authEmail || !authPassword || !authConfirmPassword) {
-      setAuthError(language === 'FR' ? "Veuillez remplir tous les champs." : "Please fill in all fields.");
-      return;
-    }
-    if (authPassword !== authConfirmPassword) {
-      setAuthError(language === 'FR' ? "Les mots de passe ne correspondent pas." : "Passwords do not match.");
-      return;
-    }
-    if (authPassword.length < 6) {
-      setAuthError(language === 'FR' ? "Le mot de passe doit comporter au moins 6 caractères." : "Password should be at least 6 characters.");
-      return;
-    }
-    setAuthLoading(true);
-    try {
-      const { createUserWithEmailAndPassword } = await import('./firebase');
-      const userCredential = await createUserWithEmailAndPassword(auth, authEmail, authPassword);
-      if (authName && userCredential.user) {
-        const { updateProfile } = await import('firebase/auth');
-        await updateProfile(userCredential.user, { displayName: authName });
-      }
-      setAuthSuccess(language === 'FR' ? "Compte créé avec succès ! Connexion de session en cours..." : "Account successfully created! Connecting session...");
-      showToast(language === 'FR' ? "Enregistrement Nexus réussi" : "Nexus registration success", 'success');
-      setAuthEmail('');
-      setAuthPassword('');
-      setAuthConfirmPassword('');
-      setAuthName('');
-    } catch (err: any) {
-      console.error(err);
-      let errMsg = err.message;
-      if (err.code === 'auth/email-already-in-use') {
-        errMsg = language === 'FR' ? "Cet e-mail est déjà associé à un compte." : "This email is already in use.";
-      } else if (err.code === 'auth/invalid-email') {
-        errMsg = language === 'FR' ? "Adresse e-mail invalide." : "Invalid email address.";
-      } else if (err.code === 'auth/weak-password') {
-        errMsg = language === 'FR' ? "Le mot de passe choisi est trop faible." : "Password is too weak.";
-      }
-      setAuthError(errMsg);
-    } finally {
-      setAuthLoading(false);
-    }
-  };
-
-  const handleEmailLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAuthError(null);
-    setAuthSuccess(null);
-    if (!authEmail || !authPassword) {
-      setAuthError(language === 'FR' ? "Veuillez remplir tous les champs." : "Please fill in all fields.");
-      return;
-    }
-    setAuthLoading(true);
-    try {
-      const { signInWithEmailAndPassword } = await import('./firebase');
-      await signInWithEmailAndPassword(auth, authEmail, authPassword);
-      showToast(language === 'FR' ? "Session Nexus établie avec succès" : "Nexus session established successfully", 'success');
-      setAuthEmail('');
-      setAuthPassword('');
-    } catch (err: any) {
-      console.error(err);
-      let errMsg = err.message;
-      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
-        errMsg = language === 'FR' ? "Identifiants ou mot de passe incorrects." : "Incorrect credentials or password.";
-      }
-      setAuthError(errMsg);
-    } finally {
-      setAuthLoading(false);
-    }
-  };
 
   const selectTheme = (next: 'dark' | 'light' | 'high-contrast') => {
     setTheme(next);
@@ -5783,93 +5055,81 @@ export default function App() {
           </div>
 
           {/* Sidebar Footer User Area */}
-          <div className="border-t border-[#1c2e46]/60 pt-4 pb-1 shrink-0 flex flex-col gap-3 w-full">
-             <div className="flex items-center gap-3 px-2 cursor-pointer group w-full" onClick={handleProfileClick}>
-                <div className="w-10 h-10 rounded-xl bg-slate-900 border border-[#1c2e46]/60 p-0.5 overflow-hidden shadow-md group-hover:border-[#0ea5e9]/40 transition-all shrink-0">
-                  {user.photoURL ? (
-                      <img src={user.photoURL} alt="User" className="w-full h-full object-cover rounded-[10px]" referrerPolicy="no-referrer" />
-                  ) : (
-                      <div className="w-full h-full flex items-center justify-center text-white font-black text-xs uppercase italic bg-[#0ea5e9]/25">{user?.displayName?.charAt(0) || "JD"}</div>
-                  )}
-                </div>
-                <div className="flex flex-col truncate text-left min-w-0 flex-grow">
-                  <span className="text-[10px] font-black italic text-white leading-tight truncate group-hover:text-[#0ea5e9] transition-colors">{user?.displayName?.toUpperCase() || "JANE DOE"}</span>
-                  <span className="text-[7.5px] font-black text-[#0ea5e9] uppercase tracking-[0.15em] mt-0.5">Compliance_Officer</span>
-                </div>
-             </div>
-
-             <button
-               onClick={() => setIsDiagnosticModalOpen(true)}
-               type="button"
-               title={language === 'FR' ? "Lancer le diagnostic d'intégrité" : "Run system integrity diagnostic"}
-               className="mx-2 py-2 px-3 text-slate-350 hover:text-[#0ea5e9] hover:bg-[#0ea5e9]/10 hover:border-[#0ea5e9]/45 transition-all bg-[#090e17] border border-[#1e2f47] rounded-xl flex items-center justify-center gap-2 font-black text-[8px] uppercase tracking-[0.16em] cursor-pointer"
-             >
-               <ShieldAlert className="w-3.5 h-3.5 text-emerald-450 animate-pulse" />
-               SYSTEM INTEGRITY
-             </button>
-
-             <div className="grid grid-cols-2 gap-2 px-2 w-full mt-2">
-                <div className="relative w-full">
-                  <button 
-                    onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}
-                    type="button"
-                    title="Choisir Thème"
-                    className="w-full py-2 px-2 text-slate-400 hover:text-[#0ea5e9] hover:bg-[#0ea5e9]/10 hover:border-[#0ea5e9]/30 transition-all bg-[#0d1520] border border-[#1c2e46]/60 rounded-xl flex items-center justify-center gap-1.5 focus:outline-none cursor-pointer"
-                  >
-                    {theme === 'dark' ? (
-                       <Moon className="w-3.5 h-3.5 text-indigo-400" />
-                    ) : theme === 'high-contrast' ? (
-                       <Eye className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
+          <div className="border-t border-[#1c2e46]/60 pt-6 shrink-0" style={{ height: '102.6667px', width: '175.333px', paddingTop: '6px', paddingBottom: '0px', paddingLeft: '-3px', marginLeft: '-8px', marginRight: '1px', marginTop: '3px', marginBottom: '-28px' }}>
+             <div className="flex items-center justify-between gap-2 px-2">
+                <div 
+                  onClick={handleProfileClick}
+                  className="flex items-center gap-3 cursor-pointer group flex-grow min-w-0"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-slate-900 border border-[#1c2e46]/60 p-0.5 overflow-hidden shadow-md group-hover:border-[#0ea5e9]/40 transition-all shrink-0">
+                    {user.photoURL ? (
+                        <img src={user.photoURL} alt="User" className="w-full h-full object-cover rounded-[10px]" referrerPolicy="no-referrer" />
                     ) : (
-                       <Sun className="w-3.5 h-3.5 text-amber-500" />
+                        <div className="w-full h-full flex items-center justify-center text-white font-black text-xs uppercase italic bg-[#0ea5e9]/25">{user.displayName?.charAt(0) || "JD"}</div>
                     )}
-                    <span className="text-[8px] font-mono font-bold tracking-wider uppercase">THEME</span>
-                  </button>
-                  {isThemeMenuOpen && (
-                    <div className="absolute bottom-11 left-0 w-48 bg-[#090d16] border border-[#1c2e46]/80 rounded-xl shadow-2xl p-1.5 z-[999] flex flex-col gap-0.5 text-left animate-in fade-in slide-in-from-bottom-2 duration-200">
-                      <span className="text-[7.5px] font-black uppercase text-[#0ea5e9] tracking-[0.15em] opacity-80 px-2 py-1 block">Sélecteur de Thème</span>
-                      <button
-                        onClick={() => selectTheme('dark')}
-                        className={cn(
-                          "w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all hover:bg-slate-80/50",
-                          theme === 'dark' ? "text-blue-400 bg-blue-500/10" : "text-slate-400 hover:text-white"
-                        )}
-                      >
-                        <Moon className="w-3.5 h-3.5" />
-                        <span>Cyber Obsidian</span>
-                      </button>
-                      <button
-                        onClick={() => selectTheme('light')}
-                        className={cn(
-                          "w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all hover:bg-slate-80/50",
-                          theme === 'light' ? "text-amber-500 bg-amber-500/10" : "text-slate-400 hover:text-white"
-                        )}
-                      >
-                        <Sun className="w-3.5 h-3.5" />
-                        <span>Slate Minimal</span>
-                      </button>
-                      <button
-                        onClick={() => selectTheme('high-contrast')}
-                        className={cn(
-                          "w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all hover:bg-slate-80/50",
-                          theme === 'high-contrast' ? "text-emerald-500 bg-emerald-500/10 font-bold" : "text-slate-500 hover:text-white"
-                        )}
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>WCAG Contrast</span>
-                      </button>
-                    </div>
-                  )}
+                  </div>
+                  <div className="flex flex-col truncate text-left" style={{ marginLeft: '-54px', paddingLeft: '2px', paddingTop: '6px', width: '118.6667px', height: '38.5px', marginRight: '5px', marginBottom: '-57px', marginTop: '50px', paddingRight: '-8px', paddingBottom: '5px' }}>
+                    <span className="text-[10px] font-black italic text-white leading-none truncate group-hover:text-[#0ea5e9] transition-colors">{user.displayName?.toUpperCase() || "JANE DOE"}</span>
+                    <span className="text-[7px] font-black text-[#0ea5e9] uppercase tracking-[0.2em] mt-1 truncate">Compliance_Officer</span>
+                  </div>
                 </div>
-
+             <div className="relative">
+                <button 
+                  onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}
+                  title="Choisir Thème & Accessibilité"
+                  className="p-2.5 text-slate-400 hover:text-blue-400 transition-colors bg-[#0d1520] border border-[#1c2e46]/60 rounded-xl hover:bg-slate-800/50 flex items-center justify-center shrink-0"
+                  style={{ width: '37.3229px', height: '34.3229px', marginLeft: '-54px', marginRight: '15px', paddingTop: '7px', paddingBottom: '18px', marginTop: '3px', marginBottom: '4px' }}
+                >
+                  {theme === 'dark' ? (
+                     <Moon className="w-3.5 h-3.5 text-indigo-400" />
+                  ) : theme === 'high-contrast' ? (
+                     <Eye className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
+                  ) : (
+                     <Sun className="w-3.5 h-3.5 text-amber-500" />
+                  )}
+                </button>
+                {isThemeMenuOpen && (
+                  <div className="absolute bottom-12 right-0 w-52 bg-[#090d16] border border-[#1c2e46]/80 rounded-xl shadow-2xl p-2 z-[999] flex flex-col gap-1 text-left">
+                    <span className="text-[7.5px] font-black uppercase text-[#0ea5e9] tracking-[0.15em] opacity-80 px-2 py-1 block">Sélecteur de Thème</span>
+                    <button
+                      onClick={() => selectTheme('dark')}
+                      className={cn(
+                        "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[9px] font-bold uppercase transition-all hover:bg-slate-850/50",
+                        theme === 'dark' ? "text-blue-400 bg-blue-500/10" : "text-slate-400 hover:text-white"
+                      )}
+                    >
+                      <Moon className="w-3.5 h-3.5" />
+                      <span>Cyber Obsidian (Sombre)</span>
+                    </button>
+                    <button
+                      onClick={() => selectTheme('light')}
+                      className={cn(
+                        "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[9px] font-bold uppercase transition-all hover:bg-slate-850/50",
+                        theme === 'light' ? "text-amber-500 bg-amber-500/10" : "text-slate-400 hover:text-white"
+                      )}
+                    >
+                      <Sun className="w-3.5 h-3.5" />
+                      <span>Slate Minimal (Clair)</span>
+                    </button>
+                    <button
+                      onClick={() => selectTheme('high-contrast')}
+                      className={cn(
+                        "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[9px] font-bold uppercase transition-all hover:bg-slate-850/50",
+                        theme === 'high-contrast' ? "text-emerald-500 bg-emerald-500/10 font-bold" : "text-slate-500 hover:text-white"
+                      )}
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>Haute Accessibilité (WCAG)</span>
+                    </button>
+                  </div>
+                )}
+             </div>
                 <button 
                   onClick={() => signOut(auth)}
-                  type="button"
                   title="Sign Out"
-                  className="py-2 px-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/30 transition-all bg-[#0d1520] border border-[#1c2e46]/60 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="p-2.5 text-slate-400 hover:text-red-500 transition-colors bg-[#0d1520] border border-[#1c2e46]/60 rounded-xl hover:bg-red-500/10"
                 >
                   <LogOut className="w-3.5 h-3.5" />
-                  <span className="text-[8px] font-mono font-bold tracking-wider uppercase">EXIT</span>
                 </button>
              </div>
           </div>
@@ -5919,13 +5179,6 @@ export default function App() {
                       )}
                     </motion.div>
                 </div>
-                <button 
-                  onClick={() => setIsDiagnosticModalOpen(true)}
-                  title={language === 'FR' ? "Diagnostic d'Intégrité Système" : "System Integrity Diagnostics"}
-                  className="p-3 text-slate-350 hover:text-emerald-400 transition-colors bg-[#0d1520] border border-[#1c2e46]/60 rounded-2xl mr-1 flex items-center justify-center shrink-0"
-                >
-                  <ShieldCheck className="w-5 h-5 text-emerald-450 animate-pulse" />
-                </button>
                 <button 
                   onClick={toggleTheme}
                   title={theme === "dark" ? "Passer au thème clair (Slate Minimal)" : theme === "light" ? "Passer au thème haute accessibilité (WCAG AAA)" : "Passer au thème Cyber Obsidian"}
@@ -5994,166 +5247,29 @@ export default function App() {
                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.5em] animate-pulse">Synchronizing Nexus...</div>
               </div>
             ) : !user ? (
-               <div className="w-full max-w-lg mx-auto bg-[#090d16]/95 border border-[#1b314e]/80 rounded-[2.5rem] p-8 shadow-[0_25px_60px_rgba(0,0,0,0.8)] text-slate-200 backdrop-blur-3xl">
-                  <div className="text-center space-y-3 mb-6">
-                     <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 border border-amber-500/25 text-amber-500 rounded-full text-[9px] font-black uppercase tracking-[0.2em] font-mono">
-                       <ShieldCheck className="w-3 h-3" /> Secure Gateway Connection
-                     </div>
-                     <h2 className="text-3xl font-extrabold tracking-tight text-white uppercase italic">Nexus Sovereign Hub</h2>
-                     <p className="text-xs text-slate-400 font-medium font-mono">
-                       {language === 'FR' ? "AUTHENTIFICATION DIRECTE SUR CLOUD SOUVERAIN" : "SOVEREIGN CLOUD DIRECT AUTHENTICATION"}
-                     </p>
+               <div className="flex flex-col items-center justify-center min-h-[60vh] gap-8 bg-white/50 backdrop-blur-2xl rounded-[4rem] border border-slate-100 shadow-2xl">
+                  <div className="text-center space-y-4">
+                     <Badge variant="crit">Access Restricted</Badge>
+                     <h2 className="text-4xl font-black italic text-slate-900 uppercase tracking-tighter">Nexus Secure Gateway</h2>
+                     <p className="text-slate-500 font-medium italic max-w-md mx-auto">Please authorize your credentials to establish a secure link with the AuditAX Nexus Hub.</p>
                   </div>
-
-                  {/* Dual Tab Controller */}
-                  <div className="grid grid-cols-2 gap-1 bg-[#05080e] p-1 rounded-2xl border border-[#1b2d45] mb-6">
-                    <button
-                      type="button"
-                      onClick={() => { setAuthTab('login'); setAuthError(null); setAuthSuccess(null); }}
-                      className={cn(
-                        "py-3 rounded-xl font-black text-[10.5px] uppercase tracking-wider transition-all cursor-pointer bg-transparent border-0",
-                        authTab === 'login' ? "bg-amber-500 text-black shadow-lg font-bold" : "text-slate-400 hover:text-white hover:bg-white/5"
-                      )}
-                    >
-                      {language === 'FR' ? 'Connexion' : 'Sign In'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => { setAuthTab('register'); setAuthError(null); setAuthSuccess(null); }}
-                      className={cn(
-                        "py-3 rounded-xl font-black text-[10.5px] uppercase tracking-wider transition-all cursor-pointer bg-transparent border-0",
-                        authTab === 'register' ? "bg-amber-500 text-black shadow-lg font-bold" : "text-slate-400 hover:text-white hover:bg-white/5"
-                      )}
-                    >
-                      {language === 'FR' ? 'Créer un Compte' : 'Register'}
-                    </button>
-                  </div>
-
-                  {/* Forms */}
-                  <form onSubmit={authTab === 'login' ? handleEmailLogin : handleEmailRegister} className="space-y-4">
-                    {authTab === 'register' && (
-                      <div className="space-y-1 text-left">
-                        <label className="block text-[8.5px] font-black uppercase tracking-widest text-slate-400 font-mono">
-                          {language === 'FR' ? "Nom Complet (Optionnel)" : "Full Name (Optional)"}
-                        </label>
-                        <input
-                          type="text"
-                          value={authName}
-                          onChange={(e) => setAuthName(e.target.value)}
-                          placeholder="e.g. Admiral Vance"
-                          className="w-full bg-[#05080e] border border-[#121f31] focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-white placeholder-slate-600 focus:outline-none transition-all font-mono"
-                        />
-                      </div>
-                    )}
-
-                    <div className="space-y-1 text-left">
-                      <label className="block text-[8.5px] font-black uppercase tracking-widest text-slate-400 font-mono">
-                        {language === 'FR' ? "Adresse E-mail" : "Email Address"}
-                      </label>
-                      <input
-                        type="email"
-                        value={authEmail}
-                        onChange={(e) => setAuthEmail(e.target.value)}
-                        placeholder="operator@auditax.internal"
-                        required
-                        className="w-full bg-[#05080e] border border-[#121f31] focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-white placeholder-slate-600 focus:outline-none transition-all font-mono"
-                      />
-                    </div>
-
-                    <div className="space-y-1 text-left">
-                      <label className="block text-[8.5px] font-black uppercase tracking-widest text-slate-400 font-mono">
-                        {language === 'FR' ? "Mot de Passe (min 6)" : "Password (min 6)"}
-                      </label>
-                      <input
-                        type="password"
-                        value={authPassword}
-                        onChange={(e) => setAuthPassword(e.target.value)}
-                        placeholder="••••••••"
-                        required
-                        className="w-full bg-[#05080e] border border-[#121f31] focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-white placeholder-slate-600 focus:outline-none transition-all font-mono"
-                      />
-                    </div>
-
-                    {authTab === 'register' && (
-                      <div className="space-y-1 text-left">
-                        <label className="block text-[8.5px] font-black uppercase tracking-widest text-slate-400 font-mono">
-                          {language === 'FR' ? "Confirmer le Mot de Passe" : "Confirm Password"}
-                        </label>
-                        <input
-                          type="password"
-                          value={authConfirmPassword}
-                          onChange={(e) => setAuthConfirmPassword(e.target.value)}
-                          placeholder="••••••••"
-                          required={authTab === 'register'}
-                          className="w-full bg-[#05080e] border border-[#121f31] focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-white placeholder-slate-600 focus:outline-none transition-all font-mono"
-                        />
-                      </div>
-                    )}
-
-                    {authError && (
-                      <div className="p-3 bg-red-500/10 border border-red-500/25 text-red-400 text-[10px] tracking-wide font-mono rounded-xl text-left">
-                        ⚠️ [AUTHENTICATION_DRIP] - {authError}
-                      </div>
-                    )}
-
-                    {authSuccess && (
-                      <div className="p-3 bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[10px] tracking-wide font-mono rounded-xl text-left">
-                        ✓ [SESSION_AUTHORIZED] - {authSuccess}
-                      </div>
-                    )}
-
-                    <motion.button
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.99 }}
-                      type="submit"
-                      disabled={authLoading}
-                      className="w-full bg-amber-500 text-black py-4 px-6 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-amber-400 transition-all cursor-pointer flex items-center justify-center gap-2 border-0"
-                    >
-                      {authLoading ? (
-                        <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                      ) : (
-                        <>
-                          <LogIn className="w-4 h-4" /> {authTab === 'login' ? (language === 'FR' ? 'ÉTABLIR LA SESSION' : 'ESTABLISH SESSION') : (language === 'FR' ? 'CRÉER ET INITIALISER LE COMPTE' : 'REGISTER & PROCEED')}
-                        </>
-                      )}
-                    </motion.button>
-                  </form>
-
-                  {/* Divider */}
-                  <div className="relative flex items-center justify-center my-5">
-                    <div className="absolute w-full border-t border-slate-800"></div>
-                    <span className="relative px-3 bg-[#090d16] text-[8.5px] uppercase font-black text-slate-500 tracking-[0.2em] select-none">OR</span>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={signInWithGoogle}
-                      className="flex items-center justify-center gap-2 p-3 bg-[#05080e] border border-[#121f31] hover:bg-slate-900/40 rounded-xl text-[10px] font-black uppercase tracking-widest text-[#cbd5e1] cursor-pointer transition-all"
-                    >
-                      <svg className="w-3.5 h-3.5 mr-0.5" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                        <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.62z" strokeWidth="0" />
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
-                      </svg>
-                      Google Sync
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={enableDemoMode}
-                      className="flex items-center justify-center gap-2 p-3 bg-[#05080e] border border-[#121f31] hover:bg-slate-900/40 rounded-xl text-[10px] font-black uppercase tracking-widest text-[#cbd5e1] cursor-pointer transition-all"
-                    >
-                      <Cpu className="w-3.5 h-3.5 text-purple-400" />
-                      {language === 'FR' ? 'Accès Démo' : 'Demo State'}
-                    </button>
-                  </div>
-
-                  {/* Diagnostic Footer */}
-                  <div className="mt-5 pt-3 border-t border-slate-900/50 text-[8.5px] font-mono text-slate-500 flex flex-col gap-0.5 text-left select-none uppercase tracking-widest">
-                     <div>● FIREBASE CONFIG STAT: STABLE</div>
-                     <div>● PROTOCOL ENGINE: V2 ACTIVE</div>
+                  <div className="flex flex-col sm:flex-row gap-4">
+                     <motion.button 
+                       whileHover={{ scale: 1.05 }}
+                       whileTap={{ scale: 0.95 }}
+                       onClick={signInWithGoogle}
+                       className="sunset-gradient text-white px-12 py-6 rounded-3xl font-black uppercase tracking-[0.3em] shadow-2xl shadow-sunset-orange/30 flex items-center justify-center gap-4 text-xs font-mono"
+                     >
+                       <LogIn className="w-5 h-5" /> Google Sync
+                     </motion.button>
+                     <motion.button 
+                       whileHover={{ scale: 1.05 }}
+                       whileTap={{ scale: 0.95 }}
+                       onClick={enableDemoMode}
+                       className="bg-[#0e1726] hover:bg-[#121f33] text-white border border-[#2d3e58] px-12 py-6 rounded-3xl font-black uppercase tracking-[0.3em] shadow-2xl flex items-center justify-center gap-4 text-xs font-mono cursor-pointer"
+                     >
+                       <Cpu className="w-5 h-5 text-purple-400" /> Demo Guest Mode
+                     </motion.button>
                   </div>
                </div>
             ) : (
@@ -6328,8 +5444,8 @@ export default function App() {
                     theme={theme}
                   />
                 )}
-                {activeTab === 'admin' && <ConfigSection data={data} actions={actions} onNotify={showToast} />}
-                {activeTab === 'intelligence' && <NexusAISection data={data} onNotify={showToast} onExit={() => setActiveTab('summary')} />}
+                {activeTab === 'admin' && <AIControlCenter data={data} actions={actions} onNotify={showToast} />}
+                {activeTab === 'intelligence' && <NexusAISection data={data} onNotify={showToast} onExit={() => setActiveTab('summary')} user={user} />}
               </>
             )}
           </motion.div>
@@ -6349,13 +5465,6 @@ export default function App() {
           </footer>
         )}
       </main>
-
-      <SystemIntegrityModal 
-        isOpen={isDiagnosticModalOpen} 
-        onClose={() => setIsDiagnosticModalOpen(false)} 
-        socketConnected={isSocketConnected} 
-        language={language}
-      />
     </div>
   );
 }

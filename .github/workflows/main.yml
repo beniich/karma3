@@ -1,0 +1,204 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+env:
+  REGISTRY: ghcr.io
+  SERVER_IMAGE: ${{ github.repository }}/auditax-server
+  WORKER_IMAGE: ${{ github.repository }}/auditax-worker
+
+jobs:
+  # ============================================================
+  # Job 1: Build, Lint, Test
+  # Runs on every push and PR — gate for merge
+  # ============================================================
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: TypeScript Compile Check (Strict)
+        run: npm run lint
+
+      - name: Build Verification (Frontend + Server + Worker)
+        run: npm run build
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+  # ============================================================
+  # Job 2: Docker Build Verification
+  # Ensures both Dockerfiles are valid on every push
+  # ============================================================
+  docker-verify:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Server Image (verify only)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: auditax-server:ci-${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build Worker Image (verify only)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.worker
+          push: false
+          tags: auditax-worker:ci-${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ============================================================
+  # Job 3: Deploy (only on push to main)
+  # Pushes Docker images to GitHub Container Registry (GHCR)
+  # then deploys to the configured hosting provider.
+  # ============================================================
+  deploy:
+    needs: [build-and-test, docker-verify]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & Push Server Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.SERVER_IMAGE }}:latest
+            ${{ env.REGISTRY }}/${{ env.SERVER_IMAGE }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build & Push Worker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.worker
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.WORKER_IMAGE }}:latest
+            ${{ env.REGISTRY }}/${{ env.WORKER_IMAGE }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # --------------------------------------------------------
+      # DEPLOY STEP — Uncomment and configure for your provider.
+      # Choose ONE of the following blocks:
+      # --------------------------------------------------------
+
+      # --- Option A: Google Cloud Run (Active Deployment) ---
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Deploy Server to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: auditax-server
+          image: ${{ env.REGISTRY }}/${{ env.SERVER_IMAGE }}:${{ github.sha }}
+          region: europe-west1
+          env_vars: |
+            NODE_ENV=production
+            KAFKA_BROKERS=${{ secrets.KAFKA_BROKERS }}
+            KAFKA_USERNAME=${{ secrets.KAFKA_USERNAME }}
+            KAFKA_PASSWORD=${{ secrets.KAFKA_PASSWORD }}
+            KAFKA_SSL=true
+            STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+            STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}
+            GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+
+      - name: Deploy Worker to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: auditax-worker
+          image: ${{ env.REGISTRY }}/${{ env.WORKER_IMAGE }}:${{ github.sha }}
+          region: europe-west1
+          no-traffic: true  # Worker has no HTTP traffic
+          env_vars: |
+            NODE_ENV=production
+            KAFKA_BROKERS=${{ secrets.KAFKA_BROKERS }}
+            KAFKA_USERNAME=${{ secrets.KAFKA_USERNAME }}
+            KAFKA_PASSWORD=${{ secrets.KAFKA_PASSWORD }}
+            KAFKA_SSL=true
+            GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+
+      # --- Option B: Railway ---
+      # - name: Deploy to Railway
+      #   env:
+      #     RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      #   run: |
+      #     npm install -g @railway/cli
+      #     railway up --service auditax-server
+      #     railway up --service auditax-worker
+
+      # --- Option C: Fly.io ---
+      # - name: Deploy to Fly.io
+      #   uses: superfly/flyctl-actions/setup-flyctl@master
+      # - run: flyctl deploy --config fly.server.toml --image ${{ env.REGISTRY }}/${{ env.SERVER_IMAGE }}:${{ github.sha }}
+      #   env:
+      #     FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      # - run: flyctl deploy --config fly.worker.toml --image ${{ env.REGISTRY }}/${{ env.WORKER_IMAGE }}:${{ github.sha }}
+      #   env:
+      #     FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Deployment Summary
+        run: |
+          echo "## 🚀 Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | Image | Tag |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|-------|-----|" >> $GITHUB_STEP_SUMMARY
+          echo "| Server | \`${{ env.SERVER_IMAGE }}\` | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Worker | \`${{ env.WORKER_IMAGE }}\` | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⚠️ Deploy step is commented out — uncomment your provider block in the workflow." >> $GITHUB_STEP_SUMMARY

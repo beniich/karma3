@@ -19,6 +19,8 @@ import {
   Code2
 } from 'lucide-react';
 import { useSocket } from '../hooks/useSocket';
+import { db } from '../firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
 
 interface PingResponse {
   status: string;
@@ -184,7 +186,8 @@ export const BackendConnectSection = ({ onNotify }: { onNotify: (msg: string) =>
         },
         body: JSON.stringify({
           prompt: aiPrompt,
-          systemInstruction: "You are AuditAX Full-Stack Security Evaluator. Explain key features and security strategies simply with maximum 2-3 short, clean bullet points. Return pure text, no markdown block syntax."
+          systemInstruction: "You are AuditAX Full-Stack Security Evaluator. Explain key features and security strategies simply with maximum 2-3 short, clean bullet points. Return pure text, no markdown block syntax.",
+          userId: 'demo_user_123'
         })
       });
 
@@ -194,8 +197,31 @@ export const BackendConnectSection = ({ onNotify }: { onNotify: (msg: string) =>
       }
 
       const data = await response.json();
-      setAiResult(data.text || 'Le serveur n\'a renvoyé aucun texte.');
-      onNotify('🤖 Génération de réponse sécurisée via intermédiaire serveur complétée.');
+      
+      if (data.jobId) {
+        const jobResult: string = await new Promise((resolve, reject) => {
+          const unsub = onSnapshot(doc(db, 'audit_jobs', data.jobId), (docSnap) => {
+            if (docSnap.exists()) {
+              const jobData = docSnap.data();
+              if (jobData.status === 'completed') {
+                unsub();
+                resolve(jobData.result || '');
+              } else if (jobData.status === 'failed') {
+                unsub();
+                reject(new Error(jobData.error || 'Job failed on the server'));
+              }
+            }
+          }, (err) => {
+            unsub();
+            reject(err);
+          });
+        });
+
+        setAiResult(jobResult || 'Le serveur n\'a renvoyé aucun texte.');
+        onNotify('🤖 Génération de réponse sécurisée via intermédiaire serveur complétée.');
+      } else {
+        throw new Error("Response had no jobId");
+      }
     } catch (err: any) {
       console.error(err);
       setAiResult(`❌ Échec de la requête trans-serveur : ${err.message}\nAssurez-vous que la clé d'API GEMINI_API_KEY est configurée dans votre panneau de configuration d'environnement.`);

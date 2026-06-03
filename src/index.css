@@ -16,38 +16,7 @@
 
 @layer base {
   body {
-    @apply antialiased bg-sunset-surface text-[#2d2d2d] text-sm leading-relaxed tracking-normal;
-  }
-
-  /* Executive high-precision dashboard typography */
-  h1 {
-    @apply text-3xl font-extrabold tracking-tight text-slate-900 leading-[1.1];
-  }
-
-  h2 {
-    @apply text-xl font-bold tracking-tight text-slate-800 leading-snug;
-  }
-
-  h3 {
-    @apply text-base font-semibold tracking-tight text-slate-800 leading-snug;
-  }
-
-  h4 {
-    @apply text-xs font-semibold tracking-normal text-slate-700 leading-normal;
-  }
-
-  /* Micro status labels, indicator tags and stamps */
-  .tech-label-xs {
-    @apply text-[8.5px] font-mono font-bold tracking-[0.16em] uppercase text-slate-400 select-none;
-  }
-
-  .tech-label-sm {
-    @apply text-[10px] font-mono font-bold tracking-[0.12em] uppercase text-slate-500 select-none;
-  }
-
-  /* Clean number tracking for data points */
-  .data-value {
-    @apply font-mono font-bold tracking-tighter;
+    @apply antialiased bg-sunset-surface text-[#2d2d2d];
   }
 }
 

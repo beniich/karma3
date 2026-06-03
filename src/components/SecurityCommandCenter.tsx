@@ -21,7 +21,6 @@ import {
   X
 } from 'lucide-react';
 import { TacticalResponseRuleEngine } from './TacticalResponseRuleEngine';
-import { HighFidelityIcon } from './HighFidelityIcon';
 
 interface Threat {
   id: string;
@@ -148,10 +147,10 @@ export const SecurityCommandCenter = ({ onNotify }: { onNotify: (msg: string) =>
             <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest font-mono">THREAT DETECTION STATUS</h3>
             
             <div className="flex items-center gap-6">
-              {/* Massive orange shield alert icon, using HighFidelityIcon for pure elegance */}
-              <HighFidelityIcon variant="danger" size="xl" className="shrink-0">
-                <ShieldAlert />
-              </HighFidelityIcon>
+              {/* Massive orange shield alert icon replicated image */}
+              <div className="w-24 h-24 bg-orange-600/20 text-orange-500 rounded-3xl border border-orange-500/35 flex items-center justify-center shadow-[0_0_30px_rgba(234,88,12,0.15)] shrink-0">
+                <ShieldAlert className="w-14 h-14" />
+              </div>
 
               {/* Counts display info */}
               <div className="space-y-1">
@@ -310,10 +309,8 @@ export const SecurityCommandCenter = ({ onNotify }: { onNotify: (msg: string) =>
               className="bg-[#0f0827] border border-orange-500/30 rounded-[2.5rem] shadow-2xl p-7 max-w-lg w-full text-left space-y-6"
             >
               <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 className="text-md font-extrabold text-white uppercase tracking-wider flex items-center gap-3">
-                  <HighFidelityIcon variant="danger" size="sm">
-                    <ShieldAlert />
-                  </HighFidelityIcon>
+                <h3 className="text-md font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                  <ShieldAlert className="w-5 h-5 text-orange-450" />
                   INCIDENTS SECURE LOG & RESOLUTION
                 </h3>
                 <button onClick={() => setShowThreatDetails(false)} className="text-slate-400 hover:text-white">

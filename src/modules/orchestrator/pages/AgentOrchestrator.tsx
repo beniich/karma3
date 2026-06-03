@@ -133,7 +133,7 @@ export const AgentOrchestrator = () => {
           </div>
           <div>
             <h1 className="text-2xl font-bold font-syne tracking-tight">Agent Orchestrator</h1>
-            <p className="text-[10px] text-slate-500 uppercase font-mono mt-0.5 tracking-wider">AuditAX Sovereign Control Zone</p>
+            <p className="text-[10px] text-slate-500 uppercase font-mono mt-0.5 tracking-wider">Karma3 Sovereign Control Zone</p>
           </div>
         </div>
         <div className="flex items-center gap-6 text-sm font-medium text-gray-500">

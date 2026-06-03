@@ -12,7 +12,7 @@ interface MindNode {
   type?: 'left' | 'right' | 'center' | 'intermediate';
 }
 
-export const NexusAIAnalysisStudio: React.FC<{ onNotify: (msg: string, type: 'success' | 'warn' | 'info') => void }> = ({ onNotify }) => {
+export const Karma3AIAnalysisStudio: React.FC<{ onNotify: (msg: string, type: 'success' | 'warn' | 'info') => void }> = ({ onNotify }) => {
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
   const [selectedConfidence, setSelectedConfidence] = useState<number>(92);
   const [isSyncing, setIsSyncing] = useState(false);

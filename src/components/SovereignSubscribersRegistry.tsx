@@ -158,7 +158,7 @@ export const SovereignSubscribersRegistry = ({
     setApplyStep("Initialisation de la recompilation du noyau FreeBSD local...");
     
     setTimeout(() => {
-      setApplyStep("Analyse syntaxique du fichier maître XML /etc/nexus/config.xml...");
+      setApplyStep("Analyse syntaxique du fichier maître XML /etc/karma3/config.xml...");
     }, 700);
 
     setTimeout(() => {
@@ -179,12 +179,12 @@ export const SovereignSubscribersRegistry = ({
 
   const handleDownloadConfigXML = () => {
     const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
-<nexus_appliance>
+<karma3_appliance>
   <system>
-    <hostname>pfsense-nexus.sovereign.local</hostname>
+    <hostname>pfsense-karma3.sovereign.local</hostname>
     <os_kernel>FreeBSD 14.1-STABLE (Core Edition)</os_kernel>
     <mtls_security>enabled</mtls_security>
-    <api_endpoint>https://nexus.sovereign.local/api/v2</api_endpoint>
+    <api_endpoint>https://karma3.sovereign.local/api/v2</api_endpoint>
   </system>
   <subscribers_registry>
     ${subscribers.map(sub => `
@@ -201,46 +201,46 @@ export const SovereignSubscribersRegistry = ({
     <token_signature>${apiToken}</token_signature>
     <emergency_lock>${emergencyCounter}</emergency_lock>
   </api_configuration>
-</nexus_appliance>`;
+</karma3_appliance>`;
 
     const blob = new Blob([xmlContent], { type: 'text/xml' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `nexus-appliance-config.xml`;
+    link.download = `karma3-appliance-config.xml`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    onNotify("📄 Téléchargement réussi de 'nexus-appliance-config.xml' (Manager Central).");
+    onNotify("📄 Téléchargement réussi de 'karma3-appliance-config.xml' (Manager Central).");
   };
 
   const handleDownloadCompose = () => {
     const composeContent = `version: '3.8'
 
 services:
-  nexus-core-manager:
-    image: nexus/core-manager:2.8.1-RELEASE
-    container_name: nexus-core-manager
+  karma3-core-manager:
+    image: karma3/core-manager:2.8.1-RELEASE
+    container_name: karma3-core-manager
     restart: always
     environment:
       - NODE_ENV=production
       - APPLIANCE_MODE=true
-      - CONFIG_PATH=/etc/nexus/config.xml
+      - CONFIG_PATH=/etc/karma3/config.xml
     volumes:
-      - ./config.xml:/etc/nexus/config.xml
+      - ./config.xml:/etc/karma3/config.xml
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "3000:3000"
 
   jumpserver-client:
-    image: nexus/jumpserver-pam:latest
-    container_name: nexus-jumpserver
+    image: karma3/jumpserver-pam:latest
+    container_name: karma3-jumpserver
     restart: always
 
   prometheus-sentinel:
     image: prom/prometheus:latest
-    container_name: nexus-prometheus
+    container_name: karma3-prometheus
     restart: always
 `;
 
@@ -259,7 +259,7 @@ services:
   const [auditLogs, setAuditLogs] = useState<string[]>([
     "Initialisation globale du nœud souverain terminée.",
     "Certificats mTLS cryptographiques validés : Statut optimal.",
-    "Canal de sécurité mTLS établi avec le cluster central AuditAX."
+    "Canal de sécurité mTLS établi avec le cluster central Karma3."
   ]);
 
   const subscribers = data.subscribers || [];
@@ -526,7 +526,7 @@ services:
                   </div>
                 </div>
                 <h3 className="text-lg font-black uppercase tracking-[0.3em] text-red-500">
-                  Sovereign Nexus Command
+                  Sovereign Karma3 Command
                 </h3>
                 <p className="text-[9px] text-slate-500 uppercase tracking-widest mt-1">
                   PROCÉDURE DE RÉVOCATION & DÉSENRÔLEMENT MILITAIRE • ACCRÉDITATION DIRECTE
@@ -659,7 +659,7 @@ services:
           <span className="text-[8.5px] font-black text-slate-500 uppercase tracking-widest block">Machine Hostname</span>
           <div className="flex items-center gap-2 pt-0.5">
             <Server className="w-4 h-4 text-[#ff7a00]" />
-            <span className={cn("text-xs font-black truncate", isLight ? "text-zinc-900" : "text-white")}>pfsense-nexus.sovereign</span>
+            <span className={cn("text-xs font-black truncate", isLight ? "text-zinc-900" : "text-white")}>pfsense-karma3.sovereign</span>
           </div>
           <span className="text-[9.5px] text-slate-400 block pt-0.5 font-sans">Uptime: {systemUptime}</span>
         </div>

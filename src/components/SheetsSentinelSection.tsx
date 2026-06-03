@@ -129,7 +129,7 @@ export const SheetsSentinelSection = ({ onNotify, theme = 'dark' }: { onNotify: 
 
     // MANDATORY USER CONFIRMATION GUARD
     const isConfirmed = window.confirm(
-      "Do you want to create a new spreadsheet named 'AuditAX Enterprise Audit Ledger' in your Google Drive account?"
+      "Do you want to create a new spreadsheet named 'Karma3 Enterprise Audit Ledger' in your Google Drive account?"
     );
     if (!isConfirmed) return;
 
@@ -137,7 +137,7 @@ export const SheetsSentinelSection = ({ onNotify, theme = 'dark' }: { onNotify: 
     try {
       const createBody = {
         properties: {
-          title: "AuditAX Enterprise Audit Ledger"
+          title: "Karma3 Enterprise Audit Ledger"
         },
         sheets: [
           {

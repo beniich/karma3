@@ -97,24 +97,24 @@ import { IntegrationHubSection } from './components/IntegrationHubSection';
 import { GmailSentinelSection } from './components/GmailSentinelSection';
 import { SheetsSentinelSection } from './components/SheetsSentinelSection';
 import { ComplianceMappingSection } from './components/ComplianceMappingSection';
-import { Karma3NexusHub } from './components/Karma3NexusHub';
+import { Karma3Hub } from './components/Karma3Hub';
 import { SanteConnectSection } from './components/SanteConnectSection';
 import { BackendConnectSection } from './components/BackendConnectSection';
 import { HighFidelityIcon } from './components/HighFidelityIcon';
 import { SystemIntegrityModal } from './components/SystemIntegrityModal';
 
-// --- New Sovereign Device Nexus V2 Layout Components ---
-import { NexusMainDashboard } from './components/NexusMainDashboard';
-import { NexusSupportCenter } from './components/NexusSupportCenter';
-import { NexusProfileSettings } from './components/NexusProfileSettings';
-import { NexusScriptLibrary } from './components/NexusScriptLibrary';
+// --- New Sovereign Device Karma3 V2 Layout Components ---
+import { Karma3MainDashboard } from './components/Karma3MainDashboard';
+import { Karma3SupportCenter } from './components/Karma3SupportCenter';
+import { Karma3ProfileSettings } from './components/Karma3ProfileSettings';
+import { Karma3ScriptLibrary } from './components/Karma3ScriptLibrary';
 import { SecurityCommandCenter } from './components/SecurityCommandCenter';
 import { TacticalResponseRuleEngine } from './components/TacticalResponseRuleEngine';
-import { NexusArchitectureOverview } from './components/NexusArchitectureOverview';
+import { Karma3ArchitectureOverview } from './components/Karma3ArchitectureOverview';
 import { FleetMonitoring } from './components/FleetMonitoring';
 import { DeviceInventoryList } from './components/DeviceInventoryList';
 import { SovereignSubscribersRegistry } from './components/SovereignSubscribersRegistry';
-import { NexusAIAnalysisStudio } from './components/NexusAIAnalysisStudio';
+import { Karma3AIAnalysisStudio } from './components/Karma3AIAnalysisStudio';
 import { SovereignReportsSection } from './components/SovereignReportsSection';
 
 // --- Types ---
@@ -920,11 +920,11 @@ const CommandPalette = ({ isOpen, onClose, onSelect, fieldGroups }: { isOpen: bo
 
 // --- Sections ---
 
-const NexusAISection = ({ data, onNotify, onExit }: { data: DashboardData; onNotify: (m: string) => void; onExit?: () => void }) => {
+const Karma3AISection = ({ data, onNotify, onExit }: { data: DashboardData; onNotify: (m: string) => void; onExit?: () => void }) => {
   const [messages, setMessages] = useState<{ role: 'user' | 'ai'; content: string }[]>([
     {
       role: 'ai',
-      content: `👋 Hello! I am **Pegasus**, the Central Intelligence and Orchestrator of Nexus AI.
+      content: `👋 Hello! I am **Pegasus**, the Central Intelligence and Orchestrator of Karma3 AI.
 
 I do not only analyze your compliance data, I also drive this interface in real-time to optimize your decision-making processes.
 
@@ -934,7 +934,7 @@ To start an analysis, ask me a question or try one of our predictive tools:
 <UI_ACTION type="SUGGEST_FIELD" fieldId="Compliance_Score" reason="Crucial link to model the overall audit risk." />
 
 Here is the current state of our node network:
-<UI_ACTION type="RENDER_COMPONENT" component="Gauge" props={"value": 87, "title": "Overall Confidence Index", "subtitle": "AuditAX weighted security score"} />`
+<UI_ACTION type="RENDER_COMPONENT" component="Gauge" props={"value": 87, "title": "Overall Confidence Index", "subtitle": "Karma3 weighted security score"} />`
     }
   ]);
   const [input, setInput] = useState('');
@@ -943,8 +943,8 @@ Here is the current state of our node network:
   const [activePage, setActivePage] = useState('page1');
   const [selectedVis, setSelectedVis] = useState<number | null>(0);
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
-  const [expandedGroups, setExpandedGroups] = useState<string[]>(['Nexus_Core_v1']);
-  const [activeGroup, setActiveGroup] = useState<string>('Nexus_Core_v1');
+  const [expandedGroups, setExpandedGroups] = useState<string[]>(['Karma3_Core_v1']);
+  const [activeGroup, setActiveGroup] = useState<string>('Karma3_Core_v1');
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
 
   // Custom interactive & predictive state
@@ -953,7 +953,7 @@ Here is the current state of our node network:
 
   // Hydrate from localStorage on load
   useEffect(() => {
-    const saved = localStorage.getItem('nexus-ai-storage');
+    const saved = localStorage.getItem('karma3-ai-storage');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -968,7 +968,7 @@ Here is the current state of our node network:
 
   // Sync to localStorage
   useEffect(() => {
-    localStorage.setItem('nexus-ai-storage', JSON.stringify({
+    localStorage.setItem('karma3-ai-storage', JSON.stringify({
       messages,
       selectedFields,
       activeGroup
@@ -1004,14 +1004,14 @@ Here is the current state of our node network:
   };
 
   const fieldGroups = [
-    { name: 'Nexus_Core_v1', fields: ['Audit_Status', 'Compliance_Score', 'Node_Health'] },
+    { name: 'Karma3_Core_v1', fields: ['Audit_Status', 'Compliance_Score', 'Node_Health'] },
     { name: 'Risk_Heuristics', fields: ['Exposure_Value', 'Volatility_Delta', 'Sector_Impact'] },
     { name: 'Operational_Metrics', fields: ['CPU_Load', 'Memory_Buffer', 'Latency_ms'] },
     { name: 'Personnel_Registry', fields: ['Access_Level', 'Auth_Token', 'Node_ID'] }
   ];
 
   const groupMetrics: Record<string, { label: string; value: string; color: string }[]> = {
-    'Nexus_Core_v1': [
+    'Karma3_Core_v1': [
       { label: 'System_Health', value: 'NOMINAL', color: 'text-emerald-500' },
       { label: 'Neural_Latency', value: '24ms', color: 'text-amber-500' },
       { label: 'Confidence_Score', value: '98.2%', color: 'text-slate-900' }
@@ -1080,7 +1080,7 @@ ${JSON.stringify({
 
 USER QUERY:
 ${text}`,
-        systemInstruction: `You are Pegasus, the Central Intelligence and Interface Orchestrator of Nexus AI.
+        systemInstruction: `You are Pegasus, the Central Intelligence and Interface Orchestrator of Karma3 AI.
 You are not just a text chat assistant, you have full power to dynamically manipulate the UI using special '<UI_ACTION>' action tags.
 
 You must use these tags proactively to assist the user in their analysis:
@@ -1121,7 +1121,7 @@ COMMERCE & STYLE:
       const resData = await response.json();
       
       if (!response.ok) {
-        setMessages([...newMessages, { role: 'ai', content: `⚠️ **SYSTEM ERROR:** ${resData.error || "Nexus connection severed. Please try again later."}` }]);
+        setMessages([...newMessages, { role: 'ai', content: `⚠️ **SYSTEM ERROR:** ${resData.error || "Karma3 connection severed. Please try again later."}` }]);
         return;
       }
       
@@ -1144,7 +1144,7 @@ COMMERCE & STYLE:
         setMessages([...newMessages, { role: 'ai', content: "ERROR: Data node returned null or unexpected format." }]);
       }
     } catch (err) {
-      setMessages([...newMessages, { role: 'ai', content: "SYSTEM ERROR: Nexus connection severed. Please re-authenticate." }]);
+      setMessages([...newMessages, { role: 'ai', content: "SYSTEM ERROR: Karma3 connection severed. Please re-authenticate." }]);
     } finally {
       setLoading(false);
       setActiveAnalysis(null);
@@ -1152,9 +1152,9 @@ COMMERCE & STYLE:
   };
 
   const aiTools = [
-    { name: 'Bastion Orchestrator', icon: Terminal, desc: 'INTENT_ACCESS_ENGINE', prompt: "Translate the following intent into JumpServer access commands: 'Open SSH for admin on Nexus-Core-DB-01 for 2 hours'. Verify rights and propose specific bastion rule changes." },
+    { name: 'Bastion Orchestrator', icon: Terminal, desc: 'INTENT_ACCESS_ENGINE', prompt: "Translate the following intent into JumpServer access commands: 'Open SSH for admin on Karma3-Core-DB-01 for 2 hours'. Verify rights and propose specific bastion rule changes." },
     { name: 'Behavioral Sentry', icon: ShieldCheck, desc: 'REALTIME_UBA_SCAN', prompt: "Analyze the current JumpServer session logs for behavioral anomalies. Use UBA (User Behavior Analytics) to detect suspicious terminal commands or unexpected protocol shifts." },
-    { name: 'Audit Evidence Gen', icon: FileText, desc: 'COMPLIANCE_PROOF_SYNC', prompt: "Generate a certified audit evidence report combining JumpServer session logs and Nexus AI security logic. Map interactions directly to ISO 27001 Annex A.9 controls." },
+    { name: 'Audit Evidence Gen', icon: FileText, desc: 'COMPLIANCE_PROOF_SYNC', prompt: "Generate a certified audit evidence report combining JumpServer session logs and Karma3 AI security logic. Map interactions directly to ISO 27001 Annex A.9 controls." },
     { name: 'Compliance Audit', icon: ShieldAlert, desc: 'CORE_VALIDATION_ENGINE', prompt: "Perform a complete SOC 2 and ISO 27001 audit on the current operational status. Evaluate control points, data integrity, and access protocols." },
     { name: 'Harmonize Standards', icon: Zap, desc: 'CROSS_WALK_MAPPER', prompt: "Run full cross-framework harmonization. Map all active data nodes to both SOC 2 and ISO 27001 requirements." },
     { name: 'Summary Brief', icon: FileText, desc: 'NEURAL_SYNTHESIS_LITE', prompt: "Rapid synthesis of current risks and node efficiencies. Identify the single most critical point of failure." },
@@ -1169,7 +1169,7 @@ COMMERCE & STYLE:
   ];
 
   return (
-    <div id="nexus-ai-view" className="flex flex-col lg:flex-row gap-0 h-screen w-screen bg-slate-50 overflow-hidden rounded-none border-none shadow-none">
+    <div id="karma3-ai-view" className="flex flex-col lg:flex-row gap-0 h-screen w-screen bg-slate-50 overflow-hidden rounded-none border-none shadow-none">
       {/* Power BI Left Sidebar: Data Pane */}
       <div className="w-full lg:w-64 flex flex-col shrink-0 bg-white border-r border-slate-200">
         <div className="flex flex-col h-full">
@@ -1314,7 +1314,7 @@ COMMERCE & STYLE:
              </button>
            ))}
            <div className="ml-auto flex items-center gap-2 px-4 border-l border-slate-200">
-              <DownloadPDFButton targetId="nexus-ai-view" fileName="AuditAX-Intelligence-Analysis" iconOnly className="px-0" onEmailSent={onNotify} />
+              <DownloadPDFButton targetId="karma3-ai-view" fileName="Karma3-Intelligence-Analysis" iconOnly className="px-0" onEmailSent={onNotify} />
               <button 
                 onClick={() => onNotify("Data nodes synchronized. Cache purged.")}
                 className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg text-[9px] font-black text-slate-500 hover:bg-slate-100 transition-all uppercase tracking-widest italic"
@@ -1342,7 +1342,7 @@ COMMERCE & STYLE:
         {/* Canvas Path Breadcrumbs */}
         <div className="bg-white border-b border-slate-100 p-2 px-6 flex items-center gap-4 z-10">
            <div className="flex items-center gap-2 text-[8px] font-black text-slate-400 uppercase tracking-widest">
-              <span>Nexus Root</span>
+              <span>Karma3 Root</span>
               <ChevronRight className="w-3 h-3" />
               <span>Intelligence Layer</span>
               <ChevronRight className="w-3 h-3" />
@@ -1368,7 +1368,7 @@ COMMERCE & STYLE:
                <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-2xl font-black italic tracking-tighter text-slate-900 uppercase">Analysis Output</h2>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Nexus Node ID: AX-SYNC-44</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Karma3 Node ID: AX-SYNC-44</p>
                   </div>
                   <div className="flex gap-2">
                      <button 
@@ -1523,7 +1523,7 @@ COMMERCE & STYLE:
                   </div>
                </div>
                <div className="space-y-4 relative z-10">
-                 <h2 className="text-3xl font-black italic tracking-tighter text-slate-900 uppercase">Nexus Report Builder</h2>
+                 <h2 className="text-3xl font-black italic tracking-tighter text-slate-900 uppercase">Karma3 Report Builder</h2>
                  <div className="space-y-1">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] max-w-[320px] mx-auto leading-relaxed italic border-t border-slate-100 pt-3 mb-4">Awaiting neural injection. Select a visualization or analysis model to begin.</p>
                     <div className="flex justify-center gap-3">
@@ -1552,7 +1552,7 @@ COMMERCE & STYLE:
                       </div>
                       <div className="flex flex-col">
                         <span className="text-[9px] font-black uppercase text-slate-400 tracking-[0.3em] italic">
-                          {msg.role === 'user' ? 'Operator' : 'Nexus Engine'}
+                          {msg.role === 'user' ? 'Operator' : 'Karma3 Engine'}
                         </span>
                         <span className="text-[7px] font-black text-slate-300 uppercase tracking-[0.2em]">NODE_ID: AX-SYNC-04</span>
                       </div>
@@ -1834,7 +1834,7 @@ COMMERCE & STYLE:
                     </div>
                     <div className="flex-1">
                        <div className="text-[9px] font-black uppercase tracking-tight text-slate-700 leading-tight block">{tool.name}</div>
-                       <div className="text-[6px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 italic">{(tool as any).desc || "Nexus Algorithm"}</div>
+                       <div className="text-[6px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 italic">{(tool as any).desc || "Karma3 Algorithm"}</div>
                     </div>
                   </motion.button>
                 ))}
@@ -1897,7 +1897,7 @@ const ProfileSection = ({ user, onNotify }: { user: any; onNotify: (m: string) =
   return (
     <div id="profile-view" className="space-y-8">
       <div className="flex justify-end">
-        <DownloadPDFButton targetId="profile-view" fileName="AuditAX-Profile-Officer" iconOnly onEmailSent={onNotify} />
+        <DownloadPDFButton targetId="profile-view" fileName="Karma3-Profile-Officer" iconOnly onEmailSent={onNotify} />
       </div>
       <Card title="Elite Officer Profile" icon={Users}>
         <div className="flex flex-col md:flex-row gap-12 items-start">
@@ -1961,7 +1961,7 @@ const ProfileSection = ({ user, onNotify }: { user: any; onNotify: (m: string) =
             <div className="space-y-4">
               <div className="h-40 w-full rounded-2xl sunset-gradient p-1">
                  <div className="w-full h-full bg-slate-950 rounded-[0.9rem] flex flex-col items-center justify-center p-6 text-center">
-                    <div className="text-[8px] font-black text-sunset-orange uppercase tracking-[0.4em] mb-2">Nexus Certificate</div>
+                    <div className="text-[8px] font-black text-sunset-orange uppercase tracking-[0.4em] mb-2">Karma3 Certificate</div>
                     <div className="w-12 h-1 bg-sunset-orange/30 rounded-full mb-4" />
                     <div className="text-[10px] font-medium text-white/40 leading-relaxed italic">Encryption layers active. Digital signature verified. Access persistent.</div>
                  </div>
@@ -2008,7 +2008,7 @@ const ServicesSection = ({ data, updateService, removeService, onNotify }: { dat
            <p className="text-slate-400 font-bold uppercase tracking-[0.2em] text-[10px] italic">REDAL Platform Integration & Distributed Control</p>
         </div>
         <div className="flex gap-4">
-           <DownloadPDFButton targetId="services-view" fileName="AuditAX-Services-Infrastructure" iconOnly onEmailSent={onNotify} />
+           <DownloadPDFButton targetId="services-view" fileName="Karma3-Services-Infrastructure" iconOnly onEmailSent={onNotify} />
         </div>
       </div>
 
@@ -2604,7 +2604,7 @@ const SummarySection = ({ data, onNotify, onSettings }: { data: DashboardData; o
             </motion.button>
 
            <div className="flex items-center gap-3">
-              <DownloadPDFButton targetId="summary-view" fileName="AuditAX-Diagnostic-Risques" iconOnly onEmailSent={onNotify} />
+              <DownloadPDFButton targetId="summary-view" fileName="Karma3-Diagnostic-Risques" iconOnly onEmailSent={onNotify} />
               <button 
                 onClick={onSettings}
                 className="p-5 text-slate-400 hover:text-slate-900 transition-colors bg-white border border-slate-100 rounded-3xl shadow-sm hover:shadow-xl"
@@ -2749,7 +2749,7 @@ const OrgChartSection = ({ data, onNotify }: { data: DashboardData; onNotify: (m
   return (
     <div id="org-chart-view" className="space-y-8">
       <div className="flex justify-end">
-        <DownloadPDFButton targetId="org-chart-view" fileName="AuditAX-Organizational-Structure" iconOnly onEmailSent={onNotify} />
+        <DownloadPDFButton targetId="org-chart-view" fileName="Karma3-Organizational-Structure" iconOnly onEmailSent={onNotify} />
       </div>
       <Card title="Hierarchical Structure – Solar Nodes" icon={Users}>
         <div className="flex flex-col items-center py-12">
@@ -2884,7 +2884,7 @@ const ActionPlanSection = ({ data, onManageData, onNotify }: { data: DashboardDa
            <p className="text-slate-500 font-medium italic">Operational directives and spatial risk distribution</p>
         </div>
         <div className="flex gap-4">
-          <DownloadPDFButton targetId="action-plan-view" fileName="AuditAX-Action-Plan" iconOnly onEmailSent={onNotify} />
+          <DownloadPDFButton targetId="action-plan-view" fileName="Karma3-Action-Plan" iconOnly onEmailSent={onNotify} />
           <button 
             onClick={onManageData}
             className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-sunset-orange transition-all shadow-xl"
@@ -2964,13 +2964,13 @@ const CalendarSection = () => {
     { label: 'R7 – Directive Compliance', sub: 'IMMEDIATE', bar: { start: 0, width: 15, color: '#ff4d00' }, text: 'Ref.' },
     { label: 'R5 – Visual Roadmap', sub: 'SHORT TERM', bar: { start: 15, width: 15, color: '#ffbd00' }, text: 'Setup' },
     { label: 'R6 – AI dedicated HUB', sub: 'SHORT TERM', bar: { start: 15, width: 35, color: '#1a1510' }, text: 'OS' },
-    { label: 'R4 – Management Nexus', sub: 'MEDIUM TERM', bar: { start: 30, width: 35, color: '#ff4d00' }, text: 'Fiches' },
+    { label: 'R4 – Management Karma3', sub: 'MEDIUM TERM', bar: { start: 30, width: 35, color: '#ff4d00' }, text: 'Fiches' },
     { label: 'Solar Network Grid', sub: 'LONG TERM', bar: { start: 35, width: 65, color: '#10b981' }, text: 'Audit+Int' },
   ];
 
   return (
     <div className="space-y-12">
-      <Card title="Nexus Execution Calendar" icon={CalendarIcon}>
+      <Card title="Karma3 Execution Calendar" icon={CalendarIcon}>
         <div className="overflow-x-auto no-scrollbar custom-scrollbar">
           <div className="min-w-[700px] pb-4 px-2">
             <div className="grid grid-cols-[250px_1fr] gap-8 mb-8 border-b border-slate-100 pb-5">
@@ -3070,7 +3070,7 @@ const DocumentsSection = ({ data, onNotify }: { data: DashboardData; onNotify: (
       registeredAt: "2026-05-12 10:30 UTC"
     },
     'PROF-002': {
-      desc: "Skills enhancement strategy of our field technicians towards a certified AuditAX approved expert status, maximizing service quality and operational safety.",
+      desc: "Skills enhancement strategy of our field technicians towards a certified Karma3 approved expert status, maximizing service quality and operational safety.",
       hash: "822709a32c4e36504a7428f64522955f8eb899b800e843efc6bc36dd165ff3ca",
       registeredAt: "2026-05-15 14:45 UTC"
     },
@@ -3124,7 +3124,7 @@ const DocumentsSection = ({ data, onNotify }: { data: DashboardData; onNotify: (
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.setAttribute("href", url);
-      link.setAttribute("download", `AuditAX-Document-Registry-${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute("download", `Karma3-Document-Registry-${new Date().toISOString().split('T')[0]}.csv`);
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
@@ -3151,7 +3151,7 @@ const DocumentsSection = ({ data, onNotify }: { data: DashboardData; onNotify: (
            <p className="text-slate-400 font-bold uppercase tracking-[0.2em] text-[10px] italic">Cryptographically Signed Compliance Registry</p>
         </div>
         <div className="flex gap-1.5 items-center">
-           <DownloadPDFButton targetId="docs-registry-view" fileName="AuditAX-Document-Registry" iconOnly onEmailSent={onNotify} />
+           <DownloadPDFButton targetId="docs-registry-view" fileName="Karma3-Document-Registry" iconOnly onEmailSent={onNotify} />
            <button 
               onClick={handleExportToCSV}
               disabled={isExporting}
@@ -3221,7 +3221,7 @@ const DocumentsSection = ({ data, onNotify }: { data: DashboardData; onNotify: (
                     filteredDocs.map((doc) => {
                     const isExpanded = expandedRef === doc.ref;
                     const details = docDetails[doc.ref] || {
-                      desc: `${doc.title} - Official audit document cryptographically registered and sealed for AuditAX regulatory compliance.`,
+                      desc: `${doc.title} - Official audit document cryptographically registered and sealed for Karma3 regulatory compliance.`,
                       hash: `0x${Array.from(doc.ref).map(c => c.charCodeAt(0).toString(16)).join('').padEnd(52, 'f')}`,
                       registeredAt: "2026-05-25 10:00 UTC"
                     };
@@ -3385,7 +3385,7 @@ const DocumentsSection = ({ data, onNotify }: { data: DashboardData; onNotify: (
               <div className="p-6 bg-slate-50 rounded-2xl border-dashed border-2 border-slate-200 text-center">
                  <p className="text-[10px] font-bold text-slate-400 italic mb-4 uppercase tracking-tighter">Authorized Official Delegate</p>
                  <div className="h-12 flex items-center justify-center opacity-40 grayscale mb-4">
-                    <div className="text-2xl font-serif italic text-slate-900">Nexus Security Council</div>
+                    <div className="text-2xl font-serif italic text-slate-900">Karma3 Security Council</div>
                  </div>
                  <Badge variant="blue">Valid until 12/2026</Badge>
               </div>
@@ -3478,7 +3478,7 @@ const ConfigSection = ({ data, actions, onNotify }: { data: DashboardData; actio
       id: `E${Math.floor(Math.random() * 1000)}`,
       name: 'New Employee',
       role: 'Staff',
-      email: 'new@auditax.com',
+      email: 'new@karma3.com',
       phone: '+1 555-0000'
     };
     updateEmployee(newEmployee.id, newEmployee);
@@ -3487,13 +3487,13 @@ const ConfigSection = ({ data, actions, onNotify }: { data: DashboardData; actio
   return (
     <div id="config-hub-view" className="space-y-8 pb-16">
       <div className="flex justify-end">
-        <DownloadPDFButton targetId="config-hub-view" fileName="AuditAX-Setup-Configuration" iconOnly onEmailSent={onNotify} />
+        <DownloadPDFButton targetId="config-hub-view" fileName="Karma3-Setup-Configuration" iconOnly onEmailSent={onNotify} />
       </div>
       <Card title="Employee Directory Management" icon={Users}>
         <div className="space-y-6">
           <div className="flex justify-between items-center bg-slate-50 p-6 rounded-2xl border border-slate-100">
              <div className="flex flex-col">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Nexus Personnel Hub</span>
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Karma3 Personnel Hub</span>
                 <span className="text-sm font-black text-slate-900 uppercase italic">Configure project staff & contact vectors</span>
              </div>
              <motion.button 
@@ -3557,7 +3557,7 @@ const ConfigSection = ({ data, actions, onNotify }: { data: DashboardData; actio
         </div>
       </Card>
 
-      <Card title="Nexus Node Management" icon={Users}>
+      <Card title="Karma3 Node Management" icon={Users}>
         <div className="space-y-10">
           {/* Director Edit */}
           <div className="wrapper bg-slate-50/50 p-4 sm:p-8 rounded-[2rem] border border-slate-100 shadow-inner">
@@ -3658,7 +3658,7 @@ const ConfigSection = ({ data, actions, onNotify }: { data: DashboardData; actio
         </div>
       </Card>
 
-      <Card title="Nexus Performance Core Editor" icon={BarChart3}>
+      <Card title="Karma3 Performance Core Editor" icon={BarChart3}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {Object.entries(data.performance).map(([key, val]) => (
             <div key={key} className="space-y-3 p-6 glass-card rounded-[2rem] border-slate-100">
@@ -3811,7 +3811,7 @@ const ConfigSection = ({ data, actions, onNotify }: { data: DashboardData; actio
                 <th className="px-6 py-4 font-black">Node Name</th>
                 <th className="px-6 py-4 text-center font-black">Claims</th>
                 <th className="px-6 py-4 font-black">Cause</th>
-                <th className="px-6 py-4 font-black">Nexus Vector</th>
+                <th className="px-6 py-4 font-black">Karma3 Vector</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -3855,30 +3855,30 @@ const GuideSection = ({ onNotify }: { onNotify: (m: string) => void }) => {
 
   const pages = [
     {
-      title: "The Nexus Architecture",
+      title: "The Karma3 Architecture",
       subtitle: "Foundational Intelligence Layers",
-      content: "AuditAX Nexus is built upon a multi-layered neural architecture that synchronizes financial telemetry with global compliance frameworks. By interpreting raw system logs through the lens of SOC 2 Trust Services Criteria, we transform passive data into active defense protocols. This layer ensures that every transaction is matched against a security heuristic in real-time.",
+      content: "Karma3 is built upon a multi-layered neural architecture that synchronizes financial telemetry with global compliance frameworks. By interpreting raw system logs through the lens of SOC 2 Trust Services Criteria, we transform passive data into active defense protocols. This layer ensures that every transaction is matched against a security heuristic in real-time.",
       image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800",
       stats: { label: "Synaptic Sync", value: "0.4ms" }
     },
     {
       title: "Risk Topology Mapping",
       subtitle: "Visualizing Hidden Vulnerabilities",
-      content: "The 'Intelligence' module employs a proprietary Topology Engine to map dependencies between critical operational nodes. When a vulnerability is detected in a peripheral service (e.g., a specific cloud region or personnel cluster), Nexus automatically propagates' Exposure Scores' throughout the network, allowing officers to visualize the blast radius of potential failures.",
+      content: "The 'Intelligence' module employs a proprietary Topology Engine to map dependencies between critical operational nodes. When a vulnerability is detected in a peripheral service (e.g., a specific cloud region or personnel cluster), Karma3 automatically propagates' Exposure Scores' throughout the network, allowing officers to visualize the blast radius of potential failures.",
       image: "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&q=80&w=800",
       stats: { label: "Graph Nodes", value: "4.2k" }
     },
     {
       title: "Harmonized Compliance",
       subtitle: "SOC 2 & ISO 27001 Convergence",
-      content: "Traditional auditing is reactive and retrospective. AuditAX harmonizes frameworks like ISO 27001 and SOC 2 into a single unified control matrix. Our 'Compliance' module utilizes automated evidence collection to keep audit trails warm, reducing the time to certification by up to 85% while maintaining a state of 'Continuous Readiness'.",
+      content: "Traditional auditing is reactive and retrospective. Karma3 harmonizes frameworks like ISO 27001 and SOC 2 into a single unified control matrix. Our 'Compliance' module utilizes automated evidence collection to keep audit trails warm, reducing the time to certification by up to 85% while maintaining a state of 'Continuous Readiness'.",
       image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800",
       stats: { label: "Evidence Gen", value: "Auto" }
     },
     {
       title: "Neural Financial Audit",
       subtitle: "Predictive Capital Protection",
-      content: "Beyond security, Nexus utilizes advanced LLMs to identify financial anomalies before they manifest in ledgers. By correlating spend patterns with risk heuristics, we provide the CFO with a 'Neural Projection' of potential capital leaks, enabling preemptive reallocation of resources to high-growth sectors.",
+      content: "Beyond security, Karma3 utilizes advanced LLMs to identify financial anomalies before they manifest in ledgers. By correlating spend patterns with risk heuristics, we provide the CFO with a 'Neural Projection' of potential capital leaks, enabling preemptive reallocation of resources to high-growth sectors.",
       image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800",
       stats: { label: "Leak Detection", value: ">99%" }
     }
@@ -3892,7 +3892,7 @@ const GuideSection = ({ onNotify }: { onNotify: (m: string) => void }) => {
            <BookOpen className="w-8 h-8 text-white -rotate-12" />
         </div>
         <div className="space-y-4">
-          <h1 className="text-6xl font-black italic text-slate-900 uppercase tracking-tighter">AuditAX <span className="text-slate-300">Handbook</span></h1>
+          <h1 className="text-6xl font-black italic text-slate-900 uppercase tracking-tighter">Karma3 <span className="text-slate-300">Handbook</span></h1>
           <div className="flex items-center justify-center gap-6">
              <div className="h-px w-12 bg-slate-200" />
              <p className="text-slate-400 font-black uppercase tracking-[0.4em] text-[10px] italic underline decoration-sunset-orange/30 decoration-4 underline-offset-8">The Definitive Operating Manual • v4.2</p>
@@ -3900,7 +3900,7 @@ const GuideSection = ({ onNotify }: { onNotify: (m: string) => void }) => {
           </div>
           
           <div className="pt-4">
-            <DownloadPDFButton targetId="handbook-content" fileName="AuditAX-Nexus-Handbook" iconOnly onEmailSent={onNotify} />
+            <DownloadPDFButton targetId="handbook-content" fileName="Karma3-Karma3-Handbook" iconOnly onEmailSent={onNotify} />
           </div>
         </div>
       </div>
@@ -4026,14 +4026,14 @@ const GuideSection = ({ onNotify }: { onNotify: (m: string) => void }) => {
       {/* Lexicon / Definitive Terms Grid */}
       <div className="space-y-8">
          <div className="flex items-center gap-4">
-            <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-900">The Nexus Lexicon</h3>
+            <h3 className="text-xl font-black italic uppercase tracking-tighter text-slate-900">The Karma3 Lexicon</h3>
             <div className="flex-1 h-px bg-slate-100" />
          </div>
 
          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-               { icon: Info, term: "AuditAX Hub", def: "The centralized command post where all risk data is aggregated. It acts as the 'Single Source of Truth' for senior financial officers." },
-               { icon: Zap, term: "Nexus Vector", def: "A unidirectional data path linking an operational incident to its estimated financial impact within the dashboard." },
+               { icon: Info, term: "Karma3 Hub", def: "The centralized command post where all risk data is aggregated. It acts as the 'Single Source of Truth' for senior financial officers." },
+               { icon: Zap, term: "Karma3 Vector", def: "A unidirectional data path linking an operational incident to its estimated financial impact within the dashboard." },
                { icon: ShieldAlert, term: "Trust Services", def: "The five SOC 2 principles (Security, Availability, Processing Integrity, Confidentiality, Privacy) that the system monitors continuously." }
             ].map((item, i) => (
                <motion.div 
@@ -4059,7 +4059,7 @@ const GuideSection = ({ onNotify }: { onNotify: (m: string) => void }) => {
 const BastionAccessSection = ({ onNotify }: { onNotify: (m: string) => void }) => {
   const [intent, setIntent] = useState('');
   const [sessions, setSessions] = useState([
-    { id: 'SES-912', user: 'admin', asset: 'Nexus-Core-DB-01', protocol: 'SSH', status: 'active', time: '12m 44s', risk: 12, behavior: 'Normal' },
+    { id: 'SES-912', user: 'admin', asset: 'Karma3-Core-DB-01', protocol: 'SSH', status: 'active', time: '12m 44s', risk: 12, behavior: 'Normal' },
     { id: 'SES-915', user: 'j.dupont', asset: 'Audit-Relay-Alpha', protocol: 'RDP', status: 'idle', time: '05m 12s', risk: 8, behavior: 'Normal' },
     { id: 'SES-918', user: 'system', asset: 'Cloud-Gateway-04', protocol: 'SSH', status: 'active', time: '01m 02s', risk: 42, behavior: 'Anomalous Cmd' },
   ]);
@@ -4089,14 +4089,14 @@ const BastionAccessSection = ({ onNotify }: { onNotify: (m: string) => void }) =
                 <Globe className="w-3 h-3 text-sunset-orange" /> Neural Operating System
              </div>
              <div className="px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full text-[10px] font-black text-blue-500 uppercase tracking-widest italic">
-                Nexus-Bastion Synergy v1.0
+                Karma3-Bastion Synergy v1.0
              </div>
           </div>
           <h2 className="text-5xl md:text-7xl font-black text-slate-900 italic tracking-tighter uppercase leading-[0.85]">
             Access <br/><span className="text-sunset-orange">Orchestrator</span>
           </h2>
           <p className="text-slate-400 text-sm font-medium italic tracking-wide max-w-xl leading-relaxed">
-            Collaborative security layer where Nexus AI proactively monitors JumpServer sessions using cognitive UBA and intent-based orchestration.
+            Collaborative security layer where Karma3 AI proactively monitors JumpServer sessions using cognitive UBA and intent-based orchestration.
           </p>
         </div>
 
@@ -4117,7 +4117,7 @@ const BastionAccessSection = ({ onNotify }: { onNotify: (m: string) => void }) =
                   if (lower.includes('add') || lower.includes('créer') || lower.includes('grant') || lower.includes('ssh') || lower.includes('rdp')) {
                     const newSesId = `SES-${Math.floor(100 + Math.random() * 900)}`;
                     const newUser = lower.match(/(?:for|to|user|officier)\s+(\w+)/)?.[1] || 'officier';
-                    const newAsset = lower.match(/(?:on|target|asset|core)\s+([\w-]+)/)?.[1] || 'Nexus-Cloud-02';
+                    const newAsset = lower.match(/(?:on|target|asset|core)\s+([\w-]+)/)?.[1] || 'Karma3-Cloud-02';
                     const newSession = {
                       id: newSesId,
                       user: newUser,
@@ -4129,9 +4129,9 @@ const BastionAccessSection = ({ onNotify }: { onNotify: (m: string) => void }) =
                       behavior: 'Normal'
                     };
                     setSessions(p => [newSession, ...p]);
-                    onNotify(`Nexus AI: Command interpreted. Session ${newSesId} successfully granted for ${newUser} on ${newAsset}.`);
+                    onNotify(`Karma3 AI: Command interpreted. Session ${newSesId} successfully granted for ${newUser} on ${newAsset}.`);
                   } else {
-                    onNotify(`Nexus AI: Command "${intent}" analyzed. Remediation strategy parameters applied.`);
+                    onNotify(`Karma3 AI: Command "${intent}" analyzed. Remediation strategy parameters applied.`);
                   }
                   setIntent('');
                 }
@@ -4192,7 +4192,7 @@ const BastionAccessSection = ({ onNotify }: { onNotify: (m: string) => void }) =
            <div className="p-8 border-b border-slate-100 flex items-center justify-between">
               <div className="space-y-1">
                 <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest italic leading-none">Synergistic Session Stream</h3>
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest italic">Monitoring Powered by JumpServer + Nexus AI</p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest italic">Monitoring Powered by JumpServer + Karma3 AI</p>
               </div>
               <div className="flex items-center gap-3">
                  <button 
@@ -4250,7 +4250,7 @@ const BastionAccessSection = ({ onNotify }: { onNotify: (m: string) => void }) =
                       <td className="p-6">
                         <div className="flex gap-2">
                           <button 
-                             onClick={() => onNotify(`Nexus AI generated forensic brief for session ${s.id}.`)}
+                             onClick={() => onNotify(`Karma3 AI generated forensic brief for session ${s.id}.`)}
                              className="p-2.5 text-slate-400 hover:text-sunset-orange transition-colors bg-white border border-slate-100 rounded-xl shadow-sm"
                              title="Generate AI Audit Brief"
                           >
@@ -4571,7 +4571,7 @@ const PricingSection = ({ onNotify }: { onNotify: (m: string) => void }) => {
           The Price of <br /><span className="text-sunset-orange">Certainty</span>
         </h2>
         <p className="text-slate-400 text-lg font-medium italic leading-relaxed">
-          Nexus AI is not a tool; it is an instrument of decision. We don't sell code; we sell time, clarity, and the power of immediate insight.
+          Karma3 AI is not a tool; it is an instrument of decision. We don't sell code; we sell time, clarity, and the power of immediate insight.
         </p>
       </div>
 
@@ -4689,7 +4689,7 @@ export default function App() {
   const [portalTab, setPortalTab] = useState<'home' | 'solutions' | 'orchestration' | 'architecture' | 'compliance' | 'fleet' | 'security' | 'tarifs' | 'rapports'>('home');
   const [language, setLanguage] = useState<'FR' | 'EN'>('FR');
   const [theme, setTheme] = useState<'dark' | 'light' | 'high-contrast'>(() => {
-    return (localStorage.getItem('auditax-theme') as 'dark' | 'light' | 'high-contrast') || 'dark';
+    return (localStorage.getItem('karma3-theme') as 'dark' | 'light' | 'high-contrast') || 'dark';
   });
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
   const [isSolutionsMenuOpen, setIsSolutionsMenuOpen] = useState(false);
@@ -4729,7 +4729,7 @@ export default function App() {
         await updateProfile(userCredential.user, { displayName: authName });
       }
       setAuthSuccess(language === 'FR' ? "Compte créé avec succès ! Connexion de session en cours..." : "Account successfully created! Connecting session...");
-      showToast(language === 'FR' ? "Enregistrement Nexus réussi" : "Nexus registration success", 'success');
+      showToast(language === 'FR' ? "Enregistrement Karma3 réussi" : "Karma3 registration success", 'success');
       setAuthEmail('');
       setAuthPassword('');
       setAuthConfirmPassword('');
@@ -4762,7 +4762,7 @@ export default function App() {
     try {
       const { signInWithEmailAndPassword } = await import('./firebase');
       await signInWithEmailAndPassword(auth, authEmail, authPassword);
-      showToast(language === 'FR' ? "Session Nexus établie avec succès" : "Nexus session established successfully", 'success');
+      showToast(language === 'FR' ? "Session Karma3 établie avec succès" : "Karma3 session established successfully", 'success');
       setAuthEmail('');
       setAuthPassword('');
     } catch (err: any) {
@@ -4779,7 +4779,7 @@ export default function App() {
 
   const selectTheme = (next: 'dark' | 'light' | 'high-contrast') => {
     setTheme(next);
-    localStorage.setItem('auditax-theme', next);
+    localStorage.setItem('karma3-theme', next);
     const themeNames = {
       'dark': 'Thème sombre (Cyber Obsidian) activé',
       'light': 'Thème clair (Slate Minimal) activé',
@@ -4795,7 +4795,7 @@ export default function App() {
       if (prev === 'dark') next = 'light';
       else if (prev === 'light') next = 'high-contrast';
       else next = 'dark';
-      localStorage.setItem('auditax-theme', next);
+      localStorage.setItem('karma3-theme', next);
       const themeNames = {
         'dark': 'Thème sombre (Cyber Obsidian) activé',
         'light': 'Thème clair (Slate Minimal) activé',
@@ -4927,7 +4927,7 @@ export default function App() {
 
   const categories = [
     {
-      title: "Sovereign Device Nexus V2",
+      title: "Sovereign Device Karma3 V2",
       items: [
         { id: 'summary', label: 'Global Terminal Dashboard', icon: Layout },
         { id: 'fleet', label: 'Real-time Fleet Telemetry', icon: Truck },
@@ -4939,7 +4939,7 @@ export default function App() {
       ]
     },
     {
-      title: "AuditAX Lab & Sprints",
+      title: "Karma3 Lab & Sprints",
       items: [
         { id: 'sante', label: 'Santé Connect V2', icon: HeartPulse },
         { id: 'services', label: 'Plan Chirurgical', icon: Zap },
@@ -4999,7 +4999,7 @@ export default function App() {
               for Data Experts
             </h1>
             <p className="text-slate-400 text-sm md:text-base font-medium max-w-2xl mx-auto italic tracking-wide leading-relaxed">
-              Nexus AI: A high-density Cognitive Command Center designed to synchronize risk intelligence, financial heuristics, and operational integrity into a single instrument of decision.
+              Karma3 AI: A high-density Cognitive Command Center designed to synchronize risk intelligence, financial heuristics, and operational integrity into a single instrument of decision.
             </p>
           </div>
 
@@ -5029,7 +5029,7 @@ export default function App() {
             onClick={() => setIsInitialized(true)}
             className="px-16 py-6 bg-sunset-orange text-white rounded-3xl font-black uppercase tracking-[0.4em] shadow-2xl transition-all flex items-center gap-4 mx-auto"
           >
-            Initialize Nexus OS <ArrowRight className="w-5 h-5" />
+            Initialize Karma3 OS <ArrowRight className="w-5 h-5" />
           </motion.button>
 
           <div className="flex items-center justify-center gap-8 pt-8">
@@ -5114,7 +5114,7 @@ export default function App() {
                 <Zap className="w-5 h-5 text-orange-500 -rotate-12 group-hover:rotate-0 transition-transform duration-300" />
               </div>
               <span className="text-sm sm:text-base font-black tracking-widest text-white italic uppercase flex items-center gap-1.5 leading-none animate__animated animate__fadeIn">
-                AUDITAX <span className="text-orange-500 not-italic font-medium">NEXUS HUB</span>
+                AUDITAX <span className="text-orange-500 not-italic font-medium">Karma3</span>
               </span>
             </div>
 
@@ -5286,9 +5286,9 @@ export default function App() {
                     className="text-sm md:text-base text-slate-350 font-medium tracking-wide max-w-2xl mx-auto leading-relaxed"
                   >
                     {language === 'FR' ? (
-                      "AuditAX Nexus Hub: L'avenir de l'intelligence opérationnelle, sécurisé par une technologie de pointe."
+                      "Karma3: L'avenir de l'intelligence opérationnelle, sécurisé par une technologie de pointe."
                     ) : (
-                      "AuditAX Nexus Hub: The future of operational intelligence, protected by state-of-the-art technology."
+                      "Karma3: The future of operational intelligence, protected by state-of-the-art technology."
                     )}
                   </motion.p>
                 </div>
@@ -5510,12 +5510,12 @@ export default function App() {
                 {/* Header specifically for solutions page matching Image 1 */}
                 <div className="text-center space-y-3 pb-6">
                   <h2 className="text-3xl md:text-5xl font-extrabold uppercase tracking-tight flex items-center justify-center gap-3">
-                    <span className="text-white">Nexus </span>
+                    <span className="text-white">Karma3 </span>
                     <span className="text-orange-500">AI</span>
                     <span className="text-white"> Analysis Studio</span>
                   </h2>
                 </div>
-                <NexusAIAnalysisStudio onNotify={(m, t) => showToast(m, t === 'warn' ? 'error' : 'success')} />
+                <Karma3AIAnalysisStudio onNotify={(m, t) => showToast(m, t === 'warn' ? 'error' : 'success')} />
               </motion.div>
             )}
 
@@ -5606,7 +5606,7 @@ export default function App() {
                   </h2>
                   <p className="text-xs text-slate-400 font-medium">Visualizing cryptographic nodes, database layers and container routing parameters.</p>
                 </div>
-                <NexusArchitectureOverview onNotify={(m) => showToast(m, 'success')} />
+                <Karma3ArchitectureOverview onNotify={(m) => showToast(m, 'success')} />
               </motion.div>
             )}
 
@@ -5689,7 +5689,7 @@ export default function App() {
 
         <footer className="relative z-10 select-none pb-12 mt-20 border-t border-slate-900/60 max-w-7xl mx-auto px-4 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-center shrink-0">
           <div className="text-xs font-bold uppercase tracking-[0.25em] text-slate-400 font-mono">
-            AUDITAX NEXUS PLATFORM • CELESTIAL PORTAL
+            Karma3 PLATFORM • CELESTIAL PORTAL
           </div>
           <div className="text-[10px] text-slate-600 font-medium">
             © {new Date().getFullYear()} CELESTIAL RISK INC. SECURE ENCLAVE INFRASTRUCTURE LABS.
@@ -5730,7 +5730,7 @@ export default function App() {
                   <ShieldCheck className="w-6 h-6 text-[#0ea5e9] -rotate-12" />
                </div>
                <div className="flex flex-col text-left">
-                  <span className="text-xl font-black italic text-white tracking-tighter leading-none">AuditAX</span>
+                  <span className="text-xl font-black italic text-white tracking-tighter leading-none">Karma3</span>
                   <div className="flex items-center gap-2 mt-1">
                      <span className="text-[7.5px] font-black text-[#0ea5e9] uppercase tracking-[0.2em]">Sovereign Elite</span>
                   </div>
@@ -5891,7 +5891,7 @@ export default function App() {
                 <ShieldCheck className="w-6 h-6 md:w-8 md:h-8 text-[#0ea5e9] -rotate-12" />
              </div>
              <div className="flex flex-col text-left">
-                <span className="text-xl md:text-2xl font-black italic text-white tracking-tighter leading-none">AuditAX</span>
+                <span className="text-xl md:text-2xl font-black italic text-white tracking-tighter leading-none">Karma3</span>
                 <div className="flex items-center gap-2 mt-1">
                    <span className="text-[8px] md:text-[10px] font-black text-[#0ea5e9] uppercase tracking-[0.3em] font-mono">Sovereign Elite</span>
                 </div>
@@ -5991,7 +5991,7 @@ export default function App() {
                 <div className="w-20 h-20 sunset-gradient rounded-[2rem] rotate-45 animate-spin flex items-center justify-center">
                    <ShieldAlert className="w-10 h-10 text-white -rotate-45" />
                 </div>
-                <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.5em] animate-pulse">Synchronizing Nexus...</div>
+                <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.5em] animate-pulse">Synchronizing Karma3...</div>
               </div>
             ) : !user ? (
                <div className="w-full max-w-lg mx-auto bg-[#090d16]/95 border border-[#1b314e]/80 rounded-[2.5rem] p-8 shadow-[0_25px_60px_rgba(0,0,0,0.8)] text-slate-200 backdrop-blur-3xl">
@@ -5999,7 +5999,7 @@ export default function App() {
                      <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 border border-amber-500/25 text-amber-500 rounded-full text-[9px] font-black uppercase tracking-[0.2em] font-mono">
                        <ShieldCheck className="w-3 h-3" /> Secure Gateway Connection
                      </div>
-                     <h2 className="text-3xl font-extrabold tracking-tight text-white uppercase italic">Nexus Sovereign Hub</h2>
+                     <h2 className="text-3xl font-extrabold tracking-tight text-white uppercase italic">Karma3 Sovereign Hub</h2>
                      <p className="text-xs text-slate-400 font-medium font-mono">
                        {language === 'FR' ? "AUTHENTIFICATION DIRECTE SUR CLOUD SOUVERAIN" : "SOVEREIGN CLOUD DIRECT AUTHENTICATION"}
                      </p>
@@ -6054,7 +6054,7 @@ export default function App() {
                         type="email"
                         value={authEmail}
                         onChange={(e) => setAuthEmail(e.target.value)}
-                        placeholder="operator@auditax.internal"
+                        placeholder="operator@karma3.internal"
                         required
                         className="w-full bg-[#05080e] border border-[#121f31] focus:border-amber-500 rounded-xl px-4 py-3 text-xs text-white placeholder-slate-600 focus:outline-none transition-all font-mono"
                       />
@@ -6191,7 +6191,7 @@ export default function App() {
                                       <ShieldCheck className="w-5 h-5 text-[#0ea5e9] -rotate-12" />
                                    </div>
                                    <div className="flex flex-col">
-                                      <span className="text-lg font-black italic text-white tracking-tighter leading-none">AuditAX</span>
+                                      <span className="text-lg font-black italic text-white tracking-tighter leading-none">Karma3</span>
                                       <span className="text-[6.5px] font-black text-[#0ea5e9] uppercase tracking-[0.3em] mt-0.5 font-mono">Sovereign Elite</span>
                                    </div>
                                 </div>
@@ -6292,16 +6292,16 @@ export default function App() {
                   );
                 })()}
 
-                {/* Sovereign Device Nexus V2 High-Stature Components */}
-                {activeTab === 'summary' && <NexusMainDashboard onNotify={showToast} theme={theme} />}
+                {/* Sovereign Device Karma3 V2 High-Stature Components */}
+                {activeTab === 'summary' && <Karma3MainDashboard onNotify={showToast} theme={theme} />}
                 {activeTab === 'fleet' && <FleetMonitoring onNotify={showToast} />}
                 {activeTab === 'inventory' && <DeviceInventoryList onNotify={showToast} />}
                 {activeTab === 'security' && <SecurityCommandCenter onNotify={showToast} />}
                 {activeTab === 'rule-engine' && <TacticalResponseRuleEngine onNotify={showToast} />}
-                {activeTab === 'scripts' && <NexusScriptLibrary onNotify={showToast} theme={theme} />}
-                {activeTab === 'architecture' && <NexusArchitectureOverview onNotify={showToast} />}
-                {activeTab === 'support' && <NexusSupportCenter onNotify={showToast} />}
-                {activeTab === 'profile' && <NexusProfileSettings onNotify={showToast} theme={theme} />}
+                {activeTab === 'scripts' && <Karma3ScriptLibrary onNotify={showToast} theme={theme} />}
+                {activeTab === 'architecture' && <Karma3ArchitectureOverview onNotify={showToast} />}
+                {activeTab === 'support' && <Karma3SupportCenter onNotify={showToast} />}
+                {activeTab === 'profile' && <Karma3ProfileSettings onNotify={showToast} theme={theme} />}
 
                 {/* AuditLab Support Routes */}
                 {activeTab === 'sante' && <SanteConnectSection onNotify={showToast} />}
@@ -6312,7 +6312,7 @@ export default function App() {
                 {activeTab === 'integrations' && <IntegrationHubSection onNotify={showToast} />}
                 {activeTab === 'gmail' && <GmailSentinelSection onNotify={showToast} />}
                 {activeTab === 'sheets' && <SheetsSentinelSection onNotify={showToast} theme={theme} />}
-                {activeTab === 'karma3' && <Karma3NexusHub onNotify={showToast} theme={theme} />}
+                {activeTab === 'karma3' && <Karma3Hub onNotify={showToast} theme={theme} />}
                 {activeTab === 'connect' && <BackendConnectSection onNotify={showToast} />}
                 {activeTab === 'academy' && <TechnicalAcademySection onNotify={showToast} />}
                 {activeTab === 'config' && <GovernanceSection data={data} onNotify={showToast} onAddDocument={addDocument} onRemoveDocument={removeDocument} />}
@@ -6329,7 +6329,7 @@ export default function App() {
                   />
                 )}
                 {activeTab === 'admin' && <ConfigSection data={data} actions={actions} onNotify={showToast} />}
-                {activeTab === 'intelligence' && <NexusAISection data={data} onNotify={showToast} onExit={() => setActiveTab('summary')} />}
+                {activeTab === 'intelligence' && <Karma3AISection data={data} onNotify={showToast} onExit={() => setActiveTab('summary')} />}
               </>
             )}
           </motion.div>
@@ -6338,7 +6338,7 @@ export default function App() {
         {activeTab !== 'intelligence' && (
           <footer className="mt-32 pt-16 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-8 opacity-60">
              <div className="flex flex-col gap-2">
-                <div className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-900 italic">AuditAX – SOLAR GLOW OS</div>
+                <div className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-900 italic">Karma3 – SOLAR GLOW OS</div>
                 <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">© {new Date().getFullYear()} ELITE COMPLIANCE & FINANCIAL RISK SYSTEMS</div>
              </div>
              <div className="flex gap-12 text-[9px] font-black uppercase tracking-[0.3em] text-slate-400">
@@ -6411,7 +6411,7 @@ const TechnicalAcademySection = ({ onNotify }: { onNotify: (m: string) => void }
            <p className="text-slate-400 font-bold uppercase tracking-[0.2em] text-[10px] italic underline decoration-sunset-orange/30 decoration-4 underline-offset-8">Strategic Professionalization & Autonomy Program</p>
         </div>
         <div className="flex gap-4">
-           <DownloadPDFButton targetId="academy-view" fileName="AuditAX-Professionalization-Program" iconOnly onEmailSent={onNotify} />
+           <DownloadPDFButton targetId="academy-view" fileName="Karma3-Professionalization-Program" iconOnly onEmailSent={onNotify} />
         </div>
       </div>
 
@@ -6689,7 +6689,7 @@ const sprintRoadmap = [
   {
     id: 7,
     sprint: 'Sprint 7',
-    name: 'Karma3 Sovereign Analytics & Nexus Hub',
+    name: 'Karma3 Sovereign Analytics & Karma3',
     tag: 'Télémétrie Globale',
     icon: Cpu,
     status: 'Opérationnel',
@@ -6701,7 +6701,7 @@ const sprintRoadmap = [
       { name: 'Sovereign Ratio Dashboard', desc: 'Indicateur clé en temps réel pour le pilotage de crise de la direction.' },
       { name: 'Central Logic Dispatcher', desc: 'Gestionnaire de routage pour acheminer les contre-mesures urgentes.' }
     ],
-    architecture: 'Multi-stream Feeds -> Event Correlation Engine -> Core Latency Metric -> Nexus UI Dashboard',
+    architecture: 'Multi-stream Feeds -> Event Correlation Engine -> Core Latency Metric -> Karma3 UI Dashboard',
     inputLabel: 'Niveau thermique du transformateur (°C)',
     defaultInputValue: '87.4',
     simulationTrace: (val: string) => [
@@ -6769,7 +6769,7 @@ const PlanChirurgicalSection = ({ data, onNotify }: { data: DashboardData; onNot
           </motion.div>
         </div>
         <div className="flex gap-4">
-           <DownloadPDFButton targetId="surgical-plan-view" fileName="AuditAX-Plan-Surgical" iconOnly onEmailSent={onNotify} />
+           <DownloadPDFButton targetId="surgical-plan-view" fileName="Karma3-Plan-Surgical" iconOnly onEmailSent={onNotify} />
         </div>
       </div>
 
@@ -7082,7 +7082,7 @@ const GovernanceSection = ({
       id: `doc-${Date.now()}`,
       ref: ref,
       title: file.name.replace(/\.[^/.]+$/, ""), // remove extension
-      obj: 'Système Sécure - Certification AuditAX ' + (file.size / 1024).toFixed(1) + ' KB',
+      obj: 'Système Sécure - Certification Karma3 ' + (file.size / 1024).toFixed(1) + ' KB',
       nature: file.type || 'Document Local',
       priority: file.size > 1024 * 500 ? 'Critical' : 'High'
     };
@@ -7129,7 +7129,7 @@ const GovernanceSection = ({
           </motion.div>
         </div>
         <div className="flex gap-4">
-           <DownloadPDFButton targetId="governance-view" fileName="AuditAX-Governance-Docs" iconOnly onEmailSent={onNotify} />
+           <DownloadPDFButton targetId="governance-view" fileName="Karma3-Governance-Docs" iconOnly onEmailSent={onNotify} />
         </div>
       </div>
 

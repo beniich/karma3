@@ -79,7 +79,7 @@ const INITIAL_TRANSACTIONS: TransactionRecord[] = [
   {
     id: "TX-762",
     timestamp: "2026-05-23 09:15:00",
-    tenantName: "AuditAX Public Sandbox",
+    tenantName: "Karma3 Public Sandbox",
     type: "Automatic Renewal",
     amount: 0,
     tokensAdded: 50,
@@ -749,7 +749,7 @@ export const StripeMonetizationSection = ({ onNotify, theme = 'dark' }: StripeMo
                 Commercial Audit Trail
               </h3>
               <p className="text-[9.5px] text-slate-400 italic leading-snug">
-                Sondes Stripe asynchrones enregistrées dans l'enclave de conformité d'AuditAX.
+                Sondes Stripe asynchrones enregistrées dans l'enclave de conformité d'Karma3.
               </p>
             </div>
 
@@ -908,7 +908,7 @@ export const StripeMonetizationSection = ({ onNotify, theme = 'dark' }: StripeMo
             Le Labo Technique des 4 Piliers (SaaS &amp; On-Premise)
           </h2>
           <p className={cn("text-xs md:text-sm leading-relaxed max-w-4xl", isLight ? "text-slate-600" : "text-slate-400")}>
-            Testez de manière interactive les quatre piliers fondamentaux sous-jacents aux flux commerciaux d'AuditAX : 
+            Testez de manière interactive les quatre piliers fondamentaux sous-jacents aux flux commerciaux d'Karma3 : 
             du middleware de blocage temporaire à la signature de certificats cryptographiques pour les déploiements on-premise isolés.
           </p>
         </div>
@@ -1199,9 +1199,9 @@ export const StripeMonetizationSection = ({ onNotify, theme = 'dark' }: StripeMo
                     } else {
                       if (tokens >= 5) {
                         setTokens(prev => prev - 5);
-                        onNotify("🛰️ Diagnostic exécuté sur la clé globale d'AuditAX. Coût : 5 Tokens.");
+                        onNotify("🛰️ Diagnostic exécuté sur la clé globale d'Karma3. Coût : 5 Tokens.");
                       } else {
-                        onNotify("⛔ Crédit insuffisant sur le plan global AuditAX. Ajoutez des jetons ou connectez une clé BYOK.");
+                        onNotify("⛔ Crédit insuffisant sur le plan global Karma3. Ajoutez des jetons ou connectez une clé BYOK.");
                       }
                     }
                   }}
@@ -1297,7 +1297,7 @@ export const StripeMonetizationSection = ({ onNotify, theme = 'dark' }: StripeMo
                         tenant: licTenant,
                         plan: licPlan,
                         expiry: licExpiry,
-                        engine: 'auditax-k8s-sprint7'
+                        engine: 'karma3-k8s-sprint7'
                       };
                       const stringPayload = JSON.stringify(payload);
                       const signature = btoa(stringPayload).substring(0, 32) + "::RSA-253";

@@ -300,7 +300,7 @@ export const SovereignReportsSection: React.FC<{ onNotify: (msg: string, type: '
             Vérifier la validité d&apos;une signature numérique d&apos;audit (.audit)
           </h4>
           <p className="text-xs text-slate-400">
-            Faites glisser-déposer un rapport AuditAX signé ou copiez son empreinte SHA-256 pour confirmer son intégrité souveraine en direct.
+            Faites glisser-déposer un rapport Karma3 signé ou copiez son empreinte SHA-256 pour confirmer son intégrité souveraine en direct.
           </p>
         </div>
 

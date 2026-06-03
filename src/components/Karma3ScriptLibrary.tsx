@@ -54,7 +54,7 @@ const INITIAL_SCRIPTS: ScriptTemplate[] = [
  * Version: 2.4.1 (Sprint 7 Sovereign Core)
  */
 async function executeSovereignHandshake(targetNode, payload) {
-  const connection = await SovereignNexus.connect(targetNode);
+  const connection = await SovereignKarma3.connect(targetNode);
   if (!connection.secure) {
     throw new Error(\`Security Drift Detected on: \${targetNode}\`);
   }
@@ -188,12 +188,12 @@ interface ScheduledJob {
   status: 'active' | 'inactive';
 }
 
-interface NexusScriptLibraryProps {
+interface Karma3ScriptLibraryProps {
   onNotify: (msg: string) => void;
   theme?: 'dark' | 'light' | 'high-contrast';
 }
 
-export const NexusScriptLibrary = ({ onNotify, theme = 'dark' }: NexusScriptLibraryProps) => {
+export const Karma3ScriptLibrary = ({ onNotify, theme = 'dark' }: Karma3ScriptLibraryProps) => {
   const isLight = theme === 'light' || theme === 'high-contrast';
 
   // State Definitions
@@ -383,7 +383,7 @@ export const NexusScriptLibrary = ({ onNotify, theme = 'dark' }: NexusScriptLibr
   };
 
   return (
-    <div id="nexus-automation-scripts-layout" className={`space-y-6 text-left select-none rounded-[1.8rem] p-4 md:p-6 transition-all duration-300 ${
+    <div id="karma3-automation-scripts-layout" className={`space-y-6 text-left select-none rounded-[1.8rem] p-4 md:p-6 transition-all duration-300 ${
       isLight ? 'bg-slate-50 text-slate-800 border border-slate-200 shadow-inner' : 'bg-[#021117] text-slate-100'
     }`}>
       
@@ -409,7 +409,7 @@ export const NexusScriptLibrary = ({ onNotify, theme = 'dark' }: NexusScriptLibr
               <span className={`text-[9px] font-black tracking-widest uppercase font-mono ${
                 isLight ? 'text-cyan-700' : 'text-cyan-400'
               }`}>
-                Nexus Automation Suite
+                Karma3 Automation Suite
               </span>
               <span className={`px-2 py-0.5 border rounded-full text-[8px] font-mono uppercase font-black tracking-widest flex items-center gap-1 ${
                 isLight ? 'bg-[#f0fdfa] border-cyan-200 text-cyan-700' : 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400'

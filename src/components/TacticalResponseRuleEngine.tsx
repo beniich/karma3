@@ -356,13 +356,13 @@ export const TacticalResponseRuleEngine = ({ onNotify }: { onNotify: (msg: strin
 
   const saveRuleset = () => {
     addConsoleLog('success', 'DATABASE', `Ruleset actif sauvegardé. (${nodes.length} nœuds, ${connections.length} câbles cryptologiques)`);
-    onNotify("💾 Configuration tactique sauvegardée dans le registre central AuditAX.");
+    onNotify("💾 Configuration tactique sauvegardée dans le registre central Karma3.");
   };
 
   const deployConfig = () => {
     addConsoleLog('info', 'DEPLOIER', 'Déploiement de la configuration des règles sur l\'OS Sovereign...');
     setTimeout(() => {
-      addConsoleLog('success', 'DEPLOIER', '✓ Synchronisation effectuée avec succès! Les règles mTLS d\'AuditAX sont résolues.');
+      addConsoleLog('success', 'DEPLOIER', '✓ Synchronisation effectuée avec succès! Les règles mTLS d\'Karma3 sont résolues.');
       onNotify("🚀 Déploiement matériel terminé.");
     }, 1200);
   };

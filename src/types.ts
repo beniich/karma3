@@ -124,9 +124,9 @@ export const INITIAL_DATA: DashboardData = {
     { id: 'S4', name: 'Solar Deployment', status: 'Maintenance', efficiency: 45, lastUpdate: '2h ago' },
   ],
   employees: [
-    { id: 'E1', name: 'Alice Smith', role: 'Compliance Officer', email: 'alice.smith@auditax.com', phone: '+1 555-0101' },
-    { id: 'E2', name: 'Bob Jones', role: 'Security Specialist', email: 'bob.jones@auditax.com', phone: '+1 555-0202' },
-    { id: 'E3', name: 'Charlie Davis', role: 'Technical Lead', email: 'charlie.davis@auditax.com', phone: '+1 555-0303' },
+    { id: 'E1', name: 'Alice Smith', role: 'Compliance Officer', email: 'alice.smith@karma3.com', phone: '+1 555-0101' },
+    { id: 'E2', name: 'Bob Jones', role: 'Security Specialist', email: 'bob.jones@karma3.com', phone: '+1 555-0202' },
+    { id: 'E3', name: 'Charlie Davis', role: 'Technical Lead', email: 'charlie.davis@karma3.com', phone: '+1 555-0303' },
   ],
   subscribers: [
     { id: 'SUB-001', name: 'Jean Dupont', organization: 'Electro-Plus Solutions', email: 'j.dupont@electroplus.fr', plan: 'Enterprise', status: 'Active', joinedDate: '2026-01-12' },

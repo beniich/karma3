@@ -81,7 +81,7 @@ const INITIAL_INTEGRATIONS: Integration[] = [
     config: {
       url: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
       apiKey: "xoxb-secops-bot-617a2ee34b",
-      extraParam1: "#auditax-critical-alerts",
+      extraParam1: "#karma3-critical-alerts",
     },
     encryptedConfigSnippet: "98ab23fcd84100ea:3ab0efd8eecde1f893de93994fe88ee1cd39890aefcc34a1",
     createdAt: "2026-05-24 14:30:22"
@@ -192,7 +192,7 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
             uptime: 100.0,
             errorRate: 0.0,
             source: integration.name,
-            rawPayload: { channel: "#auditax-critical-alerts", status: "ready_listening", webhook_urls_configured: 1 }
+            rawPayload: { channel: "#karma3-critical-alerts", status: "ready_listening", webhook_urls_configured: 1 }
           });
         } else if (integration.type === 'DATADOG') {
           computedMetrics.push({
@@ -491,7 +491,7 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
                 Patron de Conception : Adapter Pattern
              </div>
              <h2 className="text-3xl md:text-4xl font-black italic uppercase leading-none tracking-tight">
-               Framework d'Intégration Extensible d'AuditAX
+               Framework d'Intégration Extensible d'Karma3
              </h2>
              <p className="text-xs font-semibold uppercase tracking-wider text-slate-300 italic leading-relaxed">
                Pour garantir un couplage lâche, la plateforme utilise l'architecture en <span className="text-white underline">Adaptateur</span>. Le frontend reçoit des objets <span className="font-mono text-white bg-white/10 px-2 py-0.5 rounded">SovereignHealthMetric</span> universels, masquant l'hétérogénéité d'AWS CloudWatch, Datadog ou Prometheus. De plus, toutes les clés sont chiffrées en base de données de manière étanche.
@@ -552,7 +552,7 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
                           else if (val === 'DATADOG') setUrl('https://api.datadoghq.eu');
                           else if (val === 'AWS_CLOUDWATCH') setUrl('https://monitoring.eu-west-3.amazonaws.com');
                           else if (val === 'SLACK') setUrl('https://hooks.slack.com/services');
-                          else if (val === 'JIRA') setUrl('https://auditax-sovereign.atlassian.net');
+                          else if (val === 'JIRA') setUrl('https://karma3-sovereign.atlassian.net');
                           else setUrl('https://webhook-receiver.local/events');
                         }}
                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800"
@@ -605,7 +605,7 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
                       </label>
                       <input 
                         type="text" 
-                        placeholder={type === 'SLACK' ? '#auditax-alerts' : type === 'AWS_CLOUDWATCH' ? 'eu-west-3' : 'Optional Value'} 
+                        placeholder={type === 'SLACK' ? '#karma3-alerts' : type === 'AWS_CLOUDWATCH' ? 'eu-west-3' : 'Optional Value'} 
                         value={extraParam1} 
                         onChange={(e) => setExtraParam1(e.target.value)}
                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800"

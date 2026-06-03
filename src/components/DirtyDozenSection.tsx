@@ -40,7 +40,7 @@ const ATTACK_TEMPLATES: AttackPayload[] = [
     category: "Access",
     severity: "Critical",
     payload: `{\n  "title": "Nouveau Risque Infiltré",\n  "severity": "High",\n  "domain": "Réseau Interne"\n}`,
-    headers: `POST /api/risks HTTP/1.1\nHost: api.auditax.sov\nAuthorization: None`,
+    headers: `POST /api/risks HTTP/1.1\nHost: api.karma3.sov\nAuthorization: None`,
     interceptorName: "isSignedIn() Firebase Rule",
     ruleExplanation: "Immediately rejects write operations if request.auth is empty or invalid.",
     expectedException: "403 PERMISSION_DENIED: User must be signed in with Google or Custom Token."
@@ -211,7 +211,7 @@ export const DirtyDozenSection = ({ onNotify, theme = 'dark' }: { onNotify: (msg
     const runSim = async () => {
       setTerminalLogs([]);
       await addLog(`[EXEC] Initializing malicious packet injector...`, 150);
-      await addLog(`[EXEC] Targeting secure AuditAX API ingress endpoint...`, 200);
+      await addLog(`[EXEC] Targeting secure Karma3 API ingress endpoint...`, 200);
       await addLog(`[PAYLOAD] Transmitting Exploit #${attack.num}: "${attack.title}" (${attack.category})`, 300);
       await addLog(`-------- RAW TRANSMISSION SEND -------- \n${attack.headers}\n\n${attack.payload}\n---------------------------------------`, 400);
       await addLog(`[SYSTEM] Processing secure cloud pipeline routing...`, 250);

@@ -24,7 +24,7 @@ import {
   Info
 } from 'lucide-react';
 
-interface NexusProfileSettingsProps {
+interface Karma3ProfileSettingsProps {
   onNotify: (msg: string) => void;
   theme?: 'dark' | 'light' | 'high-contrast';
 }
@@ -45,7 +45,7 @@ const PRESET_AVATARS = [
   'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&q=80&w=150'
 ];
 
-export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileSettingsProps) => {
+export const Karma3ProfileSettings = ({ onNotify, theme = 'dark' }: Karma3ProfileSettingsProps) => {
   const isLight = theme === 'light' || theme === 'high-contrast';
 
   // State definitions aligned with original functional logic
@@ -151,7 +151,7 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
               <span className={`text-[9px] font-black tracking-widest uppercase font-mono ${
                 isLight ? 'text-orange-700' : 'text-orange-400'
               }`}>
-                Nexus Operating Console
+                Karma3 Operating Console
               </span>
               <span className={`px-2 py-0.5 border rounded-full text-[8px] font-mono uppercase font-black tracking-widest flex items-center gap-1 ${
                 isLight 

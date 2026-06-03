@@ -14,12 +14,12 @@ import {
   X
 } from 'lucide-react';
 
-export const NexusSupportCenter = ({ onNotify }: { onNotify: (msg: string) => void }) => {
+export const Karma3SupportCenter = ({ onNotify }: { onNotify: (msg: string) => void }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFAQ, setActiveFAQ] = useState<number | null>(null);
   const [showExpertChat, setShowExpertChat] = useState(false);
   const [chatMessages, setChatMessages] = useState([
-    { sender: 'expert', text: 'Bonjour ! Je suis un expert de Sovereign Device Nexus. Comment puis-je vous aider aujourd\'hui sur ReclamTrack Pro ?' }
+    { sender: 'expert', text: 'Bonjour ! Je suis un expert de Sovereign Device Karma3. Comment puis-je vous aider aujourd\'hui sur ReclamTrack Pro ?' }
   ]);
   const [chatInput, setChatInput] = useState('');
 
@@ -73,10 +73,10 @@ export const NexusSupportCenter = ({ onNotify }: { onNotify: (msg: string) => vo
         </div>
         
         <h1 className="text-4xl md:text-6xl font-black text-white italic uppercase tracking-tighter leading-none">
-          Nexus Support & <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-500">Help Center</span>
+          Karma3 Support & <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-500">Help Center</span>
         </h1>
         <p className="text-slate-400 text-sm font-medium tracking-wide max-w-2xl mx-auto">
-          Sovereign Device Nexus - Support and technical assistance portal. Retrouvez des réponses immédiates ou discutez avec l'ingénierie globale de garde.
+          Sovereign Device Karma3 - Support and technical assistance portal. Retrouvez des réponses immédiates ou discutez avec l'ingénierie globale de garde.
         </p>
 
         {/* Giant search box matched image */}

@@ -57,8 +57,8 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
   
   // Send state
   const [emailTo, setEmailTo] = useState('');
-  const [emailSubject, setEmailSubject] = useState('AuditAX Security report: Continuous Readiness Status');
-  const [emailBody, setEmailBody] = useState('<p>Hello,</p><p>This is an automated <strong>AuditAX Readiness Assessment Report</strong>.</p><p>Our active diagnostics show SOC 2 and ISO-27001 continuous alignment is currently healthy at <strong>94% remediation index</strong>.</p><p>Best regards,<br/>Compliance Officer</p>');
+  const [emailSubject, setEmailSubject] = useState('Karma3 Security report: Continuous Readiness Status');
+  const [emailBody, setEmailBody] = useState('<p>Hello,</p><p>This is an automated <strong>Karma3 Readiness Assessment Report</strong>.</p><p>Our active diagnostics show SOC 2 and ISO-27001 continuous alignment is currently healthy at <strong>94% remediation index</strong>.</p><p>Best regards,<br/>Compliance Officer</p>');
   const [isSending, setIsSending] = useState(false);
   const [emailType, setEmailType] = useState<'custom' | 'iso' | 'risk'>('iso');
   
@@ -70,7 +70,7 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
       snippet: "We detected a new suspicious connection to your Bastion SSH server from an unusual IP address in Central Europe. Please verify the activation key.",
       internalDate: String(Date.now() - 3600000),
       headers: {
-        subject: "[AuditAX-Bastion] Critical SSH connection alert detected",
+        subject: "[Karma3-Bastion] Critical SSH connection alert detected",
         from: "securite@bastion-prod.internal",
         date: new Date(Date.now() - 3600000).toLocaleString()
       },
@@ -116,10 +116,10 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
   // Preset report generators
   useEffect(() => {
     if (emailType === 'iso') {
-      setEmailSubject('Continuous ISO 27001 Alignment Report - AuditAX');
+      setEmailSubject('Continuous ISO 27001 Alignment Report - Karma3');
       setEmailBody(`
         <div style="font-family: sans-serif; color: #1e293b; max-width: 600px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
-          <h2 style="color: #0f172a; border-bottom: 2px solid #3b82f6; padding-bottom: 8px;">AuditAX: ISO 27001 Alignment</h2>
+          <h2 style="color: #0f172a; border-bottom: 2px solid #3b82f6; padding-bottom: 8px;">Karma3: ISO 27001 Alignment</h2>
           <p>Hello,</p>
           <p>Here is the continuous alignment state of our policies and infrastructures to the security standards <strong>ISO 27001:2022</strong>:</p>
           <table style="width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 15px;">
@@ -142,14 +142,14 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
           </table>
           <p>The consolidated readiness score is estimated at <strong>94.3%</strong>. No major non-compliance has been detected.</p>
           <hr style="border: 0; border-top: 1px solid #e2e8f0; margin-top: 20px; margin-bottom: 20px;" />
-          <p style="font-size: 11px; color: #64748b;">Report automatically generated from the AuditAX Gmail Sentinel module.</p>
+          <p style="font-size: 11px; color: #64748b;">Report automatically generated from the Karma3 Gmail Sentinel module.</p>
         </div>
       `);
     } else if (emailType === 'risk') {
       setEmailSubject('SecOps Risk Analysis & Mitigations Report');
       setEmailBody(`
         <div style="font-family: sans-serif; color: #1e293b; max-width: 600px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
-          <h2 style="color: #0f172a; border-bottom: 2px solid #ef4444; padding-bottom: 8px;">AuditAX: Risk Analysis Report</h2>
+          <h2 style="color: #0f172a; border-bottom: 2px solid #ef4444; padding-bottom: 8px;">Karma3: Risk Analysis Report</h2>
           <p>Hello,</p>
           <p>We have identified the elements below requiring priority mitigation in our SecOps plan:</p>
           <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 12px; margin-bottom: 15px; border-radius: 4px;">
@@ -160,11 +160,11 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
           <ul style="padding-left: 20px;">
             <li>Revoke API key ID: "stripe-sovereign-live" within 15 hours.</li>
             <li>Restrict open ports on SSH Bastion to authorized IP addresses only.</li>
-            <li>Deploy the intelligence artificial filters of Nexus AI.</li>
+            <li>Deploy the intelligence artificial filters of Karma3 AI.</li>
           </ul>
           <p>Thank you for coordinating these operations as soon as possible.</p>
           <hr style="border: 0; border-top: 1px solid #e2e8f0; margin-top: 20px;" />
-          <p style="font-size: 11px; color: #64748b;">SecOps Sentinel Engine - AuditAX Portal</p>
+          <p style="font-size: 11px; color: #64748b;">SecOps Sentinel Engine - Karma3 Portal</p>
         </div>
       `);
     } else {
@@ -324,7 +324,7 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
 
     // MANDATORY USER CONFIRMATION GUARD
     const isConfirmed = window.confirm(
-      `Confirmez-vous l'envoi de cet email de sécurité à "${emailTo}" ?\n\nSujet : ${emailSubject}\n\nCette action utilisera votre propre compte Gmail AuditAX.`
+      `Confirmez-vous l'envoi de cet email de sécurité à "${emailTo}" ?\n\nSujet : ${emailSubject}\n\nCette action utilisera votre propre compte Gmail Karma3.`
     );
     if (!isConfirmed) return;
 

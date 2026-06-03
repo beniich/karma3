@@ -169,7 +169,7 @@ io.on("connection", (socket) => {
     console.log(`Socket ${socket.id} triggered a manual agent workflow run`);
     
     const steps = [
-      { level: 'INFO', agent: 'System', text: 'Triggering AuditAX Sovereign Agent Orchestrator pipeline...', color: 'text-purple-400' },
+      { level: 'INFO', agent: 'System', text: 'Triggering Karma3 Sovereign Agent Orchestrator pipeline...', color: 'text-purple-400' },
       { level: 'DEBUG', agent: 'Alpha', text: 'Analyzing active compliance database schemas for SOC 2 Mapping...', color: 'text-gray-400' },
       { level: 'DEBUG', agent: 'Beta', text: 'Aligning requirements with CC1.3 temporal parameters...', color: 'text-gray-400' },
       { level: 'WARN', agent: 'Gamma', text: 'Found 1 legacy control node with unencrypted credentials backup.', color: 'text-yellow-400' },
@@ -206,7 +206,7 @@ app.post("/api/ai/generate", async (req, res) => {
       model: "gemini-2.0-flash",
       contents: prompt,
       config: {
-        systemInstruction: systemInstruction || "You are AuditAX Nexus Intelligence. Provide professional, concise risk analysis."
+        systemInstruction: systemInstruction || "You are Karma3 Intelligence. Provide professional, concise risk analysis."
       }
     });
 

@@ -185,9 +185,15 @@ export const StripeMonetizationSection = ({ onNotify, theme = 'dark' }: StripeMo
       fetchWebhookLogs();
     };
 
+    const handleTokenUpdate = (data: any) => {
+      setTokens(data.tokenBalance);
+    };
+
     socket.on("stripe-webhook-processed", handleWebhookSignal);
+    socket.on("token-balance-updated", handleTokenUpdate);
     return () => {
       socket.off("stripe-webhook-processed", handleWebhookSignal);
+      socket.off("token-balance-updated", handleTokenUpdate);
     };
   }, [socket]);
 

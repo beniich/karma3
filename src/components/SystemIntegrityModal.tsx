@@ -23,6 +23,7 @@ import { auth, db } from '../firebase';
 import { collection, getDocs, query, limit } from 'firebase/firestore';
 import { HighFidelityIcon } from './HighFidelityIcon';
 import { cn } from '../lib/utils';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface SystemIntegrityModalProps {
   isOpen: boolean;
@@ -49,6 +50,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
   socketConnected,
   language = 'FR'
 }) => {
+  const { t } = useTranslation();
   const [isRunning, setIsRunning] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
   const [activeCheckId, setActiveCheckId] = useState<string | null>(null);
@@ -58,57 +60,57 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
   const [checks, setChecks] = useState<DiagnosticItem[]>([
     {
       id: 'firebase_auth',
-      name: language === 'FR' ? 'Initialisation & Session Firebase Auth' : 'Firebase Auth Initialisation & Session',
+      name: t('diagnostic.diag_firebase_auth_initialisation_s'),
       category: 'AUTH',
-      description: language === 'FR' ? 'Vérifier la connexion sécurisée Firebase Auth et les jetons de session en cours.' : 'Verify secure Firebase Auth connectivity and active session tokens.',
+      description: t('diagnostic.diag_verify_secure_firebase_auth_co'),
       status: 'PENDING',
-      details: language === 'FR' ? 'En attente du lancement de l\'audit systeme.' : 'Awaiting system audit execution.',
-      resolution: language === 'FR' ? 'Si ce test échoue, vérifiez que votre configuration dans firebase-applet-config.json est correcte.' : 'If this test fails, make sure your firebase-applet-config.json configuration is correct.'
+      details: t('diagnostic.diag_awaiting_system_audit_executio'),
+      resolution: t('diagnostic.diag_if_this_test_fails_make_sure_y')
     },
     {
       id: 'firestore_db',
-      name: language === 'FR' ? 'Accessibilité Cloud Firestore Enclave' : 'Cloud Firestore Enclave Reachability',
+      name: t('diagnostic.diag_cloud_firestore_enclave_reacha'),
       category: 'DATABASE',
-      description: language === 'FR' ? 'Faire un test de poignée de main réseau avec Firestore et mesurer la latence.' : 'Perform a network handshake with Firestore and measure latency.',
+      description: t('diagnostic.diag_perform_a_network_handshake_wi'),
       status: 'PENDING',
-      details: language === 'FR' ? 'En attente du lancement de l\'audit systeme.' : 'Awaiting system audit execution.',
-      resolution: language === 'FR' ? 'Assurez-vous d\'être connecté à internet et que vos règles de sécurité Firestore de la base ai-studio sont déployées.' : 'Ensure you are connected to the internet and your Firestore security rules for the ai-studio database are deployed.'
+      details: t('diagnostic.diag_awaiting_system_audit_executio'),
+      resolution: t('diagnostic.diag_ensure_you_are_connected_to_th')
     },
     {
       id: 'api_reachability',
-      name: language === 'FR' ? 'Routage API REST (Port 3000)' : 'REST API Ingress Routing (Port 3000)',
+      name: t('diagnostic.diag_rest_api_ingress_routing_port'),
       category: 'NETWORK',
-      description: language === 'FR' ? 'Vérifier l\'accessibilité des microservices du serveur Express autonome.' : 'Verify the reachability of stand-alone Express server microservices.',
+      description: t('diagnostic.diag_verify_the_reachability_of_sta'),
       status: 'PENDING',
-      details: language === 'FR' ? 'En attente du lancement de l\'audit systeme.' : 'Awaiting system audit execution.',
-      resolution: language === 'FR' ? 'Le serveur backend doit être démarré sur le port 3000. Lancez "npm run dev" si vous êtes en local.' : 'The backend server must be started on port 3000. Launch "npm run dev" if running locally.'
+      details: t('diagnostic.diag_awaiting_system_audit_executio'),
+      resolution: t('diagnostic.diag_the_backend_server_must_be_sta')
     },
     {
       id: 'websocket_stream',
-      name: language === 'FR' ? 'Canal en Temps Réel Socket.IO' : 'Socket.IO Real-Time Stream',
+      name: t('diagnostic.diag_socket_io_real_time_stream'),
       category: 'NETWORK',
-      description: language === 'FR' ? 'Vérifier la connectivité active du flux de télémétrie WebSocket.' : 'Verify active connectivity of the WebSocket telemetry stream.',
+      description: t('diagnostic.diag_verify_active_connectivity_of'),
       status: 'PENDING',
-      details: language === 'FR' ? 'En attente du lancement de l\'audit systeme.' : 'Awaiting system audit execution.',
-      resolution: language === 'FR' ? 'Vérifiez la configuration du reverse proxy nginx ou l\'état du serveur node.' : 'Check the configuration of the nginx reverse proxy or the node server status.'
+      details: t('diagnostic.diag_awaiting_system_audit_executio'),
+      resolution: t('diagnostic.diag_check_the_configuration_of_the')
     },
     {
       id: 'local_storage',
-      name: language === 'FR' ? 'Enclave de Données Locales (Quota)' : 'Local State Sandbox Quota',
+      name: t('diagnostic.diag_local_state_sandbox_quota'),
       category: 'HARDWARE',
-      description: language === 'FR' ? 'Tester la lecture, l\'écriture et la limite de mémoire cache persistante du navigateur.' : 'Verify persistent browser cache storage read/write limits.',
+      description: t('diagnostic.diag_verify_persistent_browser_cach'),
       status: 'PENDING',
-      details: language === 'FR' ? 'En attente du lancement de l\'audit systeme.' : 'Awaiting system audit execution.',
-      resolution: language === 'FR' ? 'Libérez de l\'espace disque sur votre navigateur ou autorisez les cookies tiers pour ce domaine.' : 'Free some browser cache disk space or allow third-party cookies for this domain.'
+      details: t('diagnostic.diag_awaiting_system_audit_executio'),
+      resolution: t('diagnostic.diag_free_some_browser_cache_disk_s')
     },
     {
       id: 'gemini_config',
-      name: language === 'FR' ? 'Intégration du Moteur d\'IA Gemini-2.0' : 'Gemini-2.0 AI Engine Integration',
+      name: t('diagnostic.diag_gemini_2_0_ai_engine_integrati'),
       category: 'SECURITY',
-      description: language === 'FR' ? 'Vérifier la présence et la validation de la clé secrète GEMINI_API_KEY.' : 'Confirm presence and validation of secret GEMINI_API_KEY.',
+      description: t('diagnostic.diag_confirm_presence_and_validatio'),
       status: 'PENDING',
-      details: language === 'FR' ? 'En attente du lancement de l\'audit systeme.' : 'Awaiting system audit execution.',
-      resolution: language === 'FR' ? 'Ajoutez GEMINI_API_KEY dans votre fichier .env et relancez le serveur de développement.' : 'Add GEMINI_API_KEY into your .env file and restart the development server.'
+      details: t('diagnostic.diag_awaiting_system_audit_executio'),
+      resolution: t('diagnostic.diag_add_gemini_api_key_into_your_e')
     }
   ]);
 
@@ -131,7 +133,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
     setExpandedCheckId(null);
     
     // Set all to scanning at the start
-    setChecks(prev => prev.map(c => ({ ...c, status: 'SCANNING', details: language === 'FR' ? 'Séquence d\'audit démarrée...' : 'Audit sequence initiated...' })));
+    setChecks(prev => prev.map(c => ({ ...c, status: 'SCANNING', details: t('diagnostic.diag_audit_sequence_initiated') })));
     
     addLog('SYS_DIAG_ENGINE_START: Initialisation de la routine d\'audit d\'intégrité AuditAX...');
     addLog('STRICT_ISOLATED_SANDBOX: Isolation de la session d\'audit en cours...');
@@ -458,7 +460,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
             </HighFidelityIcon>
             <div className="text-left">
               <h2 className="text-lg font-black tracking-tight text-white uppercase flex items-center gap-2">
-                {language === 'FR' ? 'Diagnostic d\'Intégrité Système' : 'System Integrity Diagnostics'}
+                {t('diagnostic.diag_system_integrity_diagnostics')}
               </h2>
               <p className="text-[10px] font-mono font-bold tracking-[0.15em] text-[#0ea5e9]">
                 STATUS: {isRunning ? 'DIGITAL_SCAN_RUNNING' : stats.fail > 0 ? 'DIAL_COMPROMISED_ERR' : 'ACTIVE_SECURE_ENCLAVE'}
@@ -710,7 +712,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
             type="button"
             className="px-6 py-2.5 bg-slate-900 border border-[#1c2e46]/60 hover:bg-slate-800 hover:border-slate-600 rounded-xl text-xs font-semibold text-white transition-all focus:outline-none cursor-pointer"
           >
-            {language === 'FR' ? 'Fermer la console' : 'Dismiss integrity console'}
+            {t('diagnostic.diag_dismiss_integrity_console')}
           </button>
         </div>
       </motion.div>

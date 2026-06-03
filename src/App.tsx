@@ -88,6 +88,7 @@ import remarkGfm from 'remark-gfm';
 import { type Risk, type Zone, type Recommendation, type Document, type DashboardData, type OrgNode, type Service, type Employee, type Subscriber } from './types';
 import { useFirebaseDashboard } from './hooks/useFirebaseDashboard';
 import { useSocket } from './hooks/useSocket';
+import { useTranslation } from './hooks/useTranslation';
 import { signInWithGoogle, auth } from './firebase';
 import { signOut } from 'firebase/auth';
 import { MultiTenancySection } from './components/MultiTenancySection';
@@ -4527,7 +4528,7 @@ const PAMRoadmapSection = ({ onNotify }: { onNotify: (m: string) => void }) => {
   );
 };
 
-const PricingSection = ({ onNotify }: { onNotify: (m: string) => void }) => {
+const PricingSection = ({ onNotify, handlePurchase }: { onNotify: (m: string) => void, handlePurchase: (planName: string) => void }) => {
   const plans = [
     { 
       name: "SaaS Expert", 
@@ -4618,7 +4619,10 @@ const PricingSection = ({ onNotify }: { onNotify: (m: string) => void }) => {
             </div>
 
             <button 
-              onClick={() => onNotify(`${plan.name} license request initiated.`)}
+              onClick={() => {
+                onNotify(`${plan.name} checkout initiated...`);
+                handlePurchase(plan.name);
+              }}
               className={cn(
                 "mt-12 w-full py-5 rounded-2xl text-[11px] font-black uppercase tracking-[0.4em] transition-all active:scale-95",
                 plan.highlight ? "sunset-gradient text-white shadow-xl shadow-sunset-orange/20" : "bg-slate-900 text-white"
@@ -4688,7 +4692,7 @@ export default function App() {
   const [isDiagnosticModalOpen, setIsDiagnosticModalOpen] = useState(false);
   const [isLandingPortal, setIsLandingPortal] = useState(true);
   const [portalTab, setPortalTab] = useState<'home' | 'solutions' | 'orchestration' | 'architecture' | 'compliance' | 'fleet' | 'security' | 'tarifs' | 'rapports'>('home');
-  const [language, setLanguage] = useState<'FR' | 'EN'>('FR');
+  const { t, lang: language, setLang: setLanguage } = useTranslation('FR');
   const [theme, setTheme] = useState<'dark' | 'light' | 'high-contrast'>(() => {
     return (localStorage.getItem('auditax-theme') as 'dark' | 'light' | 'high-contrast') || 'dark';
   });
@@ -4710,15 +4714,15 @@ export default function App() {
     setAuthError(null);
     setAuthSuccess(null);
     if (!authEmail || !authPassword || !authConfirmPassword) {
-      setAuthError(language === 'FR' ? "Veuillez remplir tous les champs." : "Please fill in all fields.");
+      setAuthError(t('auth.fill_all_fields'));
       return;
     }
     if (authPassword !== authConfirmPassword) {
-      setAuthError(language === 'FR' ? "Les mots de passe ne correspondent pas." : "Passwords do not match.");
+      setAuthError(t('auth.passwords_mismatch'));
       return;
     }
     if (authPassword.length < 6) {
-      setAuthError(language === 'FR' ? "Le mot de passe doit comporter au moins 6 caractères." : "Password should be at least 6 characters.");
+      setAuthError(t('auth.password_too_short'));
       return;
     }
     setAuthLoading(true);
@@ -4729,8 +4733,8 @@ export default function App() {
         const { updateProfile } = await import('firebase/auth');
         await updateProfile(userCredential.user, { displayName: authName });
       }
-      setAuthSuccess(language === 'FR' ? "Compte créé avec succès ! Connexion de session en cours..." : "Account successfully created! Connecting session...");
-      showToast(language === 'FR' ? "Enregistrement Nexus réussi" : "Nexus registration success", 'success');
+      setAuthSuccess(t('auth.account_created'));
+      showToast(t('auth.register_success'), 'success');
       setAuthEmail('');
       setAuthPassword('');
       setAuthConfirmPassword('');
@@ -4739,11 +4743,11 @@ export default function App() {
       console.error(err);
       let errMsg = err.message;
       if (err.code === 'auth/email-already-in-use') {
-        errMsg = language === 'FR' ? "Cet e-mail est déjà associé à un compte." : "This email is already in use.";
+        errMsg = t('auth.email_in_use');
       } else if (err.code === 'auth/invalid-email') {
-        errMsg = language === 'FR' ? "Adresse e-mail invalide." : "Invalid email address.";
+        errMsg = t('auth.invalid_email');
       } else if (err.code === 'auth/weak-password') {
-        errMsg = language === 'FR' ? "Le mot de passe choisi est trop faible." : "Password is too weak.";
+        errMsg = t('auth.weak_password');
       }
       setAuthError(errMsg);
     } finally {
@@ -4756,21 +4760,21 @@ export default function App() {
     setAuthError(null);
     setAuthSuccess(null);
     if (!authEmail || !authPassword) {
-      setAuthError(language === 'FR' ? "Veuillez remplir tous les champs." : "Please fill in all fields.");
+      setAuthError(t('auth.fill_all_fields'));
       return;
     }
     setAuthLoading(true);
     try {
       const { signInWithEmailAndPassword } = await import('./firebase');
       await signInWithEmailAndPassword(auth, authEmail, authPassword);
-      showToast(language === 'FR' ? "Session Nexus établie avec succès" : "Nexus session established successfully", 'success');
+      showToast(t('auth.session_established'), 'success');
       setAuthEmail('');
       setAuthPassword('');
     } catch (err: any) {
       console.error(err);
       let errMsg = err.message;
       if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
-        errMsg = language === 'FR' ? "Identifiants ou mot de passe incorrects." : "Incorrect credentials or password.";
+        errMsg = t('auth.invalid_credentials');
       }
       setAuthError(errMsg);
     } finally {
@@ -4878,6 +4882,26 @@ export default function App() {
   } = useFirebaseDashboard();
 
   const { isConnected: isSocketConnected } = useSocket(user?.uid);
+
+  const handlePurchase = async (planName: string) => {
+    try {
+      const response = await fetch('/api/billing/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          planId: planName, 
+          userId: user?.uid || 'demo_user_123' 
+        }),
+      });
+      
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (err) {
+      showToast("Checkout failed. Please try again.", 'error');
+    }
+  };
 
   const actions = { 
     updateRisk, 
@@ -5127,7 +5151,7 @@ export default function App() {
                     ['solutions', 'orchestration', 'compliance', 'security', 'fleet'].includes(portalTab) ? "text-orange-500 border-b-2 border-orange-500/70" : "text-slate-350"
                   )}
                 >
-                  {language === 'FR' ? 'SOLUTIONS AI' : 'SOLUTIONS AI'} <span className="text-[8px] text-orange-500 opacity-80 select-none">▼</span>
+                  {t('nav.solutions')} <span className="text-[8px] text-orange-500 opacity-80 select-none">▼</span>
                 </button>
 
                 {isSolutionsMenuOpen && (
@@ -5174,7 +5198,7 @@ export default function App() {
                   portalTab === 'tarifs' ? "text-orange-500 border-b-2 border-orange-500/70" : "text-slate-350"
                 )}
               >
-                {language === 'FR' ? 'TARIFS PRO' : 'PRO PRICING'}
+                {t('nav.pricing')}
               </button>
               
               <button 
@@ -5196,7 +5220,7 @@ export default function App() {
                   portalTab === 'rapports' ? "text-orange-500 border-b-2 border-orange-500/70" : "text-slate-350"
                 )}
               >
-                {language === 'FR' ? 'RAPPORTS' : 'REPORTS'}
+                {t('nav.reports')}
               </button>
             </div>
 
@@ -5207,7 +5231,7 @@ export default function App() {
                 type="button"
                 onClick={() => {
                   const nextLang = language === 'FR' ? 'EN' : 'FR';
-                  setLanguage(nextLang);
+                  setLanguage(nextLang as 'FR' | 'EN');
                   showToast(nextLang === 'FR' ? "Portail basculé en Français" : "Portal switched to English", 'success');
                 }}
                 className="text-[10px] font-bold text-slate-500 tracking-wider hover:text-slate-300 transition-colors uppercase bg-transparent border-none cursor-pointer"
@@ -5219,7 +5243,7 @@ export default function App() {
                 type="button"
                 onClick={() => {
                   setIsLandingPortal(false);
-                  showToast(language === 'FR' ? "Connexion établie au terminal" : "Connection established to main panel", 'success');
+                  showToast(t('dashboard.connection_toast'), 'success');
                 }}
                 className="hidden sm:block text-[10px] font-black uppercase tracking-wider text-white hover:text-orange-400 hover:border-orange-500/30 transition-all cursor-pointer bg-[#05111b] border border-slate-800 px-4 py-2.5 rounded-xl text-center font-bold"
               >
@@ -5230,11 +5254,11 @@ export default function App() {
                 type="button"
                 onClick={() => {
                   setIsLandingPortal(false);
-                  showToast(language === 'FR' ? "Démarrage de l'interface d'administration" : "Launching core admin interface", 'success');
+                  showToast(t('dashboard.admin_launch_toast'), 'success');
                 }}
                 className="text-[10px] font-black uppercase tracking-widest text-[#051424] bg-orange-500 hover:bg-orange-450 border-none transition-all px-5 py-2.5 rounded-xl cursor-pointer shadow-lg shadow-orange-500/20 hover:shadow-orange-500/35 active:scale-95 leading-none font-bold"
               >
-                {language === 'FR' ? 'DÉMARRER' : 'LAUNCH'}
+                {t('nav.launch')}
               </button>
             </div>
           </div>
@@ -5262,13 +5286,13 @@ export default function App() {
                   >
                     {language === 'FR' ? (
                       <>
-                        Sécurité Militaire. <br />
-                        <span className="text-orange-500">Intelligence Artificielle.</span>
+                        {t('home.hero_title_1')} <br />
+                        <span className="text-orange-500">{t('home.hero_title_2')}</span>
                       </>
                     ) : (
                       <>
-                        Military Security. <br />
-                        <span className="text-orange-500">Artificial Intelligence.</span>
+                        {t('home.hero_title_1')} <br />
+                        <span className="text-orange-500">{t('home.hero_title_2')}</span>
                       </>
                     )}
                   </motion.h1>
@@ -5279,11 +5303,7 @@ export default function App() {
                     transition={{ delay: 0.2 }}
                     className="text-sm md:text-base text-slate-350 font-medium tracking-wide max-w-2xl mx-auto leading-relaxed"
                   >
-                    {language === 'FR' ? (
-                      "AuditAX Nexus Hub: L'avenir de l'intelligence opérationnelle, sécurisé par une technologie de pointe."
-                    ) : (
-                      "AuditAX Nexus Hub: The future of operational intelligence, protected by state-of-the-art technology."
-                    )}
+                    {t('home.hero_subtitle')}
                   </motion.p>
                 </div>
 
@@ -5293,17 +5313,17 @@ export default function App() {
                     {
                       val: "99.9%",
                       sub: "UPTIME",
-                      desc: language === 'FR' ? "Fiabilité Maximale" : "Maximum Reliability",
+                      desc: t('home.reliability'),
                     },
                     {
                       val: "ACTIVE",
                       sub: "ENCLAVES",
-                      desc: language === 'FR' ? "Isolation & Protection" : "Isolation & Protection",
+                      desc: t('home.isolation'),
                     },
                     {
                       val: "AI-DRIVEN",
                       sub: "INSIGHTS",
-                      desc: language === 'FR' ? "Analyse Prédictive" : "Predictive Analysis",
+                      desc: t('home.predictive'),
                     }
                   ].map((card, idx) => (
                     <motion.div
@@ -5343,7 +5363,7 @@ export default function App() {
                 <div className="space-y-12 pt-12 pb-6 select-none max-w-6xl mx-auto">
                   <div className="text-center space-y-3">
                     <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold uppercase tracking-tight text-white font-sans">
-                      {language === 'FR' ? 'Sovereign Security Services Overview' : 'Sovereign Security Services Overview'}
+                      {t('home.services_overview')}
                     </h2>
                     <div className="w-24 h-1 bg-gradient-to-r from-transparent via-orange-500 to-transparent mx-auto rounded-full" />
                   </div>
@@ -5366,9 +5386,7 @@ export default function App() {
                           COMPLIANCE
                         </h3>
                         <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans text-center max-w-xs">
-                          {language === 'FR' 
-                            ? "Garantir la conformité réglementaire et la sécurité des données avec des audits automatisés et une surveillance continue."
-                            : "Guarantee regulatory compliance and data security with automated audits and continuous round-the-clock monitoring."}
+                          {t('home.compliance_desc')}
                         </p>
                       </div>
 
@@ -5377,11 +5395,11 @@ export default function App() {
                           type="button"
                           onClick={() => {
                             setPortalTab('compliance');
-                            showToast(language === 'FR' ? "Ouverture de la Cartographie de Conformité" : "Opening Regulatory Compliance Map", 'success');
+                            showToast(t('home.open_compliance'), 'success');
                           }}
                           className="w-full bg-orange-500 hover:bg-orange-450 active:scale-95 text-[#051424] font-black tracking-widest text-[10px] py-3.5 rounded-2xl shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 transition-all text-center border-none cursor-pointer leading-none uppercase font-bold"
                         >
-                          {language === 'FR' ? 'EN SAVOIR PLUS' : 'LEARN MORE'}
+                          {t('nav.learn_more')}
                         </button>
                       </div>
                     </motion.div>
@@ -5403,9 +5421,7 @@ export default function App() {
                           ORCHESTRATION
                         </h3>
                         <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans text-center max-w-xs">
-                          {language === 'FR'
-                            ? "Optimiser les opérations de sécurité grâce à l'orchestration automatisée des flux de travail et à la réponse aux incidents."
-                            : "Optimize security operations through automated workflow orchestration and incident playbook response actions."}
+                          {t('home.orchestration_desc')}
                         </p>
                       </div>
 
@@ -5414,11 +5430,11 @@ export default function App() {
                           type="button"
                           onClick={() => {
                             setPortalTab('orchestration');
-                            showToast(language === 'FR' ? "Ouverture de l'Engin d'Orchestration" : "Opening Orchestration Rule Engine", 'success');
+                            showToast(t('home.open_orchestration'), 'success');
                           }}
                           className="w-full bg-orange-500 hover:bg-orange-450 active:scale-95 text-[#051424] font-black tracking-widest text-[10px] py-3.5 rounded-2xl shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 transition-all text-center border-none cursor-pointer leading-none uppercase font-bold"
                         >
-                          {language === 'FR' ? 'EN SAVOIR PLUS' : 'LEARN MORE'}
+                          {t('nav.learn_more')}
                         </button>
                       </div>
                     </motion.div>
@@ -5440,9 +5456,7 @@ export default function App() {
                           AI
                         </h3>
                         <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans text-center max-w-xs">
-                          {language === 'FR'
-                            ? "Utiliser l'intelligence artificielle pour la détection proactive des menaces et l'analyse prédictive des risques."
-                            : "Leverage artificial intelligence for proactive threat detection and advanced predictive risk analysis."}
+                          {t('home.ai_desc')}
                         </p>
                       </div>
 
@@ -5451,11 +5465,11 @@ export default function App() {
                           type="button"
                           onClick={() => {
                             setPortalTab('solutions');
-                            showToast(language === 'FR' ? "Lancement du Studio de Décision Cognitive AI" : "Launching AI Analysis Studio", 'success');
+                            showToast(t('home.open_ai_studio'), 'success');
                           }}
                           className="w-full bg-orange-500 hover:bg-orange-450 active:scale-95 text-[#051424] font-black tracking-widest text-[10px] py-3.5 rounded-2xl shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 transition-all text-center border-none cursor-pointer leading-none uppercase font-bold"
                         >
-                          {language === 'FR' ? 'EN SAVOIR PLUS' : 'LEARN MORE'}
+                          {t('nav.learn_more')}
                         </button>
                       </div>
                     </motion.div>
@@ -5470,14 +5484,10 @@ export default function App() {
                     </div>
                     <div>
                       <h4 className="text-xs font-black uppercase tracking-wider text-white">
-                        {language === 'FR' ? "Passerelle Cognitive Intelligente" : "Cognitive Intelligence Gateway"}
+                        {t('home.cognitive_gateway')}
                       </h4>
                       <p className="text-[11px] text-slate-400 mt-0.5">
-                        {language === 'FR' ? (
-                          "Naviguez vers les enclaves sécurisées de calcul et explorez nos modèles prédictifs haute-densité."
-                        ) : (
-                          "Navigate toward secure processing enclaves and explore our high-density predictive models."
-                        )}
+                        {t('home.cognitive_cta')}
                       </p>
                     </div>
                   </div>
@@ -5486,7 +5496,7 @@ export default function App() {
                     onClick={() => setPortalTab('solutions')}
                     className="sunset-gradient text-white px-6 py-3 rounded-2xl font-black text-[10px] bg-orange-500 hover:bg-orange-450 uppercase tracking-widest flex items-center gap-2 hover:scale-102 transition-transform shadow-lg shadow-orange-500/20 border-none cursor-pointer"
                   >
-                    {language === 'FR' ? "LANCER L'ANALYSE" : "START ANALYSIS STUDIO"} <ArrowRight className="w-3.5 h-3.5" />
+                    {t('nav.start_analysis')} <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </motion.div>
@@ -5529,7 +5539,7 @@ export default function App() {
                     <span className="text-orange-500">Rule Engine</span>
                   </h2>
                   <p className="text-xs text-slate-400 font-medium max-w-2xl mx-auto">
-                    {language === 'FR' ? "Définir des réponses tactiques automatisées en cas de violations de politique souveraine." : "Define automated tactical responses to sovereign policy breaches."}
+                    {t('home.tactical_desc')}
                   </p>
                 </div>
                 <TacticalResponseRuleEngine onNotify={(m) => showToast(m, 'success')} />
@@ -5556,6 +5566,8 @@ export default function App() {
                     Configurez vos quotas de tokens, activez des abonnements mensuels réutilisables ou simulez des flux de facturation sécurisés par Stripe.
                   </p>
                 </div>
+                <PricingSection onNotify={(m) => showToast(m, 'success')} handlePurchase={handlePurchase} />
+                <div className="border-t border-slate-200/10 my-12" />
                 <StripeMonetizationSection onNotify={(m) => showToast(m, 'success')} theme={theme} />
               </motion.div>
             )}
@@ -5616,13 +5628,10 @@ export default function App() {
                 <div className="text-center space-y-3 pb-6">
                   <h2 className="text-3xl md:text-4xl font-black uppercase text-white font-sans flex items-center justify-center gap-3">
                     <ShieldCheck className="w-8 h-8 text-orange-500 animate-pulse" />
-                    {language === 'FR' ? "Cartographie de Conformité Réglementaire" : "Regulatory Compliance Mapping"}
+                    {t('home.compliance_title')}
                   </h2>
                   <p className="text-xs text-slate-400 font-medium">
-                    {language === 'FR' 
-                      ? "Visualisation et administration en temps réel des règles souveraines de sécurité et cadres réglementaires militarisés."
-                      : "Real-time visualization and management of sovereign security rules and militarized regulatory frameworks."
-                    }
+                    {t('home.compliance_page_desc')}
                   </p>
                 </div>
                 <ComplianceMappingSection onNotify={(m) => showToast(m, 'success')} />
@@ -5641,13 +5650,10 @@ export default function App() {
                 <div className="text-center space-y-3 pb-6">
                   <h2 className="text-3xl md:text-4xl font-black uppercase text-white font-sans flex items-center justify-center gap-3">
                     <Truck className="w-8 h-8 text-orange-500 animate-pulse" />
-                    {language === 'FR' ? "Télémétrie Globale des Équipements" : "Global Equipment Fleet Telemetry"}
+                    {t('home.fleet_title')}
                   </h2>
                   <p className="text-xs text-slate-400 font-medium">
-                    {language === 'FR'
-                      ? "Cartographies géographiques et visualisations 3D orbitale du statut de sécurité des terminaux mondiaux."
-                      : "Geographic mappings and orbital 3D visualizations of global endpoint security metrics."
-                    }
+                    {t('home.fleet_page_desc')}
                   </p>
                 </div>
                 <FleetMonitoring onNotify={(m) => showToast(m, 'success')} />
@@ -5666,13 +5672,11 @@ export default function App() {
                 <div className="text-center space-y-3 pb-6">
                   <h2 className="text-3xl md:text-4xl font-black uppercase text-white font-sans flex items-center justify-center gap-3">
                     <ShieldAlert className="w-8 h-8 text-orange-500 animate-pulse" />
-                    {language === 'FR' ? "Sovereign SecOps Command Center" : "Sovereign SecOps Command Center"}
+                    {t('home.secops_title')}
                   </h2>
                   <p className="text-xs text-slate-400 font-medium">
-                    {language === 'FR'
-                      ? "Surveillance en temps réel des menaces actives, scores de conformité instantanés et gestion des menaces."
                       : "Real-time surveillance of active threats, live compliance metrics and incident response tracking."
-                    }
+                    )}
                   </p>
                 </div>
                 <SecurityCommandCenter onNotify={(m) => showToast(m, 'success')} />
@@ -5785,7 +5789,7 @@ export default function App() {
              <button
                onClick={() => setIsDiagnosticModalOpen(true)}
                type="button"
-               title={language === 'FR' ? "Lancer le diagnostic d'intégrité" : "Run system integrity diagnostic"}
+               title={t('dashboard.diagnostic_launch')}
                className="mx-2 py-2 px-3 text-slate-350 hover:text-[#0ea5e9] hover:bg-[#0ea5e9]/10 hover:border-[#0ea5e9]/45 transition-all bg-[#090e17] border border-[#1e2f47] rounded-xl flex items-center justify-center gap-2 font-black text-[8px] uppercase tracking-[0.16em] cursor-pointer"
              >
                <ShieldAlert className="w-3.5 h-3.5 text-emerald-450 animate-pulse" />
@@ -5894,7 +5898,7 @@ export default function App() {
                 </div>
                 <button 
                   onClick={() => setIsDiagnosticModalOpen(true)}
-                  title={language === 'FR' ? "Diagnostic d'Intégrité Système" : "System Integrity Diagnostics"}
+                  title={t('dashboard.diagnostic_title')}
                   className="p-3 text-slate-350 hover:text-emerald-400 transition-colors bg-[#0d1520] border border-[#1c2e46]/60 rounded-2xl mr-1 flex items-center justify-center shrink-0"
                 >
                   <ShieldCheck className="w-5 h-5 text-emerald-450 animate-pulse" />
@@ -5970,11 +5974,11 @@ export default function App() {
                <div className="w-full max-w-lg mx-auto bg-[#090d16]/95 border border-[#1b314e]/80 rounded-[2.5rem] p-8 shadow-[0_25px_60px_rgba(0,0,0,0.8)] text-slate-200 backdrop-blur-3xl">
                   <div className="text-center space-y-3 mb-6">
                      <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 border border-amber-500/25 text-amber-500 rounded-full text-[9px] font-black uppercase tracking-[0.2em] font-mono">
-                       <ShieldCheck className="w-3 h-3" /> Secure Gateway Connection
+                       <ShieldCheck className="w-3 h-3" /> {t('auth.secure_gateway')}
                      </div>
-                     <h2 className="text-3xl font-extrabold tracking-tight text-white uppercase italic">Nexus Sovereign Hub</h2>
+                     <h2 className="text-3xl font-extrabold tracking-tight text-white uppercase italic">{t('auth.title')}</h2>
                      <p className="text-xs text-slate-400 font-medium font-mono">
-                       {language === 'FR' ? "AUTHENTIFICATION DIRECTE SUR CLOUD SOUVERAIN" : "SOVEREIGN CLOUD DIRECT AUTHENTICATION"}
+                       {t('auth.subtitle')}
                      </p>
                   </div>
 
@@ -5988,7 +5992,7 @@ export default function App() {
                         authTab === 'login' ? "bg-amber-500 text-black shadow-lg font-bold" : "text-slate-400 hover:text-white hover:bg-white/5"
                       )}
                     >
-                      {language === 'FR' ? 'Connexion' : 'Sign In'}
+                      {t('auth.login_tab')}
                     </button>
                     <button
                       type="button"
@@ -5998,7 +6002,7 @@ export default function App() {
                         authTab === 'register' ? "bg-amber-500 text-black shadow-lg font-bold" : "text-slate-400 hover:text-white hover:bg-white/5"
                       )}
                     >
-                      {language === 'FR' ? 'Créer un Compte' : 'Register'}
+                      {t('auth.register_tab')}
                     </button>
                   </div>
 
@@ -6007,7 +6011,7 @@ export default function App() {
                     {authTab === 'register' && (
                       <div className="space-y-1 text-left">
                         <label className="block text-[8.5px] font-black uppercase tracking-widest text-slate-400 font-mono">
-                          {language === 'FR' ? "Nom Complet (Optionnel)" : "Full Name (Optional)"}
+                          {t('auth.full_name_label')}
                         </label>
                         <input
                           type="text"
@@ -6021,7 +6025,7 @@ export default function App() {
 
                     <div className="space-y-1 text-left">
                       <label className="block text-[8.5px] font-black uppercase tracking-widest text-slate-400 font-mono">
-                        {language === 'FR' ? "Adresse E-mail" : "Email Address"}
+                        {t('auth.email_label')}
                       </label>
                       <input
                         type="email"
@@ -6035,7 +6039,7 @@ export default function App() {
 
                     <div className="space-y-1 text-left">
                       <label className="block text-[8.5px] font-black uppercase tracking-widest text-slate-400 font-mono">
-                        {language === 'FR' ? "Mot de Passe (min 6)" : "Password (min 6)"}
+                        {t('auth.password_label')}
                       </label>
                       <input
                         type="password"
@@ -6050,7 +6054,7 @@ export default function App() {
                     {authTab === 'register' && (
                       <div className="space-y-1 text-left">
                         <label className="block text-[8.5px] font-black uppercase tracking-widest text-slate-400 font-mono">
-                          {language === 'FR' ? "Confirmer le Mot de Passe" : "Confirm Password"}
+                          {t('auth.confirm_password_label')}
                         </label>
                         <input
                           type="password"
@@ -6086,7 +6090,7 @@ export default function App() {
                         <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
                       ) : (
                         <>
-                          <LogIn className="w-4 h-4" /> {authTab === 'login' ? (language === 'FR' ? 'ÉTABLIR LA SESSION' : 'ESTABLISH SESSION') : (language === 'FR' ? 'CRÉER ET INITIALISER LE COMPTE' : 'REGISTER & PROCEED')}
+                          <LogIn className="w-4 h-4" /> {authTab === 'login' ? t('auth.cta_login') : t('auth.cta_register')}
                         </>
                       )}
                     </motion.button>
@@ -6119,7 +6123,7 @@ export default function App() {
                       className="flex items-center justify-center gap-2 p-3 bg-[#05080e] border border-[#121f31] hover:bg-slate-900/40 rounded-xl text-[10px] font-black uppercase tracking-widest text-[#cbd5e1] cursor-pointer transition-all"
                     >
                       <Cpu className="w-3.5 h-3.5 text-purple-400" />
-                      {language === 'FR' ? 'Accès Démo' : 'Demo State'}
+                      {t('auth.demo_state')}
                     </button>
                   </div>
 

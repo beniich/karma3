@@ -371,7 +371,7 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
     setApiKey('');
     setExtraParam1('');
     
-    onNotify(`🚀 [Adapter Pattern] Nouvel adaptateur "${name}" (${type}) enregistré et injecté avec succès.`);
+    onNotify(`🚀 [Adapter Pattern] New adapter "${name}" (${type}) successfully registered and injected.`);
     
     // Refresh operational metrics directly
     setTimeout(() => {
@@ -386,7 +386,7 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
     if (selectedIntegration?.id === id) {
       setSelectedIntegration(filtered[0] || null);
     }
-    onNotify(`🗑️ Adaptateur "${nameToDelete}" retiré du cluster d'intégrations.`);
+    onNotify(`🗑️ Adapter "${nameToDelete}" removed from integration cluster.`);
   };
 
   // Encryption Sandbox handlers
@@ -396,22 +396,22 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
       JSON.parse(plainTextToEncrypt);
       const cipher = simulateEncrypt(plainTextToEncrypt);
       setSimulatedCiphertext(cipher);
-      onNotify("🔒 [Crypto] Chiffrement simulé AES-256-CBC de la payload de configuration.");
+      onNotify("🔒 [Crypto] AES-256-CBC simulated encryption of config payload.");
     } catch (e) {
-      onNotify("❌ Erreur : La payload d'entrée doit être un JSON valide pour simuler le chiffrement.");
+      onNotify("❌ Error: Input payload must be valid JSON to simulate encryption.");
     }
   };
 
   const handleSimulateDecrypt = () => {
     if (!simulatedCiphertext) {
-      onNotify("⚠️ Veuillez chiffrer une configuration au préalable.");
+      onNotify("⚠️ Please encrypt a configuration first.");
       return;
     }
     try {
       setSimulatedDecrypted(JSON.parse(plainTextToEncrypt));
-      onNotify("🔑 [Crypto] Déchiffrement inverse réussi avec la clé d'environnement ENCRYPTION_KEY.");
+      onNotify("🔑 [Crypto] Inverse decryption succeeded using ENCRYPTION_KEY server environment variable.");
     } catch(e) {
-      onNotify("❌ Échec de simulation du décryptage.");
+      onNotify("❌ Decryption simulation failed.");
     }
   };
 
@@ -428,7 +428,20 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
   };
 
   return (
-    <div id="integration-hub-view" className="space-y-12">
+    <div 
+      id="integration-hub-view" 
+      style={{
+        width: "auto",
+        height: "auto",
+        paddingLeft: "-3px",
+        marginLeft: "0px",
+        marginRight: "0px",
+        marginTop: "0px",
+        marginBottom: "0px",
+        paddingTop: "0px"
+      }}
+      className="space-y-12"
+    >
       {/* Dynamic Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
         <div className="space-y-4">
@@ -437,10 +450,10 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
               SATELLITE::SPRINT::4::INTEGRATIONS_FRAMEWORK
            </div>
            <h1 className="text-5xl md:text-7xl font-black italic text-slate-900 tracking-tighter uppercase leading-[0.85]">
-             Hub <br/><span className="text-indigo-600">& Adaptateurs</span>
+             Hub <br/><span className="text-indigo-600">& Adapters</span>
            </h1>
            <p className="text-slate-400 font-bold uppercase tracking-[0.2em] text-[10px] italic">
-             Moteur d'Intégration Architecturé (Adapter Pattern), Chiffrement AES-256 & Métriques Souveraines Unifiées
+             Architected Integration Engine (Adapter Pattern), AES-256 Encryption & Sovereign Unified Metrics
            </p>
         </div>
 
@@ -466,7 +479,10 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
       </div>
 
       {/* SPRINT 4 INFORMATION BANNER */}
-      <div className="p-8 bg-gradient-to-r from-indigo-900 to-slate-900 text-white rounded-[3rem] shadow-2xl relative overflow-hidden">
+      <div 
+        style={{ backgroundColor: "#237c5d" }}
+        className="p-6 md:p-8 bg-gradient-to-r from-indigo-900 to-slate-900 text-white rounded-3xl md:rounded-[3rem] shadow-2xl relative overflow-hidden"
+      >
         <div className="absolute top-0 right-0 w-[500px] h-full bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.1),transparent_70%)] pointer-events-none" />
         <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
           <div className="space-y-4 max-w-3xl">
@@ -485,14 +501,17 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
       </div>
 
       {/* Main Grid Content */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
+      <div 
+        style={{ width: "1013.667px" }}
+        className="grid grid-cols-1 xl:grid-cols-12 gap-10"
+      >
 
         {/* Setup Adaptaters UI - LEFT SIDE (7 Cols) */}
         <div className="xl:col-span-7 space-y-8">
            
            {/* Add/Edit Overlay or Form */}
            {isAdding && (
-             <div className="p-8 bg-white border-2 border-indigo-200 rounded-[3rem] shadow-2xl space-y-6 relative">
+             <div className="p-5 md:p-8 bg-white border-2 border-indigo-200 rounded-3xl md:rounded-[3rem] shadow-2xl space-y-6 relative">
                <button 
                   onClick={() => setIsAdding(false)} 
                   className="absolute top-6 right-6 p-2 bg-slate-50 hover:bg-slate-100 rounded-full border"
@@ -502,19 +521,19 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
                
                <div className="space-y-1">
                  <span className="text-[9px] font-black text-indigo-600 uppercase tracking-widest block font-mono">ADAPTER INSTANTIATION ENGINE</span>
-                 <h3 className="text-2xl font-black text-slate-905 uppercase italic tracking-tight">Nouvel Adaptateur de Connecteur</h3>
+                 <h3 className="text-2xl font-black text-slate-905 uppercase italic tracking-tight">New Connector Adapter</h3>
                  <p className="text-slate-400 text-xs italic">
-                    Configurez l'intermédiaire de liaison pour ingérer et traduire les métriques sécurisées.
+                    Configure the liaison middleware to ingest and translate secure metrics.
                  </p>
                </div>
 
                <form onSubmit={handleCreateIntegration} className="space-y-5 pt-3">
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase text-slate-500">Nom du Connecteur</label>
+                      <label className="text-[10px] font-bold uppercase text-slate-500">Connector Name</label>
                       <input 
                         type="text" 
-                        placeholder="Ex: Prometheus Principal" 
+                        placeholder="e.g., Main Prometheus" 
                         value={name} 
                         onChange={(e) => setName(e.target.value)}
                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800"
@@ -522,7 +541,7 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
                     </div>
                     
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase text-slate-500">Type de Service Tiers</label>
+                      <label className="text-[10px] font-bold uppercase text-slate-500">Third-Party Service Type</label>
                       <select 
                         value={type} 
                         onChange={(e) => {
@@ -549,7 +568,7 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
                  </div>
 
                  <div className="space-y-1">
-                   <label className="text-[10px] font-bold uppercase text-slate-500">URL Endpoint d'API</label>
+                   <label className="text-[10px] font-bold uppercase text-slate-500">API Endpoint URL</label>
                    <input 
                      type="text" 
                      placeholder="https://" 
@@ -561,11 +580,11 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
 
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase text-slate-500">Clé d'Accès Clé API (Chiffrée AES en DB)</label>
+                      <label className="text-[10px] font-bold uppercase text-slate-500">Access API Key (AES Encrypted in DB)</label>
                       <div className="relative">
                         <input 
                           type={showApiKey ? "text" : "password"} 
-                          placeholder="Ex: sb_live_..." 
+                          placeholder="e.g., sb_live_..." 
                           value={apiKey} 
                           onChange={(e) => setApiKey(e.target.value)}
                           className="w-full pl-4 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800 font-mono"
@@ -582,11 +601,11 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
 
                     <div className="space-y-1">
                       <label className="text-[10px] font-bold uppercase text-slate-500">
-                        {type === 'SLACK' ? 'Canal par défaut (#...)' : type === 'AWS_CLOUDWATCH' ? 'AWS Région' : 'Paramètre d\'Adaptateur additionnel'}
+                        {type === 'SLACK' ? 'Default Channel (#...)' : type === 'AWS_CLOUDWATCH' ? 'AWS Region' : 'Additional Adapter Parameter'}
                       </label>
                       <input 
                         type="text" 
-                        placeholder={type === 'SLACK' ? '#auditax-alerts' : type === 'AWS_CLOUDWATCH' ? 'eu-west-3' : 'Valeur optionnelle'} 
+                        placeholder={type === 'SLACK' ? '#auditax-alerts' : type === 'AWS_CLOUDWATCH' ? 'eu-west-3' : 'Optional Value'} 
                         value={extraParam1} 
                         onChange={(e) => setExtraParam1(e.target.value)}
                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800"
@@ -600,13 +619,13 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
                      onClick={() => setIsAdding(false)}
                      className="px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-black text-[10px] uppercase tracking-wider rounded-xl transition-all"
                    >
-                     Annuler
+                     Cancel
                    </button>
                    <button 
                      type="submit" 
                      className="px-7 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] uppercase tracking-wider rounded-xl transition-all shadow-lg"
                    >
-                     Enregistrer l'adaptateur
+                     Register Adapter
                    </button>
                  </div>
                </form>
@@ -614,22 +633,47 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
            )}
 
            {/* Integrations Catalog */}
-           <div className="p-10 bg-white border border-slate-100 rounded-[3rem] shadow-xl space-y-8">
+           <div 
+             style={{
+               paddingTop: "45px",
+               paddingBottom: "42px",
+               paddingRight: "50px",
+               marginRight: "0px",
+               marginBottom: "23px",
+               marginTop: "4px",
+               marginLeft: "-28px",
+               paddingLeft: "17px",
+               width: "608.042px",
+               height: "783.5px"
+             }}
+             className="p-5 md:p-10 bg-white border border-slate-100 rounded-3xl md:rounded-[3rem] shadow-xl space-y-8"
+           >
               <div className="space-y-2">
-                 <span className="text-[9px] font-black text-indigo-600 uppercase tracking-widest block font-mono">REGISTRE DES APPRENTISSAGES ET CONNECTEURS</span>
-                 <h3 className="text-3xl font-black text-slate-900 uppercase italic tracking-tight leading-none">Adaptateurs tiers actifs</h3>
+                 <span className="text-[9px] font-black text-indigo-600 uppercase tracking-widest block font-mono">SECURE APPRENTICES & CONNECTORS REGISTRY</span>
+                 <h3 className="text-3xl font-black text-slate-900 uppercase italic tracking-tight leading-none">Active Third-Party Corporate Adapters</h3>
                  <p className="text-slate-400 text-xs italic">
-                   Activez, désactivez ou effacez vos adaptateurs. Sélectionnez-en un pour éprouver sa connectivité.
+                   Enable, disable or delete your adapters. Select one to audit its connectivity.
                  </p>
               </div>
 
               {/* Flex list of current items */}
               <div className="space-y-4">
-                 {integrations.map((item) => {
+                 {integrations.map((item, index) => {
                    const isSelected = selectedIntegration?.id === item.id;
                    return (
                      <div 
                        key={item.id} 
+                       style={
+                         index === 1 ? {
+                           width: "538.708px",
+                           marginLeft: "0px",
+                           paddingTop: "30px",
+                           marginBottom: "17px",
+                           marginRight: "1px",
+                           marginTop: "4px",
+                           paddingBottom: "21px"
+                         } : undefined
+                       }
                        className={`p-6 border rounded-[2.5rem] transition-all flex flex-col md:flex-row md:items-center md:justify-between gap-6 relative ${isSelected ? 'bg-slate-50 border-indigo-400 ring-1 ring-indigo-200 shadow' : 'bg-white hover:bg-slate-50/50'}`}
                      >
                        <div 
@@ -643,12 +687,32 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
 
                          <div className="space-y-1">
                            <div className="flex items-center gap-2.5 flex-wrap">
-                             <h4 className="font-black text-slate-950 uppercase italic text-sm">{item.name}</h4>
-                             <span className="px-3 py-0.5 bg-slate-900 text-white text-[8px] font-mono rounded">
+                             <h4 
+                               style={index === 1 ? { marginBottom: "44px" } : undefined}
+                               className="font-black text-slate-950 uppercase italic text-sm"
+                             >
+                               {item.name}
+                             </h4>
+                             <span 
+                               style={
+                                 index === 0 ? { marginBottom: "23px" } :
+                                 index === 1 ? { marginLeft: "-246px", marginRight: "4px", paddingLeft: "10px", marginTop: "26px" } :
+                                 undefined
+                               }
+                               className="px-3 py-0.5 bg-slate-900 text-white text-[8px] font-mono rounded"
+                             >
                                {item.type}
                              </span>
                            </div>
-                           <p className="text-[10px] text-slate-400 font-mono italic truncate max-w-sm" title={item.config.url}>
+                           <p 
+                             style={
+                               index === 0 ? { marginBottom: "4px" } :
+                               index === 1 ? { marginLeft: "0px", paddingLeft: "0px", paddingTop: "0px", marginRight: "0px", marginTop: "3px", marginBottom: "3px" } :
+                               undefined
+                             }
+                             className="text-[10px] text-slate-400 font-mono italic truncate max-w-sm" 
+                             title={item.config.url}
+                           >
                              Endpoint: {item.config.url}
                            </p>
                            <div className="flex gap-2 items-center text-[10px] font-mono">
@@ -661,7 +725,14 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
                        </div>
 
                        {/* Action blocks */}
-                       <div className="flex gap-4 items-center shrink-0">
+                       <div 
+                         style={
+                           index === 0 ? { paddingLeft: "7px", marginLeft: "-62px", marginTop: "-22px" } :
+                           index === 1 ? { width: "141.25px", height: "43px", paddingTop: "1px", marginLeft: "-108px", marginBottom: "29px" } :
+                           undefined
+                         }
+                         className="flex gap-4 items-center shrink-0"
+                       >
                          {/* Toggle on off */}
                          <div className="flex items-center gap-2">
                            <span className={`text-[9px] font-black uppercase tracking-wider font-mono ${item.isActive ? 'text-emerald-500' : 'text-slate-400'}`}>
@@ -690,32 +761,47 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
                  {integrations.length === 0 && (
                    <div className="p-8 text-center border-2 border-dashed rounded-3xl text-slate-400 space-y-2">
                      <AlertTriangle className="w-10 h-10 mx-auto text-slate-350" />
-                     <p className="font-bold text-xs uppercase tracking-wider">Aucun adaptateur déclaré pour le moment</p>
-                     <p className="text-[10px] italic">Cliquez sur "Ajouter un Adaptateur" pour configurer votre premier pipeline.</p>
+                     <p className="font-bold text-xs uppercase tracking-wider">No adapter declared at this time</p>
+                     <p className="text-[10px] italic">Click on "Add Adapter" to configure your first pipeline.</p>
                    </div>
                  )}
               </div>
            </div>
 
            {/* Metrics Sandbox unified dashboard panel */}
-           <div className="p-10 bg-white border border-slate-100 rounded-[3rem] shadow-xl space-y-8">
+           <div 
+             style={{
+               marginLeft: "-24px",
+               width: "608.635px",
+               height: "857.5px",
+               marginRight: "4px"
+             }}
+             className="p-5 md:p-10 bg-white border border-slate-100 rounded-3xl md:rounded-[3rem] shadow-xl space-y-8"
+           >
               <div className="flex justify-between items-start flex-wrap gap-4">
                  <div className="space-y-1">
                     <span className="text-[9px] font-black text-sunset-orange uppercase tracking-widest block">MONITEUR UNIFIÉ DES MÉTRIQUES (SOVEREIGN HEALTH METRIC)</span>
-                    <h3 className="text-3xl font-black text-slate-900 uppercase italic tracking-tight leading-none">État agrégé de santé</h3>
+                    <h3 className="text-3xl font-black text-slate-900 uppercase italic tracking-tight leading-none">Aggregate Health State</h3>
                     <p className="text-slate-400 text-xs italic">
-                       Les adaptateurs traduisent les structures de données en métriques normalisées de manière synchrone.
+                       Adapters translate data structures into normalized metrics synchronously.
                     </p>
                  </div>
                  
                  <div className="px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-150 rounded-full text-[9px] font-bold tracking-widest inline-flex items-center gap-2">
                    <Activity className="w-3.5 h-3.5 animate-pulse" />
-                   {metrics.length} NŒUDS AGRÉGÉS
+                   {metrics.length} AGGREGATED NODES
                  </div>
               </div>
 
               {/* Grid of metrics cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div 
+                style={{
+                  width: "581.292px",
+                  height: "615.333px",
+                  marginLeft: "-24px"
+                }}
+                className="grid grid-cols-1 md:grid-cols-2 gap-6"
+              >
                 {metrics.map((met, index) => {
                   const isDegraded = met.status === 'degraded';
                   const isOffline = met.status === 'offline';
@@ -723,10 +809,18 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
 
                   let statusTextClass = 'text-emerald-500 bg-emerald-500/10 border-emerald-100';
                   if (isDegraded) statusTextClass = 'text-amber-500 bg-amber-500/10 border-amber-100';
-                  if (isOffline || isCritical) statusTextClass = 'text-red-500 bg-red-500/10 border-red-100';
+                  if (isOffline || isCritical) statusTextClass = 'text-red-500 bg-red-505/10 border-red-100';
 
                   return (
-                    <div key={index} className="p-6 bg-slate-50 border rounded-3xl space-y-4">
+                    <div 
+                      key={index} 
+                      style={
+                        index === 0 ? { width: "273.64599999999996px" } :
+                        index === 1 ? { width: "275.64599999999996px" } :
+                        undefined
+                      }
+                      className="p-6 bg-slate-50 border rounded-3xl space-y-4"
+                    >
                        <div className="flex justify-between items-start">
                           <div className="space-y-0.5">
                              <h4 className="font-black text-slate-950 font-mono text-xs truncate max-w-[160px]" title={met.nodeId}>
@@ -773,7 +867,7 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
         <div className="xl:col-span-5 space-y-8">
            
            {/* Interactive Adaptator connection tester */}
-           <div className="p-8 bg-white border border-slate-100 rounded-[3rem] shadow-xl space-y-6">
+           <div className="p-5 md:p-8 bg-white border border-slate-100 rounded-3xl md:rounded-[3rem] shadow-xl space-y-6">
               <div className="space-y-2">
                  <span className="text-[9px] font-black text-indigo-600 uppercase tracking-widest block">CONTRÔLEUR SYNCHRONE</span>
                  <h3 className="text-lg font-black text-slate-950 uppercase italic leading-none">Banc d'Essai d'Adaptateur</h3>
@@ -799,16 +893,16 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
                         className="px-5 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[9px] uppercase tracking-widest rounded-xl transition-all shadow px-4 py-2.5 flex items-center gap-1.5 shrink-0"
                       >
                          <Play className="w-3.5 h-3.5 fill-white" />
-                         Tester l’Adapter
+                         Test Adapter
                       </button>
                    </div>
                 </div>
               ) : (
-                <p className="text-xs text-slate-400 italic">Veuillez sélectionner un adaptateur pour commencer les tests de liaison.</p>
+                <p className="text-xs text-slate-400 italic">Please select an adapter to begin connecting tests.</p>
               )}
 
               {/* Terminal Logs */}
-              <div className="p-1 bg-slate-950 border border-slate-800 rounded-[2.5rem] shadow-2xl overflow-hidden relative">
+              <div className="p-1 bg-slate-950 border border-slate-800 rounded-2xl md:rounded-[2.5rem] shadow-2xl overflow-hidden relative">
                 <div className="flex justify-between items-center px-6 py-3.5 bg-slate-900 border-b border-b-slate-850">
                    <div className="flex items-center gap-2">
                      <span className="w-2 h-2 bg-red-500 rounded-full" />
@@ -829,7 +923,7 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
                    {testLogs.length === 0 ? (
                       <div className="h-full flex flex-col justify-center items-center opacity-30 text-center py-10 space-y-2">
                          <Layers className="w-8 h-8 text-slate-500" />
-                         <span className="text-[9px] uppercase tracking-widest">[CONSOLE LOGS VIDE]</span>
+                         <span className="text-[9px] uppercase tracking-widest">[EMPTY CONSOLE LOGS]</span>
                       </div>
                    ) : (
                       <div className="space-y-1.5 text-left">
@@ -848,21 +942,21 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
            </div>
 
            {/* Security Encryption module visualization */}
-           <div className="p-8 bg-white border border-slate-100 rounded-[3rem] shadow-xl space-y-6">
+           <div className="p-5 md:p-8 bg-white border border-slate-100 rounded-3xl md:rounded-[3rem] shadow-xl space-y-6">
               <div className="space-y-1">
                  <div className="flex justify-between items-center">
-                    <span className="text-[9px] font-black text-indigo-600 uppercase tracking-widest">MODULE SÉCURITAIRE CYBER</span>
+                    <span className="text-[9px] font-black text-indigo-600 uppercase tracking-widest">SECURE CYBER MODULE</span>
                     <Lock className="w-4 h-4 text-emerald-500" />
                  </div>
                  <h3 className="text-lg font-black text-slate-950 uppercase italic leading-none">EncryptionService Sandbox</h3>
                  <p className="text-[10px] text-slate-500 leading-relaxed italic">
-                    Tester l'enrobage symétrique AES-256-CBC de configurations contenant des clés sensibles.
+                    Test AES-256-CBC symmetric wrapping of configurations containing sensitive keys.
                  </p>
               </div>
 
               <div className="space-y-4 pt-2 border-t text-xs">
                  <div className="space-y-1">
-                    <label className="text-[9px] font-black uppercase tracking-wider text-slate-400">Configuration d'entrée (JSON clair)</label>
+                    <label className="text-[9px] font-black uppercase tracking-wider text-slate-400">Input Configuration (Plaintext JSON)</label>
                     <textarea 
                       value={plainTextToEncrypt}
                       onChange={(e) => setPlainTextToEncrypt(e.target.value)}
@@ -877,20 +971,20 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
                       onClick={handleSimulateEncrypt}
                       className="py-3 bg-slate-950 hover:bg-slate-900 text-white font-black text-[9px] uppercase tracking-widest rounded-xl transition-all shadow"
                     >
-                      🛡️ Chiffrer symétrique
+                      🛡️ Symmetric Encrypt
                     </button>
                     <button
                       onClick={handleSimulateDecrypt}
                       disabled={!simulatedCiphertext}
                       className="py-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-black text-[9px] uppercase tracking-widest rounded-xl transition-all disabled:opacity-50"
                     >
-                      🔑 Déchiffrer avec clé
+                      🔑 Decrypt with Key
                     </button>
                  </div>
 
                  {simulatedCiphertext && (
                     <div className="space-y-1 font-mono text-[9px]">
-                       <span className="font-sans font-black uppercase text-slate-400 block pb-1 border-b">Cipher Output (Chiffré stocké en DB)</span>
+                       <span className="font-sans font-black uppercase text-slate-400 block pb-1 border-b">Cipher Output (Encrypted stored in DB)</span>
                        <div className="p-3 bg-indigo-50/50 border border-indigo-100 text-indigo-700 font-bold break-all rounded-xl leading-snug">
                           {simulatedCiphertext}
                        </div>
@@ -899,7 +993,7 @@ export const IntegrationHubSection = ({ onNotify }: { onNotify: (msg: string) =>
 
                  {simulatedDecrypted && (
                     <div className="space-y-1 font-mono text-[9px]">
-                       <span className="font-sans font-black uppercase text-slate-400 block pb-1 border-b">Plaintext Output (Déchiffré en mémoire RAM)</span>
+                       <span className="font-sans font-black uppercase text-slate-400 block pb-1 border-b">Plaintext Output (Decrypted in RAM buffer)</span>
                        <pre className="p-3 bg-slate-900 border text-emerald-400 rounded-xl leading-snug">
                           {JSON.stringify(simulatedDecrypted, null, 2)}
                        </pre>

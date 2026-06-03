@@ -67,10 +67,10 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
     {
       id: "mock-1",
       threadId: "t-1",
-      snippet: "Nous avons détecté une nouvelle connexion suspecte à votre serveur Bastion SSH depuis une adresse IP inhabituelle en Europe centrale. Veuillez vérifier la clé d'activation.",
+      snippet: "We detected a new suspicious connection to your Bastion SSH server from an unusual IP address in Central Europe. Please verify the activation key.",
       internalDate: String(Date.now() - 3600000),
       headers: {
-        subject: "[AuditAX-Bastion] Alerte de connexion SSH critique détectée",
+        subject: "[AuditAX-Bastion] Critical SSH connection alert detected",
         from: "securite@bastion-prod.internal",
         date: new Date(Date.now() - 3600000).toLocaleString()
       },
@@ -93,10 +93,10 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
     {
       id: "mock-3",
       threadId: "t-3",
-      snippet: "Ancienne API Key Stripe expirant dans 15 jours. Veuillez procéder au renouvellement automatique depuis votre portail de monétisation pour préserver vos encaissements.",
+      snippet: "Legacy Stripe API Key expiring in 15 days. Please complete the automatic renewal from your monetization portal to preserve your cash flows.",
       internalDate: String(Date.now() - 86400000),
       headers: {
-        subject: "[Stripe-Sovereign] Action requise : Clé d'API obsolète",
+        subject: "[Stripe-Sovereign] Action required: Legacy API key expiring",
         from: "billing-services@stripe.com",
         date: new Date(Date.now() - 86400000).toLocaleString()
       },
@@ -116,53 +116,53 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
   // Preset report generators
   useEffect(() => {
     if (emailType === 'iso') {
-      setEmailSubject('Rapport d\'Alignement Continu ISO 27001 - AuditAX');
+      setEmailSubject('Continuous ISO 27001 Alignment Report - AuditAX');
       setEmailBody(`
         <div style="font-family: sans-serif; color: #1e293b; max-width: 600px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
-          <h2 style="color: #0f172a; border-bottom: 2px solid #3b82f6; padding-bottom: 8px;">AuditAX : Alignement ISO 27001</h2>
-          <p>Bonjour,</p>
-          <p>Voici l'état d'alignement continu de nos politiques et infrastructures aux normes de sécurité <strong>ISO 27001:2022</strong> :</p>
+          <h2 style="color: #0f172a; border-bottom: 2px solid #3b82f6; padding-bottom: 8px;">AuditAX: ISO 27001 Alignment</h2>
+          <p>Hello,</p>
+          <p>Here is the continuous alignment state of our policies and infrastructures to the security standards <strong>ISO 27001:2022</strong>:</p>
           <table style="width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 15px;">
             <tr style="background-color: #f8fafc;">
-              <th style="text-align: left; padding: 8px; border: 1px solid #cbd5e1;">Contrôle Annexe A</th>
-              <th style="text-align: left; padding: 8px; border: 1px solid #cbd5e1;">Statut</th>
+              <th style="text-align: left; padding: 8px; border: 1px solid #cbd5e1;">Annex A Control</th>
+              <th style="text-align: left; padding: 8px; border: 1px solid #cbd5e1;">Status</th>
             </tr>
             <tr>
-              <td style="padding: 8px; border: 1px solid #cbd5e1;">A.5 Politiques de sécurité de l'info</td>
-              <td style="padding: 8px; border: 1px solid #cbd5e1; color: #16a34a; font-weight: bold;">✔ Conforme (100%)</td>
+              <td style="padding: 8px; border: 1px solid #cbd5e1;">A.5 Info security policies</td>
+              <td style="padding: 8px; border: 1px solid #cbd5e1; color: #16a34a; font-weight: bold;">✔ Compliant (100%)</td>
             </tr>
             <tr>
-              <td style="padding: 8px; border: 1px solid #cbd5e1;">A.8 Gestion des actifs d'info</td>
-              <td style="padding: 8px; border: 1px solid #cbd5e1; color: #ca8a04; font-weight: bold;">⚠️ Attention (85%)</td>
+              <td style="padding: 8px; border: 1px solid #cbd5e1;">A.8 Info asset management</td>
+              <td style="padding: 8px; border: 1px solid #cbd5e1; color: #ca8a04; font-weight: bold;">⚠️ Warning (85%)</td>
             </tr>
             <tr>
-              <td style="padding: 8px; border: 1px solid #cbd5e1;">A.12 Sécurité d'exploitation (Bastion SSH)</td>
+              <td style="padding: 8px; border: 1px solid #cbd5e1;">A.12 Operational Security (Bastion SSH)</td>
               <td style="padding: 8px; border: 1px solid #cbd5e1; color: #16a34a; font-weight: bold;">✔ Optimal (98%)</td>
             </tr>
           </table>
-          <p>Le score de préparation consolidé est estimé à <strong>94.3%</strong>. Aucune non-conformité majeure n'a été détectée.</p>
+          <p>The consolidated readiness score is estimated at <strong>94.3%</strong>. No major non-compliance has been detected.</p>
           <hr style="border: 0; border-top: 1px solid #e2e8f0; margin-top: 20px; margin-bottom: 20px;" />
-          <p style="font-size: 11px; color: #64748b;">Rapport généré automatiquement depuis le module AuditAX Gmail Sentinel.</p>
+          <p style="font-size: 11px; color: #64748b;">Report automatically generated from the AuditAX Gmail Sentinel module.</p>
         </div>
       `);
     } else if (emailType === 'risk') {
-      setEmailSubject('Rapport d\'Analyse des Risques SecOps & Mitigations');
+      setEmailSubject('SecOps Risk Analysis & Mitigations Report');
       setEmailBody(`
         <div style="font-family: sans-serif; color: #1e293b; max-width: 600px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
-          <h2 style="color: #0f172a; border-bottom: 2px solid #ef4444; padding-bottom: 8px;">AuditAX : Rapport d'Analyse des Risques</h2>
-          <p>Bonjour,</p>
-          <p>Nous avons identifié les éléments ci-dessous nécessitant une mitigation prioritaire dans notre plan SecOps :</p>
+          <h2 style="color: #0f172a; border-bottom: 2px solid #ef4444; padding-bottom: 8px;">AuditAX: Risk Analysis Report</h2>
+          <p>Hello,</p>
+          <p>We have identified the elements below requiring priority mitigation in our SecOps plan:</p>
           <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 12px; margin-bottom: 15px; border-radius: 4px;">
-            <strong style="color: #991b1b;">⚠️ Alerte Active : Risque Élevé de Double Spending / Anti-Abus</strong>
-            <p style="margin: 4px 0 0 0; font-size: 14px; color: #7f1d1d;">Un comportement anomalique a été enregistré d'après la Suite Anti-Abus (Sprint 3) sur plusieurs API Keys tierces.</p>
+            <strong style="color: #991b1b;">⚠️ Active Alert: High Risk of Double Spending / Anti-Abuse</strong>
+            <p style="margin: 4px 0 0 0; font-size: 14px; color: #7f1d1d;">An anomalous behavior has been recorded according to the Anti-Abuse Suite (Sprint 3) across several third-party API Keys.</p>
           </div>
-          <p>Recommandations immédiates :</p>
+          <p>Immediate recommendations:</p>
           <ul style="padding-left: 20px;">
-            <li>Révoquer la clé API ID: "stripe-sovereign-live" sous 15h.</li>
-            <li>Restreindre les ports ouverts sur le Bastion SSH aux adresses IP autorisées.</li>
-            <li>Déployer le filtre d'intelligence artificielle de Nexus AI.</li>
+            <li>Revoke API key ID: "stripe-sovereign-live" within 15 hours.</li>
+            <li>Restrict open ports on SSH Bastion to authorized IP addresses only.</li>
+            <li>Deploy the intelligence artificial filters of Nexus AI.</li>
           </ul>
-          <p>Merci de coordonner ces opérations au plus vite.</p>
+          <p>Thank you for coordinating these operations as soon as possible.</p>
           <hr style="border: 0; border-top: 1px solid #e2e8f0; margin-top: 20px;" />
           <p style="font-size: 11px; color: #64748b;">SecOps Sentinel Engine - AuditAX Portal</p>
         </div>
@@ -188,15 +188,15 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
       if (token) {
         setAccessToken(token);
         setUser(result.user);
-        onNotify('Connexion réussie à Google Gmail !');
+        onNotify('Connected successfully to Google Gmail!');
         // Automatically fetch mails
         fetchEmails(token);
       } else {
-        throw new Error('Aucun token d\'accès renvoyé par le fournisseur Google.');
+        throw new Error('No access token returned by Google provider.');
       }
     } catch (error: any) {
       console.error('Gmail OAuth Connection Error:', error);
-      onNotify(`Erreur d'authentification : ${error.message || error}`);
+      onNotify(`Authentication error: ${error.message || error}`);
     } finally {
       setIsConnecting(false);
     }
@@ -356,10 +356,10 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
       });
 
       if (!response.ok) {
-        throw new Error(`Échec de l'envoi (${response.status} ${response.statusText})`);
+        throw new Error(`Sending failed (${response.status} ${response.statusText})`);
       }
 
-      onNotify(`Email envoyé avec succès à ${emailTo} !`);
+      onNotify(`Email successfully sent to ${emailTo}!`);
       
       // Clear forms
       setEmailTo('');
@@ -410,7 +410,7 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
         {/* Connection Widget */}
         <div className="flex items-center gap-3">
           {accessToken ? (
-            <div className="flex items-center gap-3 bg-slate-900 border border-slate-800 p-2 pl-4 rounded-xl">
+            <div className="flex items-center gap-3 bg-[#0b2931] border border-teal-800/40 p-2 pl-4 rounded-xl">
               <div className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                 <div className="text-left">
@@ -420,7 +420,7 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
               </div>
               <button
                 onClick={handleDisconnect}
-                className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 hover:text-red-400 text-slate-400 transition-colors"
+                className="p-1.5 rounded-lg bg-teal-900/40 hover:bg-teal-800/50 hover:text-red-400 text-slate-405 transition-colors"
                 title="Déconnecter Gmail Sentinel"
               >
                 <LogOut className="h-4 w-4" />
@@ -458,14 +458,14 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
         
         {/* Inbox / Scans Side */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-4 backdrop-blur-sm">
+          <div className="bg-[#0b2931]/75 border border-teal-800/40 rounded-2xl p-5 space-y-4 backdrop-blur-sm">
             
             {/* Inbox Title & Operations Toolbar */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-teal-800/40">
               <div className="flex items-center gap-2">
                 <Inbox className="h-4 w-4 text-blue-400" />
                 <h3 className="text-sm font-sans font-semibold text-slate-100">
-                  Inbox Scanner {accessToken ? <span className="text-emerald-400 font-mono text-[10px] ml-1 bg-emerald-500/10 px-1.5 py-0.5 rounded-full">Live Synchronized</span> : <span className="text-slate-500 font-mono text-[10px] ml-1 bg-slate-800 px-1.5 py-0.5 rounded-full">Demo Simulation</span>}
+                  Inbox Scanner {accessToken ? <span className="text-emerald-400 font-mono text-[10px] ml-1 bg-emerald-500/10 px-1.5 py-0.5 rounded-full">Live Synchronized</span> : <span className="text-slate-500 font-mono text-[10px] ml-1 bg-teal-950 px-1.5 py-0.5 rounded-full">Demo Simulation</span>}
                 </h3>
               </div>
               
@@ -495,13 +495,13 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="E.g. category:primary security OR alert..."
-                    className="w-full bg-slate-950 font-mono text-xs pl-9 pr-4 py-2 text-white border border-slate-800 rounded-xl focus:outline-none focus:border-blue-500 transition-colors placeholder:text-slate-600"
+                    className="w-full bg-[#051a20] font-mono text-xs pl-9 pr-4 py-2 text-white border border-teal-800/40 rounded-xl focus:outline-none focus:border-blue-500 transition-colors placeholder:text-slate-600"
                   />
                 </div>
                 {accessToken && (
                   <button
                     onClick={() => fetchEmails(accessToken)}
-                    className="p-2.5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 cursor-pointer"
+                    className="p-2.5 rounded-xl bg-teal-900/40 text-teal-100 hover:bg-teal-800/50 hover:text-white cursor-pointer border border-teal-800/30"
                     title="Rechercher"
                   >
                     <Search className="h-4.5 w-4.5" />
@@ -525,7 +525,7 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
                     className={`px-2.5 py-1 text-[10px] font-mono rounded-lg transition-colors border select-none ${
                       searchQuery === item.q
                         ? 'bg-blue-500/20 text-blue-300 border-blue-500/30'
-                        : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-slate-300 hover:border-slate-700'
+                        : 'bg-[#051a20] text-slate-400 border-teal-800/40 hover:text-slate-300 hover:border-teal-700'
                     }`}
                   >
                     {item.label}
@@ -537,16 +537,16 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
             {/* Mail Container */}
             <div className="space-y-2.5 max-h-[460px] overflow-y-auto pr-1">
               {isLoading ? (
-                <div className="flex flex-col items-center justify-center py-20 bg-slate-950/40 rounded-xl border border-dashed border-slate-800">
+                <div className="flex flex-col items-center justify-center py-20 bg-[#051a20]/40 rounded-xl border border-dashed border-teal-800/40">
                   <RefreshCw className="h-8 w-8 text-blue-400 animate-spin" />
-                  <p className="mt-3 text-sm text-slate-400 font-sans">Indexation de votre messagerie Gmail...</p>
-                  <p className="text-xs text-slate-500 font-mono mt-1">Requête sécurisée OAuth en cours</p>
+                  <p className="mt-3 text-sm text-slate-400 font-sans">Indexing your Gmail inbox...</p>
+                  <p className="text-xs text-slate-500 font-mono mt-1">OAuth secure request in progress</p>
                 </div>
               ) : (messages.length > 0 ? messages : MOCK_MESSAGES).length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 bg-slate-950/30 border border-slate-800 rounded-xl">
+                <div className="flex flex-col items-center justify-center py-20 bg-[#051a20]/30 border border-teal-800/40 rounded-xl">
                   <Inbox className="h-10 w-10 text-slate-600" />
-                  <p className="mt-3 text-sm text-slate-400 font-semibold font-sans">Aucun email filtré n'a été détecté</p>
-                  <p className="text-xs text-slate-500 text-center max-w-sm px-4 mt-1">Votre messagerie semble saine ! Essayez de filtrer plus largement avec le bouton "Tout" ci-dessus.</p>
+                  <p className="mt-3 text-sm text-slate-400 font-semibold font-sans">No filtered email has been detected</p>
+                  <p className="text-xs text-slate-500 text-center max-w-sm px-4 mt-1">Your inbox looks clean! Try filtering more broadly with the "All" button above.</p>
                 </div>
               ) : (
                 (messages.length > 0 ? messages : MOCK_MESSAGES).map((msg) => (
@@ -554,10 +554,10 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
                     key={msg.id}
                     layoutId={`msg-${msg.id}`}
                     onClick={() => setSelectedMessage(msg)}
-                    className={`p-3.5 bg-slate-950/90 rounded-xl border transition-all text-left cursor-pointer group hover:border-slate-600 ${
+                    className={`p-3.5 bg-[#051a20]/90 rounded-xl border transition-all text-left cursor-pointer group hover:border-teal-605 ${
                       selectedMessage?.id === msg.id 
                         ? 'border-blue-500 bg-blue-500/5 ring-1 ring-blue-500/35' 
-                        : 'border-slate-800/80'
+                        : 'border-teal-800/50'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -570,7 +570,7 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
                           <span className="text-[9px] font-mono text-slate-400">{msg.headers.date}</span>
                         </div>
                         <h4 className="text-xs font-sans font-semibold text-slate-100 group-hover:text-blue-400 transition-colors mt-1 line-clamp-1">
-                          {msg.headers.subject || '(Sujet absent)'}
+                          {msg.headers.subject || '(No subject)'}
                         </h4>
                       </div>
                       <div className="shrink-0 flex items-center gap-1">
@@ -581,7 +581,7 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
                       {msg.snippet}
                     </p>
                     <div className="flex items-center gap-1.5 mt-2.5 text-[9px] font-mono text-slate-500">
-                      <span className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400">
+                      <span className="px-1.5 py-0.5 rounded bg-[#0b2931] border border-teal-850 text-slate-300">
                         {msg.category}
                       </span>
                       <span>ID Google: {msg.id.substring(0, 8)}...</span>
@@ -595,7 +595,7 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
               <div className="p-3 bg-amber-500/5 border border-amber-500/10 rounded-xl flex items-start gap-2.5 text-left text-xs text-amber-300">
                 <AlertCircle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
                 <div>
-                  <strong>Mode Prévisualisation Démo :</strong> Vous visualisez actuellement des flux d'audits simulés. Cliquez sur "Connecter Gmail Sentinel" pour charger de vrais signaux de SecOps depuis votre boîte Google.
+                  <strong>Demo Preview Mode:</strong> You are currently viewing simulated audit signals. Click "Connect Gmail Sentinel" to load real SecOps signals from your Google Inbox.
                 </div>
               </div>
             )}
@@ -606,16 +606,15 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
         {/* Console / Compose Email Side */}
         <div className="lg:col-span-5 space-y-4">
           
-          {/* Email Body Detail Viewer if select */}
-          <AnimatePresence mode="wait">
+                    <AnimatePresence mode="wait">
             {selectedMessage && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="bg-slate-900 border border-slate-800 rounded-2xl p-5 text-left space-y-4"
+                className="bg-[#0b2931]/80 border border-teal-800/40 rounded-2xl p-5 text-left space-y-4"
               >
-                <div className="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+                <div className="flex items-start justify-between gap-3 border-b border-teal-800/40 pb-3">
                   <div>
                     <span className="text-[10px] font-mono bg-blue-500/15 text-blue-300 border border-blue-500/20 px-2 py-0.5 rounded-full mb-1 inline-block">
                       Email d'Audit Sélectionné
@@ -635,16 +634,16 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
                   </button>
                 </div>
 
-                <div className="bg-slate-950 border border-slate-850 p-4 rounded-xl min-h-24">
+                <div className="bg-[#051a20] border border-teal-800/30 p-4 rounded-xl min-h-24">
                   <p className="text-xs text-slate-300 whitespace-pre-line leading-relaxed font-sans">
                     {selectedMessage.snippet}... (contenu complet chargé)
                   </p>
                 </div>
                 
-                <div className="flex items-center justify-between gap-2 bg-slate-950 p-2.5 rounded-xl border border-slate-800/80">
+                <div className="flex items-center justify-between gap-2 bg-[#051a20] p-2.5 rounded-xl border border-teal-800/30">
                   <div className="text-[10px] font-mono text-slate-500">
                     <Clock className="h-3.5 w-3.5 inline mr-1 text-slate-500" />
-                    Reçu le : {selectedMessage.headers.date}
+                    Received on: {selectedMessage.headers.date}
                   </div>
                   
                   <button
@@ -653,11 +652,11 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
                       setEmailSubject(`RE: ${selectedMessage.headers.subject}`);
                       setEmailBody(`<p>In response to security notice:</p><blockquote style="border-left:2px solid #ccc; padding-left:10px;">${selectedMessage.snippet}</blockquote><p>We are executing active compliance controls on the affected resources.</p>`);
                       setEmailType('custom');
-                      onNotify('Champs pré-remplis pour répondre à l\'émetteur !');
+                      onNotify('Fields pre-filled to reply to sender!');
                     }}
                     className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-mono bg-blue-600/20 text-blue-300 border border-blue-500/30 rounded-lg hover:bg-blue-600/30 transition-colors"
                   >
-                    Répondre à l'alerte
+                    Reply to Alert
                   </button>
                 </div>
               </motion.div>
@@ -665,20 +664,20 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
           </AnimatePresence>
 
           {/* Secure Report Dispatcher Card */}
-          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-4 backdrop-blur-sm text-left">
-            <div className="flex items-center gap-1.5 pb-3 border-b border-slate-800">
+          <div className="bg-[#0b2931]/75 border border-teal-800/40 rounded-2xl p-5 space-y-4 backdrop-blur-sm text-left">
+            <div className="flex items-center gap-1.5 pb-3 border-b border-teal-800/40">
               <Send className="h-4 w-4 text-blue-400" />
               <h3 className="text-sm font-sans font-semibold text-slate-100">
-                Email Dispatcher & Rapporteur
+                Email Dispatcher & Reporting
               </h3>
             </div>
 
             <form onSubmit={handleSendEmail} className="space-y-3.5">
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { id: 'iso', label: 'Rapport ISO' },
-                  { id: 'risk', label: 'Plan SecOps' },
-                  { id: 'custom', label: 'Manuel / Perso' }
+                  { id: 'iso', label: 'ISO Report' },
+                  { id: 'risk', label: 'SecOps Plan' },
+                  { id: 'custom', label: 'Manual/Custom' }
                 ].map((type) => (
                   <button
                     key={type.id}
@@ -687,7 +686,7 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
                     className={`py-1.5 text-[10.5px] font-sans font-medium rounded-lg border transition-colors select-none ${
                       emailType === type.id
                         ? 'bg-blue-500/20 text-blue-400 border-blue-500/30'
-                        : 'bg-slate-950 text-slate-400 border-slate-850 hover:text-slate-200'
+                        : 'bg-[#051a20] text-slate-400 border-teal-800/40 hover:text-slate-205'
                     }`}
                   >
                     {type.label}
@@ -696,44 +695,44 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[11px] font-medium text-slate-400 font-sans block">Destinataire (Auditeur, RSSI...)</label>
+                <label className="text-[11px] font-medium text-slate-40 block font-sans">Recipient (Auditor, CISO...)</label>
                 <input
                   type="email"
                   required
                   value={emailTo}
                   onChange={(e) => setEmailTo(e.target.value)}
                   placeholder="E.g. russi@enterprise.com"
-                  className="w-full bg-slate-950 text-xs font-mono px-3 py-2 text-white border border-slate-800 rounded-xl focus:outline-none focus:border-blue-500 transition-colors placeholder:text-slate-600"
+                  className="w-full bg-[#051a20] text-xs font-mono px-3 py-2 text-white border border-teal-800/40 rounded-xl focus:outline-none focus:border-blue-500 transition-colors placeholder:text-slate-600"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[11px] font-medium text-slate-400 font-sans block">Objet de la notification Gmail</label>
+                <label className="text-[11px] font-medium text-slate-40 block font-sans">Gmail Notification Subject</label>
                 <input
                   type="text"
                   required
                   value={emailSubject}
                   onChange={(e) => setEmailSubject(e.target.value)}
                   placeholder="E.g. Security Audit AX status report"
-                  className="w-full bg-slate-950 text-xs font-mono px-3 py-2 text-white border border-slate-800 rounded-xl focus:outline-none focus:border-blue-500 transition-colors placeholder:text-slate-600"
+                  className="w-full bg-[#051a20] text-xs font-mono px-3 py-2 text-white border border-teal-800/40 rounded-xl focus:outline-none focus:border-blue-500 transition-colors placeholder:text-slate-600"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[11px] font-medium text-slate-400 font-sans block">Contenu HTML du message</label>
+                <label className="text-[11px] font-medium text-slate-40 block font-sans">HTML Message Body</label>
                 <textarea
                   value={emailBody}
                   onChange={(e) => setEmailBody(e.target.value)}
                   rows={6}
-                  placeholder="Saisissez ou modifiez le contenu du message à envoyer..."
-                  className="w-full bg-slate-950 text-xs font-mono p-3 text-white border border-slate-800 rounded-xl focus:outline-none focus:border-blue-500 transition-colors placeholder:text-slate-600"
+                  placeholder="Type or modify the message body to send..."
+                  className="w-full bg-[#051a20] text-xs font-mono p-3 text-white border border-teal-800/40 rounded-xl focus:outline-none focus:border-blue-500 transition-colors placeholder:text-slate-600"
                 />
               </div>
 
-              <div className="bg-slate-950 border border-slate-850 p-3 rounded-xl space-y-1">
+              <div className="bg-[#051a20] border border-teal-800/30 p-3 rounded-xl space-y-1">
                 <p className="text-[10px] font-sans text-slate-400 leading-normal">
                   <Lock className="h-3 w-3 text-emerald-400 inline mr-1" />
-                  Secured dispatch validation applies. En cliquant sur Envoyer, une requête client sécurisée à l'API Gmail Google de votre boîte active sera déclenchée après confirmation.
+                  Secured dispatch validation applies. By clicking Send, a secure client request to the Google Gmail API of your active inbox will be triggered after confirmation.
                 </p>
               </div>
 
@@ -745,12 +744,12 @@ export const GmailSentinelSection = ({ onNotify }: { onNotify: (msg: string) => 
                 {isSending ? (
                   <>
                     <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                    <span>Distribution en cours...</span>
+                    <span>Sending in progress...</span>
                   </>
                 ) : (
                   <>
                     <SendHorizontal className="h-3.5 w-3.5" />
-                    <span>{accessToken ? 'Envoyer le rapport par Gmail' : 'Connectez Gmail pour Envoyer'}</span>
+                    <span>{accessToken ? 'Send Report via Gmail' : 'Connect Gmail to Send'}</span>
                   </>
                 )}
               </button>

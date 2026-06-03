@@ -120,5 +120,9 @@ service cloud.firestore {
       allow read: if isSignedIn() && userId == request.auth.uid;
       allow write: if isSignedIn() && userId == request.auth.uid && (resource == null || resource.data.adminId == request.auth.uid) && incoming().adminId == request.auth.uid;
     }
+
+    match /test/{docId} {
+      allow read: if true;
+    }
   }
 }

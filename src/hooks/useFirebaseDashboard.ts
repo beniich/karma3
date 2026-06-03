@@ -68,18 +68,40 @@ export function useFirebaseDashboard() {
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      if (!u) {
-        setLoading(false);
+      if (u) {
+        setUser(u);
+      } else {
+        // Auto sign-in to Demo Guest Mode to show the application immediately with zero barriers
+        setUser({
+          uid: 'demo_user_123',
+          displayName: 'Sovereign Auditor',
+          email: 'auditor-guest@auditax.internal',
+          photoURL: null,
+        } as any);
       }
+      setLoading(false);
     });
     return () => unsubscribeAuth();
+  }, []);
+
+  const enableDemoMode = useCallback(() => {
+    setUser({
+      uid: 'demo_user_123',
+      displayName: 'Sovereign Auditor',
+      email: 'auditor-guest@auditax.internal',
+      photoURL: null,
+    } as any);
+    setLoading(false);
   }, []);
 
   useEffect(() => {
     let unsubscribes: (() => void)[] = [];
 
     if (user) {
+      if (user.uid === 'demo_user_123') {
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       
       const initAndListen = async () => {
@@ -373,6 +395,7 @@ export function useFirebaseDashboard() {
     loading, 
     user, 
     syncInitialData,
+    enableDemoMode,
     updateRisk,
     addRisk,
     removeRisk,

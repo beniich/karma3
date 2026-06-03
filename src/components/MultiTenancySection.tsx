@@ -356,7 +356,7 @@ export const MultiTenancySection = ({ onNotify }: { onNotify: (msg: string) => v
           >
             {/* Form Column */}
             <div className="lg:col-span-4 space-y-8">
-              <div className="p-8 bg-white border border-slate-100 rounded-[3rem] shadow-xl space-y-6">
+              <div className="p-5 md:p-8 bg-white border border-slate-100 rounded-3xl md:rounded-[3rem] shadow-xl space-y-6">
                 <div className="space-y-1">
                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest italic">Consigner une donnée</h3>
                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest italic">Enregistrement cloisonné sous : <span className="text-sunset-orange">{activeTenant}</span></p>
@@ -458,7 +458,7 @@ export const MultiTenancySection = ({ onNotify }: { onNotify: (msg: string) => v
 
             {/* Records List Column */}
             <div className="lg:col-span-8 space-y-6">
-              <div className="p-8 bg-white border border-slate-100 rounded-[3rem] shadow-xl space-y-8">
+              <div className="p-5 md:p-8 bg-white border border-slate-100 rounded-3xl md:rounded-[3rem] shadow-xl space-y-8">
                 <div className="flex justify-between items-center flex-wrap gap-4">
                    <div className="space-y-1">
                      <h3 className="text-lg font-black text-slate-900 uppercase tracking-widest italic flex items-center gap-3">
@@ -535,7 +535,7 @@ export const MultiTenancySection = ({ onNotify }: { onNotify: (msg: string) => v
               </div>
 
               {/* Prove separation Banner */}
-              <div className="p-10 bg-slate-900 rounded-[3rem] border border-slate-800 shadow-2xl relative overflow-hidden flex flex-col md:flex-row justify-between items-center gap-6">
+              <div className="p-6 md:p-10 bg-slate-900 rounded-3xl md:rounded-[3rem] border border-slate-800 shadow-2xl relative overflow-hidden flex flex-col md:flex-row justify-between items-center gap-6">
                  <div className="space-y-2">
                     <span className="text-[10px] font-black text-[#FF4D00] uppercase tracking-widest italic">PREUVE DE SÉPARATION ABSOLUE</span>
                     <h4 className="text-white text-base font-black uppercase italic tracking-tight">Voulez-vous vérifier que les autres clients ne voient rien ?</h4>
@@ -617,7 +617,7 @@ export const MultiTenancySection = ({ onNotify }: { onNotify: (msg: string) => v
               {/* Side controls */}
               <div className="xl:col-span-4 space-y-8">
                 {/* Controller card */}
-                <div className="p-8 bg-white border border-slate-100 rounded-[3rem] shadow-xl space-y-8">
+                <div className="p-5 md:p-8 bg-white border border-slate-100 rounded-3xl md:rounded-[3rem] shadow-xl space-y-8">
                   <div className="space-y-2">
                      <span className="text-[10px] font-black text-[#FF4D00] uppercase tracking-widest block">TEST DE NON-RÉGRESSION RECOMMANDÉ</span>
                      <h3 className="text-xl font-black text-slate-900 uppercase italic leading-none tracking-tight">Hacking Simulation <br/>& Shield Validation</h3>
@@ -702,20 +702,20 @@ export const MultiTenancySection = ({ onNotify }: { onNotify: (msg: string) => v
           >
             {/* Left side documentation */}
             <div className="xl:col-span-4 space-y-8">
-              <div className="p-8 bg-white border border-slate-100 rounded-[3rem] shadow-xl space-y-6">
+              <div className="p-5 md:p-8 bg-white border border-slate-100 rounded-3xl md:rounded-[3rem] shadow-xl space-y-6">
                 <div className="space-y-2">
-                   <div className="text-xs font-black text-sunset-orange uppercase tracking-wider">CHIRURGIE LOGICIELLE DU MULTI-TENANCY</div>
-                   <h3 className="text-2xl font-black text-slate-900 uppercase italic leading-none tracking-tight">Etanchéité du Middleware</h3>
+                   <div className="text-xs font-black text-sunset-orange uppercase tracking-wider">MULTI-TENANCY SOFTWARE SURGERY</div>
+                   <h3 className="text-2xl font-black text-slate-900 uppercase italic leading-none tracking-tight">Middleware Leak Tightness</h3>
                 </div>
                 
                 <p className="text-slate-600 text-xs leading-relaxed italic">
-                  Pour garantir l'étanchéité, l'architecture d'AuditAX s'appuie sur une isolation systématique à deux niveaux :
+                  To guarantee leak tightness, the AuditAX architecture relies on systematic isolation at two levels:
                 </p>
 
                 <div className="space-y-4">
                   {[
-                    { num: '01', title: 'Couche de Routage API (Server-side Correlator)', desc: 'Le token JWT cryptographique de l\'utilisateur authentifié est la seule source de vérité pour déduire le tenantId. Aucun paramètre envoyé en Header HTTP ou requête query n\'est cru aveuglément.' },
-                    { num: '02', title: 'Sécurité Firestore native (Rules Version 2)', desc: 'Chaque document est taggué d\'une balise adminId irrévocable. Les polices d\'écriture interdisent les opérations d\'administration si le jeton d\'authentification du write ne correspond pas à ce champ.' }
+                    { num: '01', title: 'API Routing Layer (Server-side Correlator)', desc: 'The cryptographic JWT token of the authenticated user is the only source of truth to deduce the tenantId. No parameter sent in HTTP Headers or query strings is blindly trusted.' },
+                    { num: '02', title: 'Native Firestore Security (Rules Version 2)', desc: 'Each document is tagged with an irrevocable adminId marker. Write policies forbid administration operations if the authentication token of the writer does not match this field.' }
                   ].map(step => (
                     <div key={step.num} className="flex gap-4">
                       <span className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-xs font-black text-slate-900 shrink-0 font-mono italic">{step.num}</span>
@@ -732,7 +732,7 @@ export const MultiTenancySection = ({ onNotify }: { onNotify: (msg: string) => v
               <div className="p-8 bg-slate-900 rounded-[2.5rem] border border-slate-800 text-white relative">
                  <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-sunset-orange/15 to-transparent rounded-bl-[100px]" />
                  <p className="text-[11px] italic font-medium leading-relaxed text-slate-300">
-                   "L'absence de régression automatique lors des tests d'isolation garantit la conformité continue de notre certification souveraine."
+                   "The absence of automatic regression during isolation tests ensures continuous compliance of our sovereign certification."
                  </p>
                  <span className="text-[9px] font-black uppercase text-sunset-orange tracking-widest block mt-4">— AuditAX Core Architects</span>
               </div>
@@ -754,17 +754,17 @@ export const MultiTenancySection = ({ onNotify }: { onNotify: (msg: string) => v
 
 /**
  * AuditAX Security Middleware - Sprint 1 Multi-Tenancy Engine
- * S'assure que chaque requête Prisma soit filtrée automatiquement par le tenantId
- * issu exclusivement du jeton de sécurité de session décrypté.
+ * Ensures that each Prisma query is automatically filtered by tenantId
+ * retrieved exclusively from the decrypted session security token.
  */
 export function createTenantIsolationMiddleware(activeUserTenantId: string): Prisma.Middleware {
   return async (params, next) => {
     
-    // 🛡️ S'assurer que les modèles de configuration filtrent par Tenant-Id
+    // 🛡️ Ensure configurations filter by Tenant-id
     const modelsToIsolate = ['Risk', 'Zone', 'ComplianceDoc', 'Service', 'Employee'];
     
     if (modelsToIsolate.includes(params.model || '')) {
-      // Intercepter les requêtes de lecture et injecter la clause d'étanchéité
+      // Intercept read requests and inject isolation clause
       if (['findUnique', 'findFirst', 'findMany', 'count'].includes(params.action)) {
         params.args = params.args || {};
         params.args.where = params.args.where || {};
@@ -773,7 +773,7 @@ export function createTenantIsolationMiddleware(activeUserTenantId: string): Pri
         params.args.where.tenantId = activeUserTenantId;
       }
       
-      // Intercepter les requêtes d'écriture et forcer l'attribution légale du Tenant-Id
+      // Intercept write requests and force legal tenantId assignment
       if (['create', 'createMany'].includes(params.action)) {
         if (params.action === 'create') {
           params.args.data = params.args.data || {};
@@ -790,7 +790,7 @@ export function createTenantIsolationMiddleware(activeUserTenantId: string): Pri
         params.args = params.args || {};
         params.args.where = params.args.where || {};
         
-        // Forcer le ciblage sur la partition du client
+        // Force target partition mapping
         params.args.where.tenantId = activeUserTenantId;
       }
     }
@@ -801,7 +801,7 @@ export function createTenantIsolationMiddleware(activeUserTenantId: string): Pri
 }
 
 // ==========================================
-// Règle de Non-Régression pour Firestore Security rules
+// Non-Regression Rule for Firestore Security rules
 // ==========================================
 /*
   match /risks/{riskId} {

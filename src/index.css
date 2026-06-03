@@ -1,8 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,700;1,6..96,400&family=Hanken+Grotesk:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Hanken Grotesk", "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Bodoni Moda", Georgia, serif;
+  --font-display: "Bodoni Moda", Georgia, serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   
   --color-sunset-orange: #ff4d00;
@@ -113,3 +115,626 @@
   z-index: 10;
   border-radius: 1.4rem;
 }
+
+/* Theme Dark Overrides for Sovereign Elite */
+:root {
+  --bg-sovereign-primary: #051424;
+  --bg-sovereign-secondary: #0d1c2d;
+  --bg-sovereign-card: rgba(18, 33, 49, 0.85);
+  --bg-sovereign-card-solid: #122131;
+  --text-sovereign-primary: #ffffff;
+  --text-sovereign-secondary: #d4e4fa;
+  --text-sovereign-muted: #909096;
+  --border-sovereign-primary: rgba(144, 144, 150, 0.40);
+  --border-sovereign-secondary: rgba(69, 71, 76, 0.35);
+  --shadow-sovereign: 0 20px 40px -15px rgba(1, 15, 31, 0.7);
+  --glow-sovereign-opacity: 0.35;
+}
+
+.theme-light {
+  --bg-sovereign-primary: #f8fafc;
+  --bg-sovereign-secondary: #ffffff;
+  --bg-sovereign-card: #ffffff;
+  --bg-sovereign-card-solid: #ffffff;
+  --text-sovereign-primary: #0f172a;
+  --text-sovereign-secondary: #334155;
+  --text-sovereign-muted: #475569;
+  --border-sovereign-primary: #94a3b8;
+  --border-sovereign-secondary: #cbd5e1;
+  --shadow-sovereign: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  --glow-sovereign-opacity: 0.1;
+}
+
+.theme-dark {
+  background-color: var(--bg-sovereign-primary) !important;
+  color: var(--text-sovereign-secondary) !important;
+}
+
+.theme-light {
+  background-color: var(--bg-sovereign-primary) !important;
+  color: var(--text-sovereign-secondary) !important;
+}
+
+.theme-dark .glass-card {
+  background: rgba(13, 21, 32, 0.8) !important;
+  border: 1px solid rgba(28, 46, 70, 0.6) !important;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5) !important;
+}
+
+.theme-light .glass-card,
+.theme-light .bg-slate-900,
+.theme-light .bg-\[\#0d1520\]\/80,
+.theme-light .bg-\[\#090d16\]\/75,
+.theme-light .bg-slate-950\/20,
+.theme-light .bg-\[\#0c131d\] {
+  background-color: var(--bg-sovereign-card-solid) !important;
+  background: var(--bg-sovereign-card-solid) !important;
+  border-color: var(--border-sovereign-primary) !important;
+  box-shadow: var(--shadow-sovereign) !important;
+}
+
+.theme-light .bg-slate-950\/60,
+.theme-light .bg-slate-800,
+.theme-light .bg-slate-950\/95,
+.theme-light .bg-slate-950 {
+  background-color: var(--bg-sovereign-primary) !important;
+  border-color: var(--border-sovereign-secondary) !important;
+}
+
+/* Accessibility high contrast text mapping */
+.theme-light h2,
+.theme-light h3,
+.theme-light h4,
+.theme-light p.text-white,
+.theme-light span.text-slate-100,
+.theme-light span.text-slate-200,
+.theme-light span.text-slate-300,
+.theme-light span.text-slate-400,
+.theme-light .text-white,
+.theme-light .text-slate-100,
+.theme-light .text-slate-200,
+.theme-light .text-slate-300 {
+  color: var(--text-sovereign-primary) !important;
+}
+
+/* Prevent icons inside dark headers/buttons from breaking */
+.theme-light .bg-gradient-to-tr .text-transparent,
+.theme-light .bg-gradient-to-br .text-white {
+  color: #ffffff !important;
+}
+
+.theme-light .text-slate-400 {
+  color: var(--text-sovereign-secondary) !important;
+}
+
+.theme-light .text-slate-500 {
+  color: var(--text-sovereign-muted) !important;
+}
+
+/* Increase contrast for active state elements in light theme */
+.theme-light .text-cyan-400 {
+  color: #0284c7 !important; /* Rich sky blue instead of highly glowing cyan */
+}
+
+.theme-light .text-emerald-400 {
+  color: #059669 !important; /* Rich forest emerald green */
+}
+
+.theme-light .text-amber-500 {
+  color: #b45309 !important; /* Gold bronze instead of neon amber */
+}
+
+.theme-light .text-purple-400 {
+  color: #7c3aed !important; /* Deep royal violet */
+}
+
+/* --- LIGHT THEME COMPONENT COLOR OVERRIDES --- */
+
+/* Core cards and containers in light theme */
+.theme-light .bg-\[\#1b103c\]\/45,
+.theme-light .bg-\[\#1b103c\]\/30,
+.theme-light .bg-\[\#1b103c\]\/40,
+.theme-light .bg-\[\#1b103c\]\/50,
+.theme-light .bg-\[\#1b103c\],
+.theme-light .bg-\[\#1c0f45\]\/30,
+.theme-light .bg-\[\#1c0f45\]\/50,
+.theme-light .bg-\[\#1c0f42\]\/45,
+.theme-light .bg-\[\#140b30\]\/65,
+.theme-light .bg-\[\#140b2f\]\/40,
+.theme-light .bg-\[\#1e1346\] {
+  background-color: var(--bg-sovereign-secondary) !important;
+  background: var(--bg-sovereign-secondary) !important;
+  border-color: var(--border-sovereign-primary) !important;
+  color: var(--text-sovereign-secondary) !important;
+}
+
+/* Inner block boxes & terminals (like logs terminal, code displays, mapping sections etc.) */
+.theme-light .bg-\[\#0d0725\]\/60,
+.theme-light .bg-\[\#0d072b\]\/95,
+.theme-light .bg-\[\#0d072b\],
+.theme-light .bg-\[\#09051c\]\/60,
+.theme-light .bg-\[\#09051c\]\/90,
+.theme-light .bg-\[\#09051c\],
+.theme-light .bg-\[\#070318\],
+.theme-light .bg-\[\#070319\],
+.theme-light .bg-\[\#09041a\]\/90,
+.theme-light .bg-\[\#09041a\],
+.theme-light .bg-\[\#0c0525\],
+.theme-light .bg-\[\#0c0525\]\/90,
+.theme-light .bg-\[\#0d0621\]\/80,
+.theme-light .bg-\[\#120930\],
+.theme-light .bg-\[\#1c0e3e\],
+.theme-light .bg-\[\#10072d\] {
+  background-color: #f1f5f9 !important;
+  background: #f1f5f9 !important;
+  border-color: var(--border-sovereign-secondary) !important;
+  color: var(--text-sovereign-secondary) !important;
+}
+
+/* Inputs and interactive search/entry fields */
+.theme-light .bg-\[\#150a30\]\/80,
+.theme-light .bg-\[\#150a30\],
+.theme-light .bg-\[\#180e3c\],
+.theme-light .bg-\[\#150630\] {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  border-color: var(--border-sovereign-primary) !important;
+  color: #0f172a !important;
+}
+
+/* Ensure placeholder text and values in inputs are clean */
+.theme-light .bg-\[\#150a30\]::placeholder,
+.theme-light .bg-\[\#180e3c\]::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Buttons inside light mode that are using dark colors like bg-[#180d38] or similar */
+.theme-light .bg-\[\#180d38\],
+.theme-light .bg-\[\#251554\],
+.theme-light .bg-\[\#1e1146\] {
+  background-color: #f1f5f9 !important;
+  color: #4f46e5 !important;
+  border-color: #cbd5e1 !important;
+}
+.theme-light .bg-\[\#180d38\]:hover,
+.theme-light .bg-\[\#251554\]:hover,
+.theme-light .bg-\[\#1e1146\]:hover {
+  background-color: #e2e8f0 !important;
+  color: #3730a3 !important;
+}
+
+/* High contrast custom text color overrides in theme-light */
+.theme-light .text-\[\#cbd5e1\],
+.theme-light .text-purple-200,
+.theme-light .text-purple-300,
+.theme-light .text-indigo-200,
+.theme-light .text-indigo-300,
+.theme-light .text-indigo-400 {
+  color: #1e1b4b !important; /* Deep indigo for perfect accessibility */
+}
+
+/* Avoid turning warning / green / orange text black or invisible */
+.theme-light .text-emerald-400 {
+  color: #059669 !important;
+}
+.theme-light .text-orange-400 {
+  color: #ea580c !important;
+}
+
+/* Map correct borders */
+.theme-light .border-\[\#372375\]\/45,
+.theme-light .border-\[\#372375\]\/50,
+.theme-light .border-\[\#372375\]\/40,
+.theme-light .border-\[\#3e238f\]\/40,
+.theme-light .border-\[\#3e238f\]\/60 {
+  border-color: var(--border-sovereign-secondary) !important;
+}
+
+/* --- END OF LIGHT THEME COGNITIVE OVERRIDES --- */
+
+/* Sidebar and Mobile Navigation Bar Overrides */
+.theme-light aside {
+  background-color: var(--bg-sovereign-secondary) !important;
+  border-color: var(--border-sovereign-primary) !important;
+}
+
+.theme-light nav {
+  background-color: var(--bg-sovereign-secondary) !important;
+  border-color: var(--border-sovereign-primary) !important;
+}
+
+.theme-dark input, 
+.theme-dark select, 
+.theme-dark textarea {
+  background-color: #111a27 !important;
+  color: #ffffff !important;
+  border-color: rgba(28, 46, 70, 0.6) !important;
+}
+
+.theme-light input,
+.theme-light select,
+.theme-light textarea {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: var(--border-sovereign-primary) !important;
+}
+
+.theme-dark table th {
+  background-color: #0c131d !important;
+  border-color: rgba(28, 46, 70, 0.6) !important;
+  color: #ffffff !important;
+}
+
+.theme-light table th {
+  background-color: var(--bg-sovereign-secondary) !important;
+  border-color: var(--border-sovereign-primary) !important;
+  color: var(--text-sovereign-primary) !important;
+}
+
+.theme-dark table td {
+  border-color: rgba(28, 46, 70, 0.3) !important;
+  color: #cbd5e1 !important;
+}
+
+.theme-light table td {
+  border-color: var(--border-sovereign-secondary) !important;
+  color: var(--text-sovereign-secondary) !important;
+}
+
+.theme-dark tr:hover {
+  background-color: rgba(28, 46, 70, 0.3) !important;
+}
+
+.theme-light tr:hover {
+  background-color: rgba(148, 163, 184, 0.1) !important;
+}
+
+.theme-dark .bg-white {
+  background-color: #0d1520 !important;
+}
+
+.theme-light .bg-white {
+  background-color: #ffffff !important;
+}
+
+.theme-dark .bg-slate-50 {
+  background-color: #111a27 !important;
+}
+
+.theme-light .bg-slate-50 {
+  background-color: #f8fafc !important;
+}
+
+.theme-dark .bg-slate-100 {
+  background-color: #182537 !important;
+}
+
+.theme-light .bg-slate-100 {
+  background-color: #f1f5f9 !important;
+}
+
+.theme-dark .border-slate-100 {
+  border-color: rgba(28, 46, 70, 0.4) !important;
+}
+
+.theme-light .border-slate-100 {
+  border-color: var(--border-sovereign-secondary) !important;
+}
+
+.theme-dark .border-slate-200 {
+  border-color: rgba(28, 46, 70, 0.6) !important;
+}
+
+.theme-light .border-slate-200 {
+  border-color: var(--border-sovereign-primary) !important;
+}
+
+.theme-dark .text-slate-900 {
+  color: #ffffff !important;
+}
+
+.theme-light .text-slate-900 {
+  color: #0f172a !important;
+}
+
+.theme-dark .text-slate-800 {
+  color: #e2e8f0 !important;
+}
+
+.theme-light .text-slate-800 {
+  color: #1e293b !important;
+}
+
+.theme-dark .text-[#2d2d2d] {
+  color: #cad3e0 !important;
+}
+
+.theme-light .text-[#2d2d2d] {
+  color: #334155 !important;
+}
+
+.theme-dark .text-slate-700 {
+  color: #cbd5e1 !important;
+}
+
+.theme-light .text-slate-700 {
+  color: #334155 !important;
+}
+
+.theme-dark .text-slate-650 {
+  color: #94a3b8 !important;
+}
+
+.theme-dark .text-slate-600 {
+  color: #94a3b8 !important;
+}
+
+.theme-light .text-slate-600 {
+  color: #475569 !important;
+}
+
+.theme-dark .text-slate-500 {
+  color: #64748b !important;
+}
+
+.theme-dark .bg-sunset-surface {
+  background-color: #070b13 !important;
+}
+
+.theme-light .bg-sunset-surface {
+  background-color: #f8fafc !important;
+}
+
+/* Pulse animation for network diagram */
+@keyframes dash {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+.dash-pulse {
+  animation: dash 1.5s linear infinite;
+}
+
+.shadow-glow {
+  filter: drop-shadow(0 0 8px rgba(14, 165, 233, 0.4));
+}
+
+/* Custom Simple CSS Pulse Animations for Connection indicator */
+@keyframes status-pulse-green {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(74, 222, 128, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0);
+  }
+}
+
+@keyframes status-pulse-red {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(248, 113, 113, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(248, 113, 113, 0);
+  }
+}
+
+.pulse-green {
+  animation: status-pulse-green 1.8s infinite;
+}
+
+.pulse-red {
+  animation: status-pulse-red 1.8s infinite;
+}
+
+/* Entire container pulsing glow when Online */
+@keyframes indicator-glow {
+  0% {
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5), 0 0 0 0px rgba(34, 197, 94, 0.2);
+    border-color: rgba(34, 197, 94, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5), 0 0 10px 2px rgba(34, 197, 94, 0.4);
+    border-color: rgba(34, 197, 94, 0.55);
+  }
+  100% {
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5), 0 0 0 0px rgba(34, 197, 94, 0.2);
+    border-color: rgba(34, 197, 94, 0.25);
+  }
+}
+
+.indicator-pulse-active {
+  animation: indicator-glow 2.5s ease-in-out infinite;
+}
+
+/* --- HIGH CONTRAST ACCESSIBILITY MODE SPECIFIC OVERRIDES --- */
+.theme-high-contrast {
+  --bg-sovereign-primary: #ffffff !important;
+  --bg-sovereign-secondary: #f8fafc !important;
+  --bg-sovereign-card: #ffffff !important;
+  --bg-sovereign-card-solid: #ffffff !important;
+  --text-sovereign-primary: #000000 !important;
+  --text-sovereign-secondary: #000000 !important;
+  --text-sovereign-muted: #111111 !important;
+  --border-sovereign-primary: #000000 !important;
+  --border-sovereign-secondary: #000000 !important;
+  font-weight: 600 !important; /* Force high contrast font weight */
+}
+
+/* Ensure all links and text inside high-contrast light use pure black text or deep blue for strong contrast */
+.theme-high-contrast p,
+.theme-high-contrast span,
+.theme-high-contrast div,
+.theme-high-contrast h1,
+.theme-high-contrast h2,
+.theme-high-contrast h3,
+.theme-high-contrast h4,
+.theme-high-contrast h5,
+.theme-high-contrast h6,
+.theme-high-contrast li,
+.theme-high-contrast td,
+.theme-high-contrast th,
+.theme-high-contrast input,
+.theme-high-contrast select,
+.theme-high-contrast textarea {
+  color: #000000 !important;
+  text-shadow: none !important;
+}
+
+/* Make icons stand out properly with darker tones */
+.theme-high-contrast svg {
+  stroke-width: 2.5px !important;
+  filter: saturate(2) contrast(2) !important;
+}
+
+/* Add robust clear outlines to cards instead of modern soft borders */
+.theme-high-contrast .glass-card,
+.theme-high-contrast .border,
+.theme-high-contrast border-slate-100,
+.theme-high-contrast border-slate-200,
+.theme-high-contrast border-slate-800 {
+  border: 2px solid #000105 !important;
+  border-color: #000000 !important;
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.theme-high-contrast button {
+  border: 2px solid #000000 !important;
+  background-color: #f1f5f9 !important;
+  color: #000000 !important;
+  font-weight: 800 !important;
+}
+
+.theme-high-contrast button:hover {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.theme-high-contrast button:hover * {
+  color: #ffffff !important;
+}
+
+/* Table overrides for WCAG AAA table rendering */
+.theme-high-contrast table {
+  border: 2px solid #000000 !important;
+  background-color: #ffffff !important;
+}
+
+.theme-high-contrast table th {
+  background-color: #f1f5f9 !important;
+  color: #000000 !important;
+  border: 1.5px solid #000000 !important;
+  font-weight: 900 !important;
+}
+
+.theme-high-contrast table td {
+  border: 1.5px solid #000000 !important;
+  color: #000000 !important;
+  font-weight: 700 !important;
+}
+
+.theme-high-contrast tr:hover {
+  background-color: #e2e8f0 !important;
+}
+
+/* Indicators or badges must not use faint background tones */
+.theme-high-contrast .bg-red-500\/10,
+.theme-high-contrast .bg-red-500\/20,
+.theme-high-contrast .bg-rose-500\/10,
+.theme-high-contrast .bg-rose-500\/20 {
+  background-color: #fee2e2 !important;
+  border: 2px solid #ef4444 !important;
+}
+
+.theme-high-contrast .bg-green-500\/10,
+.theme-high-contrast .bg-green-500\/20,
+.theme-high-contrast .bg-emerald-500\/10,
+.theme-high-contrast .bg-emerald-500\/20 {
+  background-color: #d1fae5 !important;
+  border: 2px solid #10b981 !important;
+}
+
+.theme-high-contrast .bg-blue-500\/10,
+.theme-high-contrast .bg-blue-500\/20,
+.theme-high-contrast .bg-sky-500\/10,
+.theme-high-contrast .bg-sky-500\/20 {
+  background-color: #dbeafe !important;
+  border: 2px solid #3b82f6 !important;
+}
+
+.theme-high-contrast .bg-amber-500\/10,
+.theme-high-contrast .bg-amber-500\/20,
+.theme-high-contrast .bg-yellow-500\/10,
+.theme-high-contrast .bg-yellow-500\/20 {
+  background-color: #fef3c7 !important;
+  border: 2px solid #f59e0b !important;
+}
+
+.theme-high-contrast .text-red-400,
+.theme-high-contrast .text-rose-450,
+.theme-high-contrast .text-rose-500 {
+  color: #991b1b !important;
+}
+
+.theme-high-contrast .text-green-400,
+.theme-high-contrast .text-emerald-500 {
+  color: #065f46 !important;
+}
+
+.theme-high-contrast .text-blue-400,
+.theme-high-contrast .text-[#0ea5e9],
+.theme-high-contrast .text-sky-500 {
+  color: #1e3a8a !important;
+}
+
+.theme-high-contrast .text-amber-500,
+.theme-high-contrast .text-yellow-600 {
+  color: #92400e !important;
+}
+
+/* Sidebar and general layouts */
+.theme-high-contrast aside,
+.theme-high-contrast nav,
+.theme-high-contrast header {
+  background-color: #ffffff !important;
+  border-right: 2px solid #000000 !important;
+  border-bottom: 2px solid #000000 !important;
+}
+
+.theme-high-contrast aside button,
+.theme-high-contrast nav button {
+  border: 1px solid #000000 !important;
+}
+
+.theme-high-contrast aside span,
+.theme-high-contrast nav span {
+  color: #000000 !important;
+}
+
+/* Fix background neon highlights in active navbar tabs */
+.theme-high-contrast aside .bg-\[\#bad1ff\] {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+/* Ensure no shadows or background radial-glows overlap text */
+.theme-high-contrast .blur-\[120px\],
+.theme-high-contrast .bg-sunset-orange\/5,
+.theme-high-contrast .bg-blue-500\/5 {
+  display: none !important;
+}
+

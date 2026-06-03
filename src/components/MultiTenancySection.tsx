@@ -22,6 +22,7 @@ import {
   Server,
   Code
 } from 'lucide-react';
+import { HighFidelityIcon } from './HighFidelityIcon';
 
 // --- Types ---
 export interface Tenant {
@@ -677,8 +678,10 @@ export const MultiTenancySection = ({ onNotify }: { onNotify: (msg: string) => v
                 </div>
 
                 {/* Important recommendation box */}
-                <div className="p-8 bg-sky-50 border border-sky-100 rounded-[2.5rem] flex gap-4">
-                   <ShieldAlert className="w-8 h-8 text-sky-600 shrink-0 mt-1" />
+                <div className="p-8 bg-sky-50 border border-sky-100 rounded-[2.5rem] flex items-center gap-5">
+                   <HighFidelityIcon variant="info" size="lg" className="shrink-0">
+                     <ShieldAlert />
+                   </HighFidelityIcon>
                    <div className="space-y-1">
                       <h4 className="text-[10px] font-black uppercase text-sky-950 tracking-widest">Garantie Souveraine de Données</h4>
                       <p className="text-xs text-sky-850/80 leading-relaxed italic">

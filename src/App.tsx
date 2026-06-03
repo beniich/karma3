@@ -100,6 +100,8 @@ import { ComplianceMappingSection } from './components/ComplianceMappingSection'
 import { Karma3NexusHub } from './components/Karma3NexusHub';
 import { SanteConnectSection } from './components/SanteConnectSection';
 import { BackendConnectSection } from './components/BackendConnectSection';
+import { HighFidelityIcon } from './components/HighFidelityIcon';
+import { SystemIntegrityModal } from './components/SystemIntegrityModal';
 
 // --- New Sovereign Device Nexus V2 Layout Components ---
 import { NexusMainDashboard } from './components/NexusMainDashboard';
@@ -186,9 +188,9 @@ const Card = ({ children, className, title, icon: Icon, tag }: CardProps) => (
       <div className="px-5 py-4 md:px-8 md:py-6 border-b border-slate-100/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-4">
           {Icon && (
-            <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl md:rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:sunset-gradient group-hover:text-white transition-all duration-500 shadow-inner">
-              <Icon className="w-4.5 h-4.5 md:w-5 md:h-5" />
-            </div>
+            <HighFidelityIcon variant="neutral" size="sm" className="group-hover:scale-105 transition-transform duration-300">
+              <Icon />
+            </HighFidelityIcon>
           )}
           {title && <h3 className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-slate-800">{title}</h3>}
         </div>
@@ -563,9 +565,19 @@ const GenerativeWidget = ({
             "bg-blue-50/80 border-blue-200 border-l-blue-500 text-blue-800"
           )}
         >
-          {isError ? <ShieldAlert className="w-5 h-5 shrink-0 mt-0.5 text-red-500 animate-bounce" /> :
-           isWarning ? <ShieldAlert className="w-5 h-5 shrink-0 mt-0.5 text-amber-500" /> :
-           <Info className="w-5 h-5 shrink-0 mt-0.5 text-blue-500" />}
+          {isError ? (
+            <HighFidelityIcon variant="danger" size="sm" className="mt-0.5 shrink-0 animate-bounce">
+              <ShieldAlert />
+            </HighFidelityIcon>
+          ) : isWarning ? (
+            <HighFidelityIcon variant="warning" size="sm" className="mt-0.5 shrink-0">
+              <ShieldAlert />
+            </HighFidelityIcon>
+          ) : (
+            <HighFidelityIcon variant="info" size="sm" className="mt-0.5 shrink-0">
+              <Info />
+            </HighFidelityIcon>
+          )}
           <div>
             <div className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-1">
               {severity === 'error' ? 'CRITICAL DISCREPANCY' : severity === 'warning' ? 'ANOMALY DETECTED' : 'SYSTEM METRIC NOTICE'}
@@ -2624,9 +2636,22 @@ const SummarySection = ({ data, onNotify, onSettings }: { data: DashboardData; o
               <kpi.icon className="w-24 h-24" />
             </div>
             <div className="relative z-10 space-y-4">
-              <div className="space-y-1">
-                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic leading-none">{kpi.label}</span>
-                 <h4 className={cn("text-5xl font-black italic tracking-tighter leading-none", kpi.color)}>{kpi.value}</h4>
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-1">
+                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic leading-none">{kpi.label}</span>
+                   <h4 className={cn("text-5xl font-black italic tracking-tighter leading-none", kpi.color)}>{kpi.value}</h4>
+                </div>
+                <HighFidelityIcon 
+                  variant={
+                    kpi.color.includes('text-red-500') ? 'danger' : 
+                    kpi.color.includes('orange') ? 'warning' :
+                    kpi.color.includes('blue') ? 'info' : 'success'
+                  } 
+                  size="md"
+                  className="mt-1 shadow-sm"
+                >
+                  <kpi.icon />
+                </HighFidelityIcon>
               </div>
               <div className="flex items-center gap-2">
                  <div className={cn("w-1.5 h-1.5 rounded-full", kpi.color)} />
@@ -4659,6 +4684,7 @@ const SubscribersManagementSection = ({
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('summary');
+  const [isDiagnosticModalOpen, setIsDiagnosticModalOpen] = useState(false);
   const [isLandingPortal, setIsLandingPortal] = useState(true);
   const [portalTab, setPortalTab] = useState<'home' | 'solutions' | 'orchestration' | 'architecture' | 'compliance' | 'fleet' | 'security' | 'tarifs' | 'rapports'>('home');
   const [language, setLanguage] = useState<'FR' | 'EN'>('FR');
@@ -5757,81 +5783,93 @@ export default function App() {
           </div>
 
           {/* Sidebar Footer User Area */}
-          <div className="border-t border-[#1c2e46]/60 pt-6 shrink-0" style={{ height: '102.6667px', width: '175.333px', paddingTop: '6px', paddingBottom: '0px', paddingLeft: '-3px', marginLeft: '-8px', marginRight: '1px', marginTop: '3px', marginBottom: '-28px' }}>
-             <div className="flex items-center justify-between gap-2 px-2">
-                <div 
-                  onClick={handleProfileClick}
-                  className="flex items-center gap-3 cursor-pointer group flex-grow min-w-0"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-slate-900 border border-[#1c2e46]/60 p-0.5 overflow-hidden shadow-md group-hover:border-[#0ea5e9]/40 transition-all shrink-0">
-                    {user.photoURL ? (
-                        <img src={user.photoURL} alt="User" className="w-full h-full object-cover rounded-[10px]" referrerPolicy="no-referrer" />
-                    ) : (
-                        <div className="w-full h-full flex items-center justify-center text-white font-black text-xs uppercase italic bg-[#0ea5e9]/25">{user.displayName?.charAt(0) || "JD"}</div>
-                    )}
-                  </div>
-                  <div className="flex flex-col truncate text-left" style={{ marginLeft: '-54px', paddingLeft: '2px', paddingTop: '6px', width: '118.6667px', height: '38.5px', marginRight: '5px', marginBottom: '-57px', marginTop: '50px', paddingRight: '-8px', paddingBottom: '5px' }}>
-                    <span className="text-[10px] font-black italic text-white leading-none truncate group-hover:text-[#0ea5e9] transition-colors">{user.displayName?.toUpperCase() || "JANE DOE"}</span>
-                    <span className="text-[7px] font-black text-[#0ea5e9] uppercase tracking-[0.2em] mt-1 truncate">Compliance_Officer</span>
-                  </div>
-                </div>
-             <div className="relative">
-                <button 
-                  onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}
-                  title="Choisir Thème & Accessibilité"
-                  className="p-2.5 text-slate-400 hover:text-blue-400 transition-colors bg-[#0d1520] border border-[#1c2e46]/60 rounded-xl hover:bg-slate-800/50 flex items-center justify-center shrink-0"
-                  style={{ width: '37.3229px', height: '34.3229px', marginLeft: '-54px', marginRight: '15px', paddingTop: '7px', paddingBottom: '18px', marginTop: '3px', marginBottom: '4px' }}
-                >
-                  {theme === 'dark' ? (
-                     <Moon className="w-3.5 h-3.5 text-indigo-400" />
-                  ) : theme === 'high-contrast' ? (
-                     <Eye className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
+          <div className="border-t border-[#1c2e46]/60 pt-4 pb-1 shrink-0 flex flex-col gap-3 w-full">
+             <div className="flex items-center gap-3 px-2 cursor-pointer group w-full" onClick={handleProfileClick}>
+                <div className="w-10 h-10 rounded-xl bg-slate-900 border border-[#1c2e46]/60 p-0.5 overflow-hidden shadow-md group-hover:border-[#0ea5e9]/40 transition-all shrink-0">
+                  {user.photoURL ? (
+                      <img src={user.photoURL} alt="User" className="w-full h-full object-cover rounded-[10px]" referrerPolicy="no-referrer" />
                   ) : (
-                     <Sun className="w-3.5 h-3.5 text-amber-500" />
+                      <div className="w-full h-full flex items-center justify-center text-white font-black text-xs uppercase italic bg-[#0ea5e9]/25">{user?.displayName?.charAt(0) || "JD"}</div>
                   )}
-                </button>
-                {isThemeMenuOpen && (
-                  <div className="absolute bottom-12 right-0 w-52 bg-[#090d16] border border-[#1c2e46]/80 rounded-xl shadow-2xl p-2 z-[999] flex flex-col gap-1 text-left">
-                    <span className="text-[7.5px] font-black uppercase text-[#0ea5e9] tracking-[0.15em] opacity-80 px-2 py-1 block">Sélecteur de Thème</span>
-                    <button
-                      onClick={() => selectTheme('dark')}
-                      className={cn(
-                        "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[9px] font-bold uppercase transition-all hover:bg-slate-850/50",
-                        theme === 'dark' ? "text-blue-400 bg-blue-500/10" : "text-slate-400 hover:text-white"
-                      )}
-                    >
-                      <Moon className="w-3.5 h-3.5" />
-                      <span>Cyber Obsidian (Sombre)</span>
-                    </button>
-                    <button
-                      onClick={() => selectTheme('light')}
-                      className={cn(
-                        "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[9px] font-bold uppercase transition-all hover:bg-slate-850/50",
-                        theme === 'light' ? "text-amber-500 bg-amber-500/10" : "text-slate-400 hover:text-white"
-                      )}
-                    >
-                      <Sun className="w-3.5 h-3.5" />
-                      <span>Slate Minimal (Clair)</span>
-                    </button>
-                    <button
-                      onClick={() => selectTheme('high-contrast')}
-                      className={cn(
-                        "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[9px] font-bold uppercase transition-all hover:bg-slate-850/50",
-                        theme === 'high-contrast' ? "text-emerald-500 bg-emerald-500/10 font-bold" : "text-slate-500 hover:text-white"
-                      )}
-                    >
-                      <Eye className="w-3.5 h-3.5" />
-                      <span>Haute Accessibilité (WCAG)</span>
-                    </button>
-                  </div>
-                )}
+                </div>
+                <div className="flex flex-col truncate text-left min-w-0 flex-grow">
+                  <span className="text-[10px] font-black italic text-white leading-tight truncate group-hover:text-[#0ea5e9] transition-colors">{user?.displayName?.toUpperCase() || "JANE DOE"}</span>
+                  <span className="text-[7.5px] font-black text-[#0ea5e9] uppercase tracking-[0.15em] mt-0.5">Compliance_Officer</span>
+                </div>
              </div>
+
+             <button
+               onClick={() => setIsDiagnosticModalOpen(true)}
+               type="button"
+               title={language === 'FR' ? "Lancer le diagnostic d'intégrité" : "Run system integrity diagnostic"}
+               className="mx-2 py-2 px-3 text-slate-350 hover:text-[#0ea5e9] hover:bg-[#0ea5e9]/10 hover:border-[#0ea5e9]/45 transition-all bg-[#090e17] border border-[#1e2f47] rounded-xl flex items-center justify-center gap-2 font-black text-[8px] uppercase tracking-[0.16em] cursor-pointer"
+             >
+               <ShieldAlert className="w-3.5 h-3.5 text-emerald-450 animate-pulse" />
+               SYSTEM INTEGRITY
+             </button>
+
+             <div className="grid grid-cols-2 gap-2 px-2 w-full mt-2">
+                <div className="relative w-full">
+                  <button 
+                    onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}
+                    type="button"
+                    title="Choisir Thème"
+                    className="w-full py-2 px-2 text-slate-400 hover:text-[#0ea5e9] hover:bg-[#0ea5e9]/10 hover:border-[#0ea5e9]/30 transition-all bg-[#0d1520] border border-[#1c2e46]/60 rounded-xl flex items-center justify-center gap-1.5 focus:outline-none cursor-pointer"
+                  >
+                    {theme === 'dark' ? (
+                       <Moon className="w-3.5 h-3.5 text-indigo-400" />
+                    ) : theme === 'high-contrast' ? (
+                       <Eye className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
+                    ) : (
+                       <Sun className="w-3.5 h-3.5 text-amber-500" />
+                    )}
+                    <span className="text-[8px] font-mono font-bold tracking-wider uppercase">THEME</span>
+                  </button>
+                  {isThemeMenuOpen && (
+                    <div className="absolute bottom-11 left-0 w-48 bg-[#090d16] border border-[#1c2e46]/80 rounded-xl shadow-2xl p-1.5 z-[999] flex flex-col gap-0.5 text-left animate-in fade-in slide-in-from-bottom-2 duration-200">
+                      <span className="text-[7.5px] font-black uppercase text-[#0ea5e9] tracking-[0.15em] opacity-80 px-2 py-1 block">Sélecteur de Thème</span>
+                      <button
+                        onClick={() => selectTheme('dark')}
+                        className={cn(
+                          "w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all hover:bg-slate-80/50",
+                          theme === 'dark' ? "text-blue-400 bg-blue-500/10" : "text-slate-400 hover:text-white"
+                        )}
+                      >
+                        <Moon className="w-3.5 h-3.5" />
+                        <span>Cyber Obsidian</span>
+                      </button>
+                      <button
+                        onClick={() => selectTheme('light')}
+                        className={cn(
+                          "w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all hover:bg-slate-80/50",
+                          theme === 'light' ? "text-amber-500 bg-amber-500/10" : "text-slate-400 hover:text-white"
+                        )}
+                      >
+                        <Sun className="w-3.5 h-3.5" />
+                        <span>Slate Minimal</span>
+                      </button>
+                      <button
+                        onClick={() => selectTheme('high-contrast')}
+                        className={cn(
+                          "w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all hover:bg-slate-80/50",
+                          theme === 'high-contrast' ? "text-emerald-500 bg-emerald-500/10 font-bold" : "text-slate-500 hover:text-white"
+                        )}
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>WCAG Contrast</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 <button 
                   onClick={() => signOut(auth)}
+                  type="button"
                   title="Sign Out"
-                  className="p-2.5 text-slate-400 hover:text-red-500 transition-colors bg-[#0d1520] border border-[#1c2e46]/60 rounded-xl hover:bg-red-500/10"
+                  className="py-2 px-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/30 transition-all bg-[#0d1520] border border-[#1c2e46]/60 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <LogOut className="w-3.5 h-3.5" />
+                  <span className="text-[8px] font-mono font-bold tracking-wider uppercase">EXIT</span>
                 </button>
              </div>
           </div>
@@ -5881,6 +5919,13 @@ export default function App() {
                       )}
                     </motion.div>
                 </div>
+                <button 
+                  onClick={() => setIsDiagnosticModalOpen(true)}
+                  title={language === 'FR' ? "Diagnostic d'Intégrité Système" : "System Integrity Diagnostics"}
+                  className="p-3 text-slate-350 hover:text-emerald-400 transition-colors bg-[#0d1520] border border-[#1c2e46]/60 rounded-2xl mr-1 flex items-center justify-center shrink-0"
+                >
+                  <ShieldCheck className="w-5 h-5 text-emerald-450 animate-pulse" />
+                </button>
                 <button 
                   onClick={toggleTheme}
                   title={theme === "dark" ? "Passer au thème clair (Slate Minimal)" : theme === "light" ? "Passer au thème haute accessibilité (WCAG AAA)" : "Passer au thème Cyber Obsidian"}
@@ -6304,6 +6349,13 @@ export default function App() {
           </footer>
         )}
       </main>
+
+      <SystemIntegrityModal 
+        isOpen={isDiagnosticModalOpen} 
+        onClose={() => setIsDiagnosticModalOpen(false)} 
+        socketConnected={isSocketConnected} 
+        language={language}
+      />
     </div>
   );
 }

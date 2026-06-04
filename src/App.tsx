@@ -50,6 +50,7 @@ import {
   Award,
   Cpu,
   CreditCard,
+  Coins,
   Workflow,
   FileSpreadsheet,
   Loader2,
@@ -118,9 +119,10 @@ import { DeviceInventoryList } from './components/DeviceInventoryList';
 import { SovereignSubscribersRegistry } from './components/SovereignSubscribersRegistry';
 import { NexusAIAnalysisStudio } from './components/NexusAIAnalysisStudio';
 import { SovereignReportsSection } from './components/SovereignReportsSection';
+import { SovereignBillingTenantHub } from './components/SovereignBillingTenantHub';
 
 // --- Types ---
-type TabType = 'summary' | 'compliance' | 'risk' | 'org' | 'services' | 'intelligence' | 'profile' | 'config' | 'handbook' | 'subscribers' | 'license' | 'bastion' | 'roadmap' | 'academy' | 'admin' | 'multitenancy' | 'monetization' | 'dirtydozen' | 'integrations' | 'gmail' | 'sheets' | 'karma3' | 'sante' | 'fleet' | 'inventory' | 'security' | 'rule-engine' | 'scripts' | 'architecture' | 'support' | 'connect';
+type TabType = 'summary' | 'compliance' | 'risk' | 'org' | 'services' | 'intelligence' | 'profile' | 'config' | 'handbook' | 'subscribers' | 'license' | 'bastion' | 'roadmap' | 'academy' | 'admin' | 'multitenancy' | 'monetization' | 'dirtydozen' | 'integrations' | 'gmail' | 'sheets' | 'karma3' | 'sante' | 'fleet' | 'inventory' | 'security' | 'rule-engine' | 'scripts' | 'architecture' | 'support' | 'connect' | 'billing-hub';
 
 // --- Mock Data for Charts ---
 const EXPOSURE_TREND = [
@@ -4911,6 +4913,7 @@ export default function App() {
     // Previous routes
     { id: 'sante', labelFr: 'Santé Connect V2', labelEn: 'Sante Connect V2', icon: HeartPulse },
     { id: 'services', labelFr: 'Plan Chirurgical', labelEn: 'Surgical Plan', icon: Zap },
+    { id: 'billing-hub', labelFr: "Souveraineté (Abo, Jeton, Multi-User)", labelEn: "Sovereign Billing & Tenant Hub", icon: Coins },
     { id: 'multitenancy', labelFr: 'Sprint 1: Multi-Tenance', labelEn: 'Sprint 1: Multi-Tenancy', icon: Key },
     { id: 'monetization', labelFr: 'Sprint 2: Monétisation', labelEn: 'Sprint 2: Monetization', icon: CreditCard },
     { id: 'dirtydozen', labelFr: 'Sprint 3: Suite anti-abus', labelEn: 'Sprint 3: Anti-Abuse Suite', icon: ShieldAlert },
@@ -4945,6 +4948,7 @@ export default function App() {
       titleFr: "Lab & Sprints AuditAX",
       titleEn: "AuditAX Lab & Sprints",
       items: [
+        { id: 'billing-hub', labelFr: "Souveraineté (Abo, Jeton, Multi-User)", labelEn: "Sovereign Billing & Tenant Hub", icon: Coins },
         { id: 'sante', labelFr: 'Santé Connect V2', labelEn: 'Sante Connect V2', icon: HeartPulse },
         { id: 'services', labelFr: 'Plan Chirurgical', labelEn: 'Surgical Plan', icon: Zap },
         { id: 'multitenancy', labelFr: 'Sprint 1: Multi-Tenance', labelEn: 'Sprint 1: Multi-Tenancy', icon: Key },
@@ -5941,14 +5945,13 @@ export default function App() {
       </nav>
 
       <main 
-        style={user && activeTab !== 'intelligence' ? { paddingLeft: '240px' } : undefined}
         className={cn(
           "transition-all duration-300",
           activeTab === 'intelligence' 
             ? "p-0 max-w-none w-screen h-screen overflow-hidden fixed inset-0 z-50 bg-[#070b13]" 
             : cn(
-                "pb-20 mx-auto min-h-screen px-8 md:px-12",
-                user ? "pt-24 xl:pt-12 max-w-[1700px]" : "pt-24 max-w-[1400px]"
+                "pb-20 mx-auto min-h-screen px-4 sm:px-6 md:px-12",
+                user ? "pt-24 xl:pt-12 xl:pl-[240px] max-w-[1700px]" : "pt-24 max-w-[1400px]"
               )
         )}
       >
@@ -6286,6 +6289,7 @@ export default function App() {
                 )}
 
                 {/* AuditLab Support Routes */}
+                {activeTab === 'billing-hub' && <SovereignBillingTenantHub onNotify={showToast} />}
                 {activeTab === 'sante' && <SanteConnectSection onNotify={showToast} language={language} />}
                 {activeTab === 'services' && <PlanChirurgicalSection data={data} onNotify={showToast} />}
                 {activeTab === 'multitenancy' && <MultiTenancySection onNotify={showToast} />}

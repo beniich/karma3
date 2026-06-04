@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from '../hooks/useTranslation.tsx';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Cpu, 
@@ -52,9 +53,17 @@ const INITIAL_DEVICES: DeviceItem[] = [
   { id: '601', name: 'IN-Mumbai Database-5', type: 'Database Vault', status: 'offline', ip: '10.8.0.42', latency: 0, location: 'Mumbai, India', cpu: 0 },
 ];
 
-export const NexusMainDashboard = ({ onNotify, theme }: { onNotify: (msg: string) => void; theme?: 'dark' | 'light' | 'high-contrast' }) => {
+export const NexusMainDashboard = ({ onNotify, theme, language = 'FR' }: { onNotify: (msg: string) => void; theme?: 'dark' | 'light' | 'high-contrast'; language?: 'FR' | 'EN' }) => {
+  const { t: translate } = useTranslation();
   const [currentSubTab, setCurrentSubTab] = useState<'summary' | 'dashboard' | 'devices' | 'alerts' | 'reports' | 'settings'>('summary');
   const isLight = theme === 'light';
+
+  const t = (fr: string, en: string) => {
+    if (fr.includes('.') && !fr.includes(' ')) {
+      return translate(fr);
+    }
+    return language === 'FR' ? fr : en;
+  };
 
   // Sovereign Settings à la pfSense
   const [config, setConfig] = useState({
@@ -98,13 +107,13 @@ export const NexusMainDashboard = ({ onNotify, theme }: { onNotify: (msg: string
       });
       if (response.ok) {
         setHasChanges(false);
-        onNotify("Configuration du système appliquée avec succès et services synchronisés !");
+        onNotify(t("Configuration du système appliquée avec succès et services synchronisés !", "System configuration successfully applied and services synchronized!"));
       } else {
-        onNotify("Erreur lors de l'application de la configuration.");
+        onNotify(t("Erreur lors de l'application de la configuration.", "Error while applying configuration."));
       }
     } catch (err) {
       console.error(err);
-      onNotify("Erreur réseau ou hôte système injoignable.");
+      onNotify(t("Erreur réseau ou hôte système injoignable.", "Network error or system host unreachable."));
     } finally {
       setIsApplying(false);
     }
@@ -182,17 +191,17 @@ export const NexusMainDashboard = ({ onNotify, theme }: { onNotify: (msg: string
     };
     setDevices([newDev, ...devices]);
     setShowAddModal(false);
-    onNotify(`✓ Équipement raccordé : ${newDev.name}`);
-    setLogs((prev) => [`[SECURE] Nouveau nœud raccordé avec succès: ${newDev.name} (${newDev.ip})`, ...prev]);
+    onNotify(t(`✓ Équipement raccordé : ${newDev.name}`, `✓ Node connected: ${newDev.name}`));
+    setLogs((prev) => [t(`[SECURE] Nouveau nœud raccordé avec succès: ${newDev.name} (${newDev.ip})`, `[SECURE] New node successfully connected: ${newDev.name} (${newDev.ip})`), ...prev]);
     setNewName('');
   };
 
   const handleStartDiagnostics = () => {
-    onNotify("⚡ Diagnostic complet du sous-réseau en cours...");
+    onNotify(t("⚡ Diagnostic complet du sous-réseau en cours...", "⚡ Full subnet diagnostics in progress..."));
     setLogs((prev) => [
-      `[DIAG] Diagnostic de sécurité lancé : Vérification de mTLS sur 1,245,678 serveurs.`,
-      `[DIAG] Flux chiffrés : OK | Algorithme AES-256 actif.`,
-      `[DIAG] Analyse complète menée avec 0 erreur critique détectée.`,
+      t(`[DIAG] Diagnostic de sécurité lancé : Vérification de mTLS sur 1,245,678 serveurs.`, `[DIAG] Security diagnostic launched: Checking mTLS on 1,245,678 servers.`),
+      t(`[DIAG] Flux chiffrés : OK | Algorithme AES-256 actif.`, `[DIAG] Encrypted flow: OK | AES-256 algorithm active.`),
+      t(`[DIAG] Analyse complète menée avec 0 erreur critique détectée.`, `[DIAG] Comprehensive analysis completed with 0 critical errors detected.`),
       ...prev
     ]);
   };
@@ -290,15 +299,15 @@ export const NexusMainDashboard = ({ onNotify, theme }: { onNotify: (msg: string
             <div className="flex items-center gap-2 text-left">
               <AlertTriangle className="w-5 h-5 animate-pulse shrink-0 text-white" />
               <div>
-                <p className="text-xs font-black uppercase tracking-wider">Vous avez des modifications système en attente</p>
-                <p className="text-[10px] font-medium opacity-90">Cliquez sur "Appliquer" pour orchestrer les services sur l'hôte Linux.</p>
+                <p className="text-xs font-black uppercase tracking-wider">{t("Vous avez des modifications système en attente", "You have pending system modifications")}</p>
+                <p className="text-[10px] font-medium opacity-90">{t("Cliquez sur \"Appliquer\" pour orchestrer les services sur l'hôte Linux.", "Click \"Apply\" to orchestrate services on the Linux host.")}</p>
               </div>
             </div>
             <button 
               onClick={applyChanges}
               className="px-4 py-2 bg-zinc-950 hover:bg-zinc-900 text-white hover:text-orange-400 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all border-none cursor-pointer shadow-lg shrink-0"
             >
-              Appliquer les changements
+              {t("Appliquer les changements", "Apply changes")}
             </button>
           </motion.div>
         )}
@@ -310,10 +319,10 @@ export const NexusMainDashboard = ({ onNotify, theme }: { onNotify: (msg: string
           <div className="text-center p-6 max-w-sm">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
             <p className="font-mono text-xs uppercase tracking-widest text-orange-550 font-bold">
-              Orchestration de la Sovereign Appliance...
+              {t("Orchestration de la Sovereign Appliance...", "Orchestrating the Sovereign Appliance...")}
             </p>
             <p className="text-[10px] font-mono text-slate-400 mt-2 leading-relaxed">
-              Recréation des fichiers de configuration, injection de clés TLS et redémarrage de l'enclave locale.
+              {t("Recréation des fichiers de configuration, injection de clés TLS et redémarrage de l'enclave locale.", "Rebuilding configuration files, injecting TLS keys, and restarting local enclave.")}
             </p>
           </div>
         </div>
@@ -373,7 +382,7 @@ export const NexusMainDashboard = ({ onNotify, theme }: { onNotify: (msg: string
                   key={tab.id}
                   onClick={() => {
                     setCurrentSubTab(tab.id as any);
-                    onNotify(`Rubrique Nexus : ${tab.label}`);
+                    onNotify(t(`Rubrique Nexus : ${tab.label}`, `Nexus Section: ${tab.label}`));
                   }}
                   className={cn(
                     "px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer relative",
@@ -394,7 +403,7 @@ export const NexusMainDashboard = ({ onNotify, theme }: { onNotify: (msg: string
 
           {/* Admin Metadata drop-trigger */}
           <button 
-            onClick={() => onNotify("👑 Grade d'habilitation : Tier 01 Active")}
+            onClick={() => onNotify(t("👑 Grade d'habilitation : Tier 01 Active", "👑 Clearance Level: Tier 01 Active"))}
             className={cn(
               "flex items-center gap-2 px-3 py-1.5 border rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ml-auto lg:ml-0",
               isLight 
@@ -455,7 +464,7 @@ export const NexusMainDashboard = ({ onNotify, theme }: { onNotify: (msg: string
                   <div className="flex justify-between items-start">
                     <div className="space-y-1 text-left">
                       <span className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                        Audit Global OK
+                        {t("Audit Global OK", "Global Audit OK")}
                       </span>
                       <h3 className={cn("text-lg font-black italic uppercase mt-1.5", isLight ? "text-slate-950" : "text-white")}>
                         Compliance Index
@@ -485,20 +494,20 @@ export const NexusMainDashboard = ({ onNotify, theme }: { onNotify: (msg: string
                     <div className="col-span-8 space-y-2 text-xs font-mono text-left">
                       <div className="flex items-center justify-between">
                         <span className="text-slate-500 text-[10px]">SOC 2 Trust Principles:</span>
-                        <span className="text-emerald-500 font-bold uppercase text-[10px]">100% Conforme</span>
+                        <span className="text-emerald-500 font-bold uppercase text-[10px]">{t("100% Conforme", "100% Compliant")}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-slate-500 text-[10px]">ISO 27001 Annex A:</span>
-                        <span className="text-emerald-500 font-bold uppercase text-[10px]">91.2% Validé</span>
+                        <span className="text-emerald-500 font-bold uppercase text-[10px]">{t("91.2% Validé", "91.2% Validated")}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-slate-500 text-[10px]">RGPD Privacy Directives:</span>
-                        <span className="text-emerald-500 font-bold uppercase text-[10px]">Conforme IP</span>
+                        <span className="text-emerald-500 font-bold uppercase text-[10px]">{t("Conforme IP", "IP Compliant")}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-slate-500 text-[10px]">mTLS Enforced Links:</span>
                         <span className={cn("font-bold uppercase text-[10px]", config.security.mtls_enforced ? "text-emerald-500" : "text-amber-500")}>
-                          {config.security.mtls_enforced ? "100% Activé" : "Bypass Partiel"}
+                          {config.security.mtls_enforced ? t("100% Activé", "100% Enabled") : t("Bypass Partiel", "Partial Bypass")}
                         </span>
                       </div>
                     </div>
@@ -506,7 +515,7 @@ export const NexusMainDashboard = ({ onNotify, theme }: { onNotify: (msg: string
 
                   <div className={cn("border-t pt-3 text-left", isLight ? "border-slate-150" : "border-white/5")}>
                     <p className="text-[10px] text-slate-500 leading-normal">
-                      L'indice de conformité agrège l'état cryptographique de l'appliance, la validité des politiques mTLS et la détection d'intrusions locales.
+                      {t("L'indice de conformité agrège l'état cryptographique de l'appliance, la validité des politiques mTLS et la détection d'intrusions locales.", "The compliance index aggregates the cryptographic state of the appliance, validity of mTLS policies, and local intrusion detection.")}
                     </p>
                   </div>
                 </div>
@@ -523,7 +532,7 @@ export const NexusMainDashboard = ({ onNotify, theme }: { onNotify: (msg: string
                   <div className="flex justify-between items-start">
                     <div className="space-y-1 text-left">
                       <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#ff7a00] bg-[#ff7a00]/10 px-2 py-0.5 rounded border border-[#ff7a00]/20">
-                        Niveau Résiduel : Faible
+                        {t("Niveau Résiduel : Faible", "Residual Level: Low")}
                       </span>
                       <h3 className={cn("text-lg font-black italic uppercase mt-1.5", isLight ? "text-slate-950" : "text-white")}>
                         Risk Exposure
@@ -536,7 +545,7 @@ export const NexusMainDashboard = ({ onNotify, theme }: { onNotify: (msg: string
 
                   <div className="my-4 text-left">
                     <div className="flex justify-between items-center mb-1 text-xs font-mono">
-                      <span className="text-slate-500">Facteur Global d'Exposition :</span>
+                      <span className="text-slate-500">{t("Facteur Global d'Exposition :", "Global Exposure Factor:")}</span>
                       <span className="text-orange-550 font-black">1.25 / 5.00 (Low)</span>
                     </div>
                     {/* Horizontal Bar */}
@@ -548,23 +557,23 @@ export const NexusMainDashboard = ({ onNotify, theme }: { onNotify: (msg: string
 
                     <div className="grid grid-cols-3 gap-2 mt-4 text-[9px] font-mono whitespace-nowrap">
                       <div className={cn("p-2 border rounded-xl", isLight ? "bg-slate-50 border-slate-200" : "bg-[#04060d] border-white/5")}>
-                        <span className="text-slate-500 block">Vecteurs Internes</span>
-                        <strong className="text-emerald-500 font-extrabold uppercase">0 MALS Sains</strong>
+                        <span className="text-slate-500 block">{t("Vecteurs Internes", "Internal Vectors")}</span>
+                        <strong className="text-emerald-500 font-extrabold uppercase">{t("0 MALS Sains", "0 Malware Healthy")}</strong>
                       </div>
                       <div className={cn("p-2 border rounded-xl", isLight ? "bg-slate-50 border-slate-200" : "bg-[#04060d] border-white/5")}>
-                        <span className="text-slate-500 block">Ports Étrangers</span>
-                        <strong className="text-emerald-500 font-extrabold uppercase animate-pulse">1 Actif (3000)</strong>
+                        <span className="text-slate-500 block">{t("Ports Étrangers", "Foreign Ports")}</span>
+                        <strong className="text-emerald-500 font-extrabold uppercase animate-pulse">{t("1 Actif (3000)", "1 Active (3000)")}</strong>
                       </div>
                       <div className={cn("p-2 border rounded-xl", isLight ? "bg-slate-50 border-slate-200" : "bg-[#04060d] border-white/5")}>
-                        <span className="text-slate-500 block">Incursions OS</span>
-                        <strong className="text-emerald-500 font-extrabold uppercase">Bloqué (FW)</strong>
+                        <span className="text-slate-500 block">{t("Incursions OS", "OS Incursions")}</span>
+                        <strong className="text-emerald-500 font-extrabold uppercase">{t("Bloqué (FW)", "Blocked (FW)")}</strong>
                       </div>
                     </div>
                   </div>
 
                   <div className={cn("border-t pt-3 text-left", isLight ? "border-slate-150" : "border-white/5")}>
                     <p className="text-[10px] text-slate-500 leading-normal">
-                      Aucun débordement de buffer mémoire ou attaque brute-force n'a été détecté dans les enclaves réseau du système Linux d'accueil.
+                      {t("Aucun débordement de buffer mémoire ou attaque brute-force n'a été détecté dans les enclaves réseau du système Linux d'accueil.", "No memory buffer overflow or brute-force attack has been detected in the host Linux system's network enclaves.")}
                     </p>
                   </div>
                 </div>
@@ -606,15 +615,15 @@ export const NexusMainDashboard = ({ onNotify, theme }: { onNotify: (msg: string
 
                     <div className="grid grid-cols-2 gap-3">
                       <div className={cn("p-2.5 border rounded-xl", isLight ? "bg-slate-50 border-slate-200" : "bg-[#04060d] border-white/5")}>
-                        <span className="text-slate-500 text-[8px] uppercase block mb-1">Rotation de clés</span>
+                        <span className="text-slate-500 text-[8px] uppercase block mb-1">{t("Rotation de clés", "Key Rotation")}</span>
                         <span className={cn("text-[9px] font-black uppercase", config.security.token_rotation ? "text-emerald-500" : "text-amber-500")}>
-                          {config.security.token_rotation ? "Automatique (12h)" : "Statique / Manuel"}
+                          {config.security.token_rotation ? t("Automatique (12h)", "Automatic (12h)") : t("Statique / Manuel", "Static / Manual")}
                         </span>
                       </div>
                       <div className={cn("p-2.5 border rounded-xl", isLight ? "bg-slate-50 border-slate-200" : "bg-[#04060d] border-white/5")}>
-                        <span className="text-slate-500 text-[8px] uppercase block mb-1">Passerelle Bastion</span>
+                        <span className="text-slate-500 text-[8px] uppercase block mb-1">{t("Passerelle Bastion", "Bastion Gateway")}</span>
                         <span className="text-[#0ea5e9] text-[9px] font-black uppercase">
-                          {config.bastion.enabled ? `Port ${config.bastion.port} (Actif)` : "Désactivé"}
+                          {config.bastion.enabled ? t(`Port ${config.bastion.port} (Actif)`, `Port ${config.bastion.port} (Active)`) : t("Désactivé", "Disabled")}
                         </span>
                       </div>
                     </div>
@@ -622,7 +631,7 @@ export const NexusMainDashboard = ({ onNotify, theme }: { onNotify: (msg: string
 
                   <div className={cn("border-t pt-3 text-left", isLight ? "border-slate-150" : "border-white/5")}>
                     <p className="text-[10px] text-slate-500 leading-normal">
-                      Les clés d'audit privée restent signées à chaud par co-génération locale HSM, et ne quittent jamais la barrière de protection.
+                      {t("Les clés d'audit privée restent signées à chaud par co-génération locale HSM, et ne quittent jamais la barrière de protection.", "Private audit keys remain hot-signed by local HSM co-generation and never leave the protection barrier.")}
                     </p>
                   </div>
                 </div>
@@ -652,33 +661,33 @@ export const NexusMainDashboard = ({ onNotify, theme }: { onNotify: (msg: string
 
                   <div className="my-4 space-y-2.5 text-xs font-mono text-left">
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500 text-[10px]">Taux d'échantillonnage de ping:</span>
+                      <span className="text-slate-500 text-[10px]">{t("Taux d'échantillonnage de ping:", "Ping sampling rate:")}</span>
                       <span className="text-purple-400 font-black uppercase text-[10px]">{config.monitoring.interval}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500 text-[10px]">Seuil d'alerte configuré:</span>
-                      <span className="text-purple-400 font-black uppercase text-[10px]">{config.monitoring.alertThreshold}% d'intensité</span>
+                      <span className="text-slate-500 text-[10px]">{t("Seuil d'alerte configuré:", "Configured alert threshold:")}</span>
+                      <span className="text-purple-400 font-black uppercase text-[10px]">{config.monitoring.alertThreshold}% {t("d'intensité", "intensity")}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500 text-[10px]">MFA de l'Audit:</span>
-                      <span className="text-purple-400 font-black uppercase text-[10px]">{config.security.mfa_required ? "Activé (Strict)" : "Inactif"}</span>
+                      <span className="text-slate-500 text-[10px]">{t("MFA de l'Audit:", "Audit MFA:")}</span>
+                      <span className="text-purple-400 font-black uppercase text-[10px]">{config.security.mfa_required ? t("Activé (Strict)", "Enabled (Strict)") : t("Inactif", "Inactive")}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500 text-[10px]">Lenteur Écho ping:</span>
-                      <span className="text-purple-400 font-black uppercase text-[10px]">{config.security.slow_pings ? "Oui (+1.5s)" : "Normal (Réduit)"}</span>
+                      <span className="text-slate-500 text-[10px]">{t("Lenteur Écho ping:", "Ping echo latency:")}</span>
+                      <span className="text-purple-400 font-black uppercase text-[10px]">{config.security.slow_pings ? t("Oui (+1.5s)", "Yes (+1.5s)") : t("Normal (Réduit)", "Normal (Reduced)")}</span>
                     </div>
                   </div>
 
                   <div className={cn("border-t pt-3 text-left", isLight ? "border-slate-150" : "border-white/5")}>
                     <div className="flex justify-between items-center">
-                      <span className="text-[10px] text-slate-500">Moteur de télémétrie actif sur port local.</span>
+                      <span className="text-[10px] text-slate-500">{t("Moteur de télémétrie actif sur port local.", "Telemetry engine active on local port.")}</span>
                       <button 
                         onClick={() => {
-                          onNotify("Télémétrie ré-évaluée manuellement.");
+                          onNotify(t("Télémétrie ré-évaluée manuellement.", "Telemetry manually re-evaluated."));
                         }}
                         className="p-1 text-[9px] font-black uppercase tracking-wider text-[#0e50e9] hover:underline bg-transparent border-none cursor-pointer"
                       >
-                        Recalibrer
+                        {t("Recalibrer", "Recalibrate")}
                       </button>
                     </div>
                   </div>
@@ -1246,7 +1255,7 @@ export const NexusMainDashboard = ({ onNotify, theme }: { onNotify: (msg: string
                       <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
                       <input
                         type="text"
-                        placeholder="Rechercher par nom, IP, pays..."
+                        placeholder={t("Rechercher par nom, IP, pays...", "Search by name, IP, country...")}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className={cn(
@@ -1304,12 +1313,12 @@ export const NexusMainDashboard = ({ onNotify, theme }: { onNotify: (msg: string
                         isLight ? "bg-slate-100 text-slate-700 border-blue-250" : "bg-white/[0.01] text-slate-400 border-white/[0.04]"
                       )}>
                         <th className="p-3">ID #</th>
-                        <th className="p-3">Équipement / Type</th>
-                        <th className="p-3">Adresse IP Securisé</th>
-                        <th className="p-3">Région Physique</th>
-                        <th className="p-3">Charge CPU</th>
-                        <th className="p-3">Echo Ping</th>
-                        <th className="p-3 text-right">Statut</th>
+                        <th className="p-3">{t("Équipement / Type", "Device / Type")}</th>
+                        <th className="p-3">{t("Adresse IP Securisé", "Secure IP Address")}</th>
+                        <th className="p-3">{t("Région Physique", "Physical Region")}</th>
+                        <th className="p-3">{t("Charge CPU", "CPU Load")}</th>
+                        <th className="p-3">{t("Echo Ping", "Ping Echo")}</th>
+                        <th className="p-3 text-right">{t("Statut", "Status")}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-transparent">
@@ -1516,9 +1525,9 @@ export const NexusMainDashboard = ({ onNotify, theme }: { onNotify: (msg: string
                       <ShieldCheck className="w-5 h-5" />
                     </div>
                     <div className="space-y-1 text-left">
-                      <span className={cn("text-xs font-bold block uppercase tracking-wide", isLight ? "text-zinc-950 font-black" : "text-white")}>Rapport Général d'Audits</span>
+                      <span className={cn("text-xs font-bold block uppercase tracking-wide", isLight ? "text-zinc-950 font-black" : "text-white")}>{t("Rapport Général d'Audits", "General Audit Report")}</span>
                       <p className={cn("text-[11px] leading-normal", isLight ? "text-slate-700 font-medium" : "text-slate-400")}>
-                        Rapports réglementaires décrivant le statut d'habilitation et la mTLS active.
+                        {t("Rapports réglementaires décrivant le statut d'habilitation et la mTLS active.", "Regulatory reports outlining clearance status and active mTLS.")}
                       </p>
                     </div>
                   </div>
@@ -1532,9 +1541,9 @@ export const NexusMainDashboard = ({ onNotify, theme }: { onNotify: (msg: string
                       <Activity className="w-5 h-5" />
                     </div>
                     <div className="space-y-1 text-left">
-                      <span className={cn("text-xs font-bold block uppercase tracking-wide", isLight ? "text-zinc-950 font-black" : "text-white")}>Analyse Latence Réseau</span>
+                      <span className={cn("text-xs font-bold block uppercase tracking-wide", isLight ? "text-zinc-950 font-black" : "text-white")}>{t("Analyse Latence Réseau", "Network Latence Analysis")}</span>
                       <p className={cn("text-[11px] leading-normal", isLight ? "text-slate-700 font-medium" : "text-slate-400")}>
-                        Tracés chronologiques d'échos ping avec relevés de dépassements de garantie SLA.
+                        {t("Tracés chronologiques d'échos ping avec relevés de dépassements de garantie SLA.", "Chronological tracings of ping echoes with SLA warranty violation records.")}
                       </p>
                     </div>
                   </div>

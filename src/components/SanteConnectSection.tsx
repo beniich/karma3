@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from '../hooks/useTranslation.tsx';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   HeartPulse, 
@@ -29,7 +30,8 @@ interface AlertItem {
   color: string;
 }
 
-export const SanteConnectSection = ({ onNotify }: { onNotify: (m: string) => void }) => {
+export const SanteConnectSection = ({ onNotify, language = 'FR' }: { onNotify: (m: string) => void; language?: 'FR' | 'EN' }) => {
+  const { t: translate } = useTranslation();
   // Simulator State
   const [hospitalName, setHospitalName] = useState("HÔPITAL UNIVERSITAIRE DE RABAT");
   const [hospitalCity, setHospitalCity] = useState("Rabat");
@@ -42,6 +44,13 @@ export const SanteConnectSection = ({ onNotify }: { onNotify: (m: string) => voi
 
   // Simulation play state
   const [isSimulating, setIsSimulating] = useState(true);
+
+  const t = (fr: string, en: string) => {
+    if (fr.includes('.') && !fr.includes(' ')) {
+      return translate(fr);
+    }
+    return language === 'FR' ? fr : en;
+  };
 
   // Active real-time alerts
   const [alerts, setAlerts] = useState<AlertItem[]>([

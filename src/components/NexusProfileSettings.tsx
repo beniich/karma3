@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from '../hooks/useTranslation.tsx';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   User, 
@@ -21,12 +22,16 @@ import {
   EyeOff,
   Cpu,
   Fingerprint,
-  Info
+  Info,
+  AlertOctagon
 } from 'lucide-react';
+import { scanInput, SecurityStatus } from '../lib/securityShield';
 
 interface NexusProfileSettingsProps {
   onNotify: (msg: string) => void;
   theme?: 'dark' | 'light' | 'high-contrast';
+  language?: 'FR' | 'EN';
+  setLanguage?: (lang: 'FR' | 'EN') => void;
 }
 
 interface UserSession {
@@ -45,21 +50,32 @@ const PRESET_AVATARS = [
   'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&q=80&w=150'
 ];
 
-export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileSettingsProps) => {
+export const NexusProfileSettings = ({ 
+  onNotify, 
+  theme = 'dark',
+  language = 'FR',
+  setLanguage
+}: NexusProfileSettingsProps) => {
+  const { t: translate } = useTranslation();
   const isLight = theme === 'light' || theme === 'high-contrast';
+  const t = (fr: string, en: string) => {
+    if (fr.includes('.') && !fr.includes(' ')) {
+      return translate(fr);
+    }
+    return language === 'FR' ? fr : en;
+  };
 
-  // State definitions aligned with original functional logic
   const [fullName, setFullName] = useState('Beniich Contact');
   const [emailAddress, setEmailAddress] = useState('beniich.contact@gmail.com');
   const [role, setRole] = useState('Sovereign Operator');
   const [avatar, setAvatar] = useState<string | null>(null);
+  const [blockedAttack, setBlockedAttack] = useState<SecurityStatus | null>(null);
 
   // Administrative Switch configurations
   const [twoFactor, setTwoFactor] = useState(true);
   const [autoSync, setAutoSync] = useState(true);
   const [notifications, setNotifications] = useState(false);
   const [dataEncryption, setDataEncryption] = useState(true);
-  const [language, setLanguage] = useState('English (US)');
 
   // Additional customized profile states for premium interaction
   const [encryptionKey, setEncryptionKey] = useState('AES-256-K3-NEXUS-SOVEREIGN-SEAL-X719');
@@ -72,14 +88,14 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
   // Handle Preset Avatar selection
   const selectPresetAvatar = (url: string) => {
     setAvatar(url);
-    onNotify('📸 Photo de profil mise à jour via la galerie de présélections.');
+    onNotify(t('📸 Photo de profil mise à jour via la galerie de présélections.', '📸 Profile picture updated via preferences presets gallery.'));
   };
 
   // Handle local mockup portrait upload
   const handleUploadImageMock = () => {
     const randomImg = PRESET_AVATARS[Math.floor(Math.random() * PRESET_AVATARS.length)];
     setAvatar(randomImg);
-    onNotify('📸 Photo de profil téléchargée et validée avec succès.');
+    onNotify(t('📸 Photo de profil téléchargée et validée avec succès.', '📸 Profile photo uploaded and validated successfully.'));
   };
 
   // Safe reset routine
@@ -91,26 +107,38 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
     setAutoSync(true);
     setNotifications(false);
     setDataEncryption(true);
-    setLanguage('English (US)');
+    if (setLanguage) setLanguage('FR');
     setAvatar(null);
     setEncryptionKey('AES-256-K3-NEXUS-SOVEREIGN-SEAL-X719');
     setActiveSessions([
       { id: 'SESS-01', device: 'Sovereign Lab Workstation (Lin-HML)', ip: '82.164.205.14', location: 'Paris, FR', active: true, type: 'desktop' },
       { id: 'SESS-02', device: 'Secure Mobile Console (Android Client)', ip: '194.254.91.50', location: 'Lyon, FR', active: false, type: 'mobile' }
     ]);
-    onNotify('🔄 Paramètres de profil et d\'administration réinitialisés à l\'état d\'origine.');
+    onNotify(t('🔄 Paramètres de profil et d\'administration réinitialisés à l\'état d\'origine.', '🔄 Profile and administration settings reset to factory original state.'));
   };
 
   // Saving state simulation
   const handleSaveChanges = (e: React.FormEvent) => {
     e.preventDefault();
-    onNotify('💾 Les configurations d\'administration et de profil ont été enregistrées avec succès.');
+    
+    const scanName = scanInput(fullName);
+    const scanEmail = scanInput(emailAddress);
+    const scanRole = scanInput(role);
+    
+    const threat = [scanName, scanEmail, scanRole].find(r => r.detected);
+    if (threat) {
+      setBlockedAttack(threat);
+      onNotify(t('🚨 TENTATIVE D\'INJECTION DE CODE BLOQUÉE PAR SOVEREIGN SHIELD !', '🚨 CODE INJECTION ATTEMPT BLOCKED BY SOVEREIGN SHIELD!'));
+      return;
+    }
+    
+    onNotify(t('💾 Les configurations d\'administration et de profil ont été enregistrées avec succès.', '💾 Operator profiles and administrator configurations saved successfully.'));
   };
 
   // Revoking device action
   const revokeSession = (id: string) => {
     setActiveSessions(prev => prev.filter(s => s.id !== id));
-    onNotify('🔌 Révocation et désaccouplement immédiat du terminal sécurisé.');
+    onNotify(t('🔌 Révocation et désaccouplement immédiat du terminal sécurisé.', '🔌 Session terminated. SecOps device immediately decoupled and revoked.'));
   };
 
   // Calculate dynamic security stance score based on custom switches
@@ -159,13 +187,13 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
                   : 'bg-orange-500/10 border-orange-500/20 text-orange-400'
               }`}>
                 <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-ping" />
-                Souveraineté Certifiée
+                {t("Souveraineté Certifiée", "Certified Sovereignty")}
               </span>
             </div>
             <h1 className={`text-xl md:text-2xl font-black tracking-tight mt-0.5 ${
               isLight ? 'text-slate-900' : 'text-white font-sans'
             }`}>
-              Personnalisation du Système &amp; Administrateur
+              {t("Personnalisation du Système & Administrateur", "System Customization & Admin Control")}
             </h1>
           </div>
         </div>
@@ -182,7 +210,7 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
             }`}
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            Réinitialiser
+            {t("Réinitialiser", "Reset to Default")}
           </button>
         </div>
       </div>
@@ -197,7 +225,7 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <span className="text-[9px] font-black tracking-widest text-slate-400 dark:text-slate-500 uppercase font-mono block">
-                Score d'Intégrité de Session
+                {t("Score d'Intégrité de Session", "Session Integrity Score")}
               </span>
               <div className="flex items-baseline gap-1.5">
                 <span className={`text-3xl font-black font-mono tracking-tight ${
@@ -228,7 +256,7 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
             />
           </div>
           <p className="text-[9.5px] text-slate-400 leading-tight mt-2.5 font-sans font-medium">
-            Calculé en temps réel selon les algorithmes d'encryption et d'authentification active.
+            {t("Calculé en temps réel selon les algorithmes d'encryption et d'authentification active.", "Calculated in real-time based on current encryption and active session authentication algorithms.")}
           </p>
         </div>
 
@@ -250,12 +278,12 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
           </div>
           <div className="space-y-1 flex-1 min-w-0">
             <span className="text-[8px] font-black tracking-widest text-[#94a3b8] uppercase font-mono block">
-              Opérateur Assigné
+              {t("Opérateur Assigné", "Assigned Operator")}
             </span>
             <h4 className={`text-sm font-black truncate ${isLight ? 'text-slate-900' : 'text-white'}`}>
-              {fullName || 'Profil Anonyme'}
+              {fullName || t('Profil Anonyme', 'Anonymous Profile')}
             </h4>
-            <p className="text-[10px] text-slate-400 truncate leading-none">
+            <p className="text-[10px] text-slate-400 truncate leading-none font-sans">
               {role} • {emailAddress}
             </p>
           </div>
@@ -267,7 +295,7 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
         }`}>
           <div className="space-y-1">
             <span className="text-[9px] font-black tracking-widest text-slate-400 dark:text-slate-500 uppercase font-mono block">
-              Sceau Cryptographique Matériel
+              {t("Sceau Cryptographique Matériel", "Hardware Cryptographic Seal")}
             </span>
             <div className="flex items-center gap-1.5 font-mono">
               <Fingerprint className="w-4 h-4 text-orange-500" />
@@ -275,8 +303,8 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
                 FIPS 140-3 LEVEL 4
               </span>
             </div>
-            <p className="text-[9.5px] text-slate-400 leading-tight mt-1.5 font-medium">
-              Signature matérielle injectée via les puces de sécurité TPM physiques.
+            <p className="text-[9.5px] text-slate-400 leading-tight mt-1.5 font-medium font-sans">
+              {t("Signature matérielle injectée via les puces de sécurité TPM physiques.", "Hardware signature injected secure-by-default via physical TPM chips.")}
             </p>
           </div>
           <div className="w-10 h-10 rounded-xl bg-teal-550/10 border border-teal-500/20 flex items-center justify-center text-teal-400">
@@ -299,10 +327,10 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
               <span className={`text-[10px] font-mono font-black uppercase tracking-wider block ${
                 isLight ? 'text-orange-700' : 'text-orange-400'
               }`}>
-                Section d'Identification Opérateur
+                {t("Section d'Identification Opérateur", "Operator Identification Section")}
               </span>
               <h3 className={`text-md font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                Informations Personnelles &amp; Accréditations
+                {t("Informations Personnelles & Accréditations", "Personal Information & Credentials")}
               </h3>
             </div>
 
@@ -311,7 +339,7 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
               {/* Full name input */}
               <div className="space-y-1.5">
                 <label className="text-[9.5px] font-bold uppercase text-slate-450 dark:text-slate-400 block tracking-widest font-mono">
-                  Nom Complet de l'Opérateur
+                  {t("Nom Complet de l'Opérateur", "Operator Full Name")}
                 </label>
                 <div className="relative">
                   <input 
@@ -319,7 +347,7 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Saisissez votre nom complet..." 
+                    placeholder={t("Saisissez votre nom complet...", "Enter your full name...")} 
                     className={`w-full text-xs px-4 py-3 rounded-xl outline-none font-medium transition-all duration-200 border ${
                       isLight 
                         ? 'bg-slate-50 border-slate-200 text-slate-900 focus:border-orange-500 focus:bg-white placeholder-slate-400' 
@@ -333,7 +361,7 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
               {/* Email input as dynamic email validator address */}
               <div className="space-y-1.5">
                 <label className="text-[9.5px] font-bold uppercase text-slate-450 dark:text-slate-400 block tracking-widest font-mono">
-                  Adresse e-mail Souveraine
+                  {t("Adresse e-mail Souveraine", "Sovereign Email Address")}
                 </label>
                 <div className="relative">
                   <input 
@@ -341,7 +369,7 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
                     required
                     value={emailAddress}
                     onChange={(e) => setEmailAddress(e.target.value)}
-                    placeholder="ex: operator@audidax.secure" 
+                    placeholder={t("ex: operator@audidax.secure", "e.g. operator@audidax.secure")} 
                     className={`w-full text-xs px-4 py-3 rounded-xl outline-none font-medium transition-all duration-200 border ${
                       isLight 
                         ? 'bg-slate-50 border-slate-200 text-slate-900 focus:border-orange-500 focus:bg-white placeholder-slate-400' 
@@ -355,7 +383,7 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
               {/* Operator Role */}
               <div className="space-y-1.5">
                 <label className="text-[9.5px] font-bold uppercase text-slate-450 dark:text-slate-400 block tracking-widest font-mono">
-                  Rôle Système &amp; Prélèvement de Sécurité
+                  {t("Rôle Système & Prélèvement de Sécurité", "System Role & Security Clearance")}
                 </label>
                 <div className="relative">
                   <input 
@@ -363,7 +391,7 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
                     required
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
-                    placeholder="Opérateur niveau 3, Auditeur..." 
+                    placeholder={t("Opérateur niveau 3, Auditeur...", "Level 3 Operator, Auditor...")} 
                     className={`w-full text-xs px-4 py-3 rounded-xl outline-none font-medium transition-all duration-205 border ${
                       isLight 
                         ? 'bg-slate-50 border-slate-200 text-slate-900 focus:border-orange-500 focus:bg-white placeholder-slate-400' 
@@ -376,8 +404,8 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
 
               {/* Avatar Selector and Preset Gallery */}
               <div className="space-y-3 pt-3.5 border-t border-dashed border-slate-200 dark:border-teal-800/20">
-                <span className="text-[9.5px] font-bold uppercase text-slate-450 dark:text-slate-450 block tracking-widest font-mono">
-                  Photo de Profil &amp; Identité Visuelle
+                <span className="text-[9.5px] font-bold uppercase text-slate-455 dark:text-slate-450 block tracking-widest font-mono">
+                  {t("Photo de Profil & Identité Visuelle", "Profile Picture & Visual Identity")}
                 </span>
 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
@@ -396,10 +424,10 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
                       <button
                         type="button"
                         onClick={handleUploadImageMock}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-xl font-mono font-extrabold tracking-wide text-[9.5px] uppercase transition-all shadow-sm cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-xl font-mono font-extrabold tracking-wide text-[9.5px] uppercase transition-all shadow-sm cursor-pointer border-none"
                       >
                         <Upload className="w-3.5 h-3.5 stroke-[2.5]" />
-                        Importer Fichier
+                        {t("Importer Fichier", "Upload File")}
                       </button>
 
                       {avatar && (
@@ -407,7 +435,7 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
                           type="button"
                           onClick={() => {
                             setAvatar(null);
-                            onNotify('🗑️ Photo de profil retirée et réinitialisée par défaut.');
+                            onNotify(t('🗑️ Photo de profil retirée et réinitialisée par défaut.', '🗑️ Profile picture removed and reset to default.'));
                           }}
                           className={`inline-flex items-center gap-1 px-3 py-2 rounded-xl text-[9px] font-black uppercase font-mono transition-all border cursor-pointer ${
                             isLight 
@@ -416,12 +444,12 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
                           }`}
                         >
                           <Trash2 className="w-3 h-3" />
-                          Retirer
+                          {t("Retirer", "Remove")}
                         </button>
                       )}
                     </div>
                     <p className="text-[9px] text-[#94a3b8] leading-normal font-sans">
-                      Chargez une photo au format JPG / PNG, max 1 Mb. Ou sélectionnez l'une des présélections cryptographiques ci-dessous :
+                      {t("Chargez une photo au format JPG / PNG, max 1 Mb. Ou sélectionnez l'une des présélections cryptographiques ci-dessous :", "Upload a photo in JPG / PNG format, max 1 Mb. Or select one of the cryptographic presets below:")}
                     </p>
                   </div>
                 </div>
@@ -450,9 +478,9 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
             <div className="flex gap-3 pt-4 border-t border-slate-200 dark:border-teal-800/20">
               <button
                 type="submit"
-                className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white rounded-xl font-bold uppercase tracking-widest text-[10px] transition-all cursor-pointer shadow-sm"
+                className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white rounded-xl font-bold uppercase tracking-widest text-[10px] transition-all cursor-pointer shadow-sm border-none"
               >
-                <Check className="w-4 h-4 stroke-[3px]" /> Enregistrer les changements
+                <Check className="w-4 h-4 stroke-[3px]" /> {t("Enregistrer les changements", "Save Changes")}
               </button>
             </div>
 
@@ -471,10 +499,10 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
                 <span className={`text-[10px] font-mono font-black uppercase tracking-wider block ${
                   isLight ? 'text-teal-700' : 'text-teal-400'
                 }`}>
-                  Console de Pilotage Administratif
+                  {t("Console de Pilotage Administratif", "Administrative Pilot Console")}
                 </span>
                 <h3 className={`text-md font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                  Sécurité et Comportement Système
+                  {t("Sécurité et Comportement Système", "Security & System Behavior")}
                 </h3>
               </div>
 
@@ -482,10 +510,10 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
               <div className="flex justify-between items-center gap-4 p-3 rounded-xl border bg-slate-50/50 dark:bg-[#05141b]/60 border-slate-200 dark:border-teal-800/10">
                 <div className="space-y-0.5 text-left flex-1">
                   <div className={`text-[11px] font-semibold leading-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                    Double Facteur Obligatoire (2FA)
+                    {t("Double Facteur Obligatoire (2FA)", "Mandatory Two-Factor (2FA)")}
                   </div>
                   <p className="text-[9px] text-[#94a3b8] leading-tight font-mono">
-                    Validation OTP lors du ciblage stratégique.
+                    {t("Validation OTP lors du ciblage stratégique.", "OTP validation required during strategic routing.")}
                   </p>
                 </div>
                 <button
@@ -493,9 +521,9 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
                   id="toggle-2fa"
                   onClick={() => {
                     setTwoFactor(!twoFactor);
-                    onNotify(!twoFactor ? '🔒 Double facteur enclenché obligatoirement.' : '⚠️ Protection double facteur assouplie.');
+                    onNotify(!twoFactor ? t('🔒 Double facteur enclenché obligatoirement.', '🔒 Mandatory two-factor protection active.') : t('⚠️ Protection double facteur assouplie.', '⚠️ Two-factor authorization downscaled.'));
                   }}
-                  className={`w-11 h-6 rounded-full transition-all flex items-center p-0.5 cursor-pointer ${
+                  className={`w-11 h-6 rounded-full transition-all flex items-center p-0.5 cursor-pointer border-none ${
                     twoFactor 
                       ? 'bg-orange-600 justify-end' 
                       : 'bg-slate-300 dark:bg-slate-700 justify-start'
@@ -509,10 +537,10 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
               <div className="flex justify-between items-center gap-4 p-3 rounded-xl border bg-slate-50/50 dark:bg-[#05141b]/60 border-slate-200 dark:border-teal-800/10">
                 <div className="space-y-0.5 text-left flex-1">
                   <div className={`text-[11px] font-semibold leading-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                    Synchronisation Automatique
+                    {t("Synchronisation Automatique", "Automatic Synchronization")}
                   </div>
                   <p className="text-[9px] text-[#94a3b8] leading-tight font-mono">
-                    Télémétrie asynchrone continue avec le Hub.
+                    {t("Télémétrie asynchrone continue avec le Hub.", "Continuous asynchronous telemetry link with the Hub.")}
                   </p>
                 </div>
                 <button
@@ -520,9 +548,9 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
                   id="toggle-autosync"
                   onClick={() => {
                     setAutoSync(!autoSync);
-                    onNotify(!autoSync ? '🔄 Restauration de la liaison asynchrone automatique.' : '⚠️ Synchronisation manuelle requise.');
+                    onNotify(!autoSync ? t('🔄 Restauration de la liaison asynchrone automatique.', '🔄 Restored automatic async link.') : t('⚠️ Synchronisation manuelle requise.', '⚠️ Manual synchronization requested.'));
                   }}
-                  className={`w-11 h-6 rounded-full transition-all flex items-center p-0.5 cursor-pointer ${
+                  className={`w-11 h-6 rounded-full transition-all flex items-center p-0.5 cursor-pointer border-none ${
                     autoSync 
                       ? 'bg-orange-600 justify-end' 
                       : 'bg-slate-300 dark:bg-slate-700 justify-start'
@@ -536,10 +564,10 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
               <div className="flex justify-between items-center gap-4 p-3 rounded-xl border bg-slate-50/50 dark:bg-[#05141b]/60 border-slate-200 dark:border-teal-800/10">
                 <div className="space-y-0.5 text-left flex-1">
                   <div className={`text-[11px] font-semibold leading-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                    Signaux d'Intrusion &amp; Alerte
+                    {t("Signaux d'Intrusion & Alerte", "Intrusion Alerts & Signals")}
                   </div>
                   <p className="text-[9px] text-[#94a3b8] leading-tight font-mono">
-                    Notifications immédiates sur sabotage de courant.
+                    {t("Notifications immédiates sur sabotage de courant.", "Immediate live push alerts in case of grid sabotage.")}
                   </p>
                 </div>
                 <button
@@ -547,9 +575,9 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
                   id="toggle-notifications"
                   onClick={() => {
                     setNotifications(!notifications);
-                    onNotify(!notifications ? '🔔 Surveillance active sur les attaques force-brute en direct.' : '🔇 Notifications désactivées.');
+                    onNotify(!notifications ? t('🔔 Surveillance active sur les attaques force-brute en direct.', '🔔 Live surveillance active against force-brute vectors.') : t('🔇 Notifications désactivées.', '🔇 Notifications disabled.'));
                   }}
-                  className={`w-11 h-6 rounded-full transition-all flex items-center p-0.5 cursor-pointer ${
+                  className={`w-11 h-6 rounded-full transition-all flex items-center p-0.5 cursor-pointer border-none ${
                     notifications 
                       ? 'bg-orange-600 justify-end' 
                       : 'bg-slate-300 dark:bg-slate-700 justify-start'
@@ -563,10 +591,10 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
               <div className="flex justify-between items-center gap-4 p-3 rounded-xl border bg-slate-50/50 dark:bg-[#05141b]/60 border-slate-200 dark:border-teal-800/10">
                 <div className="space-y-0.5 text-left flex-1">
                   <div className={`text-[11px] font-semibold leading-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                    Encryption Fortifiée AES-GCM-256
+                    {t("Encryption Fortifiée AES-GCM-256", "Fortified AES-GCM-256 Encryption")}
                   </div>
                   <p className="text-[9px] text-[#94a3b8] leading-tight font-mono">
-                    Verrouillage cryptographique matériel de la dB locale.
+                    {t("Verrouillage cryptographique matériel de la dB locale.", "Hardware-backed cryptographic lock of local storage.")}
                   </p>
                 </div>
                 <button
@@ -574,9 +602,9 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
                   id="toggle-encryption"
                   onClick={() => {
                     setDataEncryption(!dataEncryption);
-                    onNotify(!dataEncryption ? '🔒 Base de données locale chiffrée avec succès.' : '⚠️ Chiffrement matériel affaibli.');
+                    onNotify(!dataEncryption ? t('🔒 Base de données locale chiffrée avec succès.', '🔒 Local database successfully encrypted.') : t('⚠️ Chiffrement matériel affaibli.', '⚠️ Hardware encryption downscaled.'));
                   }}
-                  className={`w-11 h-6 rounded-full transition-all flex items-center p-0.5 cursor-pointer ${
+                  className={`w-11 h-6 rounded-full transition-all flex items-center p-0.5 cursor-pointer border-none ${
                     dataEncryption 
                       ? 'bg-orange-600 justify-end' 
                       : 'bg-slate-300 dark:bg-slate-700 justify-start'
@@ -589,14 +617,15 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
               {/* Dropdown: Language Preference selection */}
               <div className="space-y-1.5 pt-2">
                 <label className="text-[9.5px] font-bold uppercase text-slate-455 dark:text-slate-400 block tracking-widest font-mono">
-                  Sélections de la Langue Système
+                  {t("Sélections de la Langue Système", "System Language Selection")}
                 </label>
                 <div className="relative">
                   <select
-                    value={language}
+                    value={language === 'FR' ? 'French (FR)' : 'English (US)'}
                     onChange={(e) => {
-                      setLanguage(e.target.value);
-                      onNotify(`🌐 Langue système modifiée : ${e.target.value}`);
+                      const val = e.target.value === 'French (FR)' ? 'FR' : 'EN';
+                      if (setLanguage) setLanguage(val);
+                      onNotify(val === 'FR' ? '🌐 Langue système modifiée : Français' : '🌐 System language modified : English');
                     }}
                     className={`w-full text-xs px-4 py-3 rounded-xl outline-none appearance-none cursor-pointer border ${
                       isLight 
@@ -606,8 +635,6 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
                   >
                     <option value="English (US)">English (US) 🇺🇸</option>
                     <option value="French (FR)">Français (FR) 🇫🇷</option>
-                    <option value="Spanish (ES)">Español (ES) 🇪🇸</option>
-                    <option value="German (DE)">Deutsch (DE) 🇩🇪</option>
                   </select>
                   <ChevronDown className="w-4.5 h-4.5 text-slate-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
@@ -624,10 +651,10 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
               <span className={`text-[10px] font-mono font-black uppercase tracking-wider block ${
                 isLight ? 'text-teal-700' : 'text-teal-400'
               }`}>
-                Terminaux Autorisés en Ligne ({activeSessions.length})
+                {t("Terminaux Autorisés en Ligne", "Online Authorized Terminals")} ({activeSessions.length})
               </span>
               <h3 className={`text-md font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                Audit des Sessions Actives
+                {t("Audit des Sessions Actives", "Active Sessions Audit")}
               </h3>
             </div>
 
@@ -660,7 +687,7 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
                           </span>
                           {ses.active && (
                             <span className="px-1.5 py-0.5 rounded-full text-[7.5px] font-black uppercase tracking-widest bg-emerald-500 text-white leading-none font-mono">
-                              ACTIF
+                              {t("ACTIF", "ACTIVE")}
                             </span>
                           )}
                         </div>
@@ -677,7 +704,7 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
                         className={`p-2 rounded-lg border hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all cursor-pointer ${
                           isLight ? 'bg-white border-slate-200 text-slate-400' : 'bg-black/30 border-slate-805 text-slate-500'
                         }`}
-                        title="Révoquer l'appareil"
+                        title={t("Révoquer l'appareil", "Revoke Device")}
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -688,7 +715,7 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
 
               {activeSessions.length === 0 && (
                 <div className="text-center py-5 italic text-slate-500 text-xs font-mono">
-                  Aucune session secondaire autorisée actuellement.
+                  {t("Aucune session secondaire autorisée actuellement.", "No secondary authorized sessions active currently.")}
                 </div>
               )}
             </div>
@@ -696,7 +723,7 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
             {/* Sovereign Key configuration field with visual show/hide toggle */}
             <div className="mt-4 pt-3.5 border-t border-slate-200 dark:border-teal-800/25 text-left space-y-1.5">
               <label className="text-[9px] font-black tracking-widest text-[#94a3b8] uppercase font-mono block">
-                Clé de Descellement Matériel Souveraine
+                {t("Clé de Descellement Matériel Souveraine", "Hardware Sovereign Decouple Key")}
               </label>
               <div className="flex gap-2">
                 <div className="relative flex-1 min-w-0">
@@ -725,11 +752,11 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
                   type="button"
                   onClick={() => {
                     navigator.clipboard.writeText(encryptionKey);
-                    onNotify('📋 Clé de descellement copiée dans le presse-papier de l\'opérateur.');
+                    onNotify(t('📋 Clé de descellement copiée dans le presse-papier de l\'opérateur.', '📋 Sovereign decouple key copied into your operators clipboard.'));
                   }}
-                  className="px-3.5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-[9px] font-mono uppercase font-black cursor-pointer leading-tight shadow-sm shrink-0"
+                  className="px-3.5 py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-[9px] font-mono uppercase font-black cursor-pointer leading-tight shadow-sm shrink-0 border-none"
                 >
-                  Copier Key
+                  {t("Copier Key", "Copy Key")}
                 </button>
               </div>
             </div>
@@ -745,15 +772,79 @@ export const NexusProfileSettings = ({ onNotify, theme = 'dark' }: NexusProfileS
         isLight ? 'bg-orange-50/50 border-orange-200/50' : 'bg-orange-500/5 border-orange-500/20'
       }`}>
         <Info className="w-4 h-4 shrink-0 text-orange-500 mt-0.5" />
-        <div className="space-y-0.5 leading-tight">
+        <div className="space-y-0.5 leading-tight text-left">
           <div className={`text-[10px] font-black uppercase text-orange-500 font-mono tracking-wider`}>
-            CONSEIL DE SÉCURITÉ ADMIN
+            {t("CONSEIL DE SÉCURITÉ ADMIN", "ADMIN SECURITY ADVISORY")}
           </div>
-          <p className="text-[10px] text-slate-450 dark:text-slate-400 text-left font-sans">
-            Pour maintenir une certification **SOC 2 &amp; ISO 27001** sans dérive, conservez l'encryption matériel active et effectuez une rotation de la clé souveraine de descellement tous les 90 jours.
+          <p className="text-[10px] text-slate-450 dark:text-slate-400 text-left font-sans font-medium">
+            {t("Pour maintenir une certification SOC 2 & ISO 27001 sans dérive, conservez l'encryption matériel active et effectuez une rotation de la clé souveraine de descellement tous les 90 jours.", "To easily satisfy SOC 2 & ISO 27001 continuous alignment checks, preserve physical storage encryption and rotate sovereign decouple seals every 90 days.")}
           </p>
         </div>
       </div>
+
+      <AnimatePresence>
+        {blockedAttack && (
+          <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-50">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 30 }}
+              className="bg-[#0b020a] border-2 border-red-500/40 rounded-[2rem] p-8 max-w-lg w-full text-left space-y-6 shadow-[0_0_50px_rgba(239,68,68,0.2)]"
+            >
+              <div className="flex items-center gap-4 text-red-500 border-b border-red-500/10 pb-4">
+                <div className="w-12 h-12 bg-red-650/20 rounded-2xl border border-red-500/30 flex items-center justify-center text-red-500 shrink-0">
+                  <AlertOctagon className="w-7 h-7 animate-bounce" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-black text-red-400 font-mono tracking-widest uppercase">SOVEREIGN SHIELD | ANTIVIRUS COGNITIF</h4>
+                  <div className="text-md font-black text-white uppercase tracking-tight">ATTENTAT À L'INJECTION REJETÉ</div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <p className="text-slate-300 text-xs font-medium leading-relaxed">
+                  Le Web Application Firewall (WAF) d'AuditAX a intercepté une chaîne de caractères contenant une signature de code non autorisée dans l'interface utilisateur. La transaction de mise à jour s'est interrompue instantanément pour préserver l'intégrité de l'application.
+                </p>
+
+                <div className="space-y-1 bg-red-950/25 p-3.5 rounded-xl border border-red-500/20 font-mono">
+                  <span className="text-[9px] font-black uppercase text-red-450 tracking-wider">PAYLOAD MALVEILLANT EXTRACTÉ</span>
+                  <code className="text-xs font-semibold text-rose-350 break-all block leading-tight mt-1">
+                    {blockedAttack.payload}
+                  </code>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-3 bg-[#110103] border border-red-500/5 rounded-xl">
+                    <span className="text-[8px] font-bold text-slate-500 uppercase block font-mono">VECTEUR DE MENACE</span>
+                    <span className="text-[10px] font-black text-rose-400 uppercase font-mono">{blockedAttack.type}</span>
+                  </div>
+                  <div className="p-3 bg-[#110103] border border-red-500/5 rounded-xl">
+                    <span className="text-[8px] font-bold text-slate-500 uppercase block font-mono">SIGNATURE REGEX</span>
+                    <span className="text-[10px] font-black text-white uppercase truncate block font-mono font-sans">{blockedAttack.pattern}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-1 bg-emerald-950/20 p-3 rounded-xl border border-emerald-500/10 font-mono">
+                  <span className="text-[9px] font-black uppercase text-emerald-400 tracking-wider font-mono font-black">NETTOYAGE AUTOMATIQUE EXÉCUTÉ</span>
+                  <code className="text-[11px] font-bold text-emerald-300 break-all block leading-tight mt-1">
+                    {blockedAttack.clean}
+                  </code>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t border-red-500/10">
+                <button
+                  type="button"
+                  onClick={() => setBlockedAttack(null)}
+                  className="flex-1 py-3 bg-red-650 hover:bg-red-600 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all shadow-md cursor-pointer text-center"
+                >
+                  Fermer &amp; Restaurer
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

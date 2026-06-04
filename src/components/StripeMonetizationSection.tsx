@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSocket } from '../hooks/useSocket';
+import { useTranslation } from '../hooks/useTranslation.tsx';
 import { 
   CreditCard,
   Zap,
@@ -94,6 +95,7 @@ interface StripeMonetizationSectionProps {
 }
 
 export const StripeMonetizationSection = ({ onNotify, theme = 'dark' }: StripeMonetizationSectionProps) => {
+  const { t } = useTranslation();
   // Live socket connection to intercept background raw-body webhook processed events
   const { socket } = useSocket();
   const isLight = theme === 'light' || theme === 'high-contrast';
@@ -185,15 +187,9 @@ export const StripeMonetizationSection = ({ onNotify, theme = 'dark' }: StripeMo
       fetchWebhookLogs();
     };
 
-    const handleTokenUpdate = (data: any) => {
-      setTokens(data.tokenBalance);
-    };
-
     socket.on("stripe-webhook-processed", handleWebhookSignal);
-    socket.on("token-balance-updated", handleTokenUpdate);
     return () => {
       socket.off("stripe-webhook-processed", handleWebhookSignal);
-      socket.off("token-balance-updated", handleTokenUpdate);
     };
   }, [socket]);
 
@@ -366,7 +362,7 @@ export const StripeMonetizationSection = ({ onNotify, theme = 'dark' }: StripeMo
               "text-2xl md:text-3.5xl font-extrabold tracking-tight mt-1 transition-colors",
               isLight ? "text-slate-900" : "text-white"
             )}>
-              Moteur Économique &amp; Monétisation
+              {t('billing.pricing_billing')}
             </h1>
           </div>
         </div>

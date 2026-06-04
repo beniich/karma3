@@ -36,7 +36,8 @@ interface ComponentDetail {
   detailsEN: string;
 }
 
-export const NexusArchitectureOverview = ({ onNotify }: { onNotify: (msg: string) => void }) => {
+export const NexusArchitectureOverview = ({ onNotify, language = 'FR' }: { onNotify: (msg: string) => void; language?: 'FR' | 'EN' }) => {
+  const t = (fr: string, en: string) => language === 'FR' ? fr : en;
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [isTrafficActive, setIsTrafficActive] = useState(true);
   const [activeTunnel, setActiveTunnel] = useState<string | null>(null);
@@ -215,7 +216,7 @@ export const NexusArchitectureOverview = ({ onNotify }: { onNotify: (msg: string
         <div className="flex items-center gap-3">
           <div className="w-2.5 h-2.5 rounded-full bg-orange-500 animate-ping" />
           <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-[#94a3b8]">
-            Simulateur d'Intégrité d'Infrastructure
+            {t("Simulateur d'Intégrité d'Infrastructure", "Infrastructure Integrity Simulator")}
           </span>
         </div>
         <div className="flex items-center gap-3">
@@ -223,7 +224,7 @@ export const NexusArchitectureOverview = ({ onNotify }: { onNotify: (msg: string
             type="button"
             onClick={() => {
               setIsTrafficActive(!isTrafficActive);
-              onNotify(isTrafficActive ? "⏸️ Flux d'activité réseau mis en pause" : "▶️ Flux de paquets réactivé");
+              onNotify(isTrafficActive ? t("⏸️ Flux d'activité réseau mis en pause", "⏸️ Network traffic activity stream paused") : t("▶️ Flux de paquets réactivé", "▶️ Packet flows reactivated"));
             }}
             className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider border transition-all cursor-pointer ${
               isTrafficActive 
@@ -238,7 +239,7 @@ export const NexusArchitectureOverview = ({ onNotify }: { onNotify: (msg: string
             onClick={() => {
               const newMultiplier = latencyMultiplier === 1 ? 0.3 : latencyMultiplier === 0.3 ? 2 : 1;
               setLatencyMultiplier(newMultiplier);
-              onNotify(`🚀 Vitesse de transmission ajustée : x${1/newMultiplier}`);
+              onNotify(t(`🚀 Vitesse de transmission ajustée : x${1/newMultiplier}`, `🚀 Transmission speed adjusted: x${1/newMultiplier}`));
             }}
             className="px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 transition-all cursor-pointer"
           >
@@ -541,21 +542,21 @@ export const NexusArchitectureOverview = ({ onNotify }: { onNotify: (msg: string
                   <button
                     type="button"
                     onClick={() => {
-                      onNotify(`🛡️ Commande envoyée: Audit de diagnostic immédiate sur ${componentsData[selectedElement]?.name}`);
+                      onNotify(t(`🛡️ Commande envoyée: Audit de diagnostic immédiat sur ${componentsData[selectedElement]?.name}`, `🛡️ Command sent: Immediate diagnostic audit on ${componentsData[selectedElement]?.name}`));
                     }}
                     className="w-full py-2 bg-orange-500 text-slate-950 hover:bg-orange-400 transition-all rounded-xl text-[10px] font-black uppercase tracking-widest cursor-pointer shadow-lg shadow-orange-500/10 hover:shadow-orange-500/25 border-none leading-none select-none text-center"
                   >
-                    FORCER DIAGNOSTIC RESEAU
+                    {t("FORCER DIAGNOSTIC RESEAU", "FORCE NETWORK DIAGNOSTIC")}
                   </button>
                 </motion.div>
               ) : (
                 <div className="py-12 text-center text-slate-500 px-4 space-y-2">
                   <Terminal className="w-8 h-8 mx-auto text-slate-700 animate-bounce" />
                   <p className="text-[10px] font-extrabold uppercase tracking-widest">
-                    En attente de sélection
+                    {t("En attente de sélection", "Awaiting Selection")}
                   </p>
                   <p className="text-[9px] leading-relaxed text-slate-600">
-                    Cliquez sur l'un des ports VPN, des terminaux ou des enclaves du schéma technique pour évaluer l'état de sécurité cryptographique.
+                    {t("Cliquez sur l'un des ports VPN, des terminaux ou des enclaves du schéma technique pour évaluer l'état de sécurité cryptographique.", "Click on one of the VPN ports, terminals or enclaves of the technical diagram to evaluate the cryptographic security status.")}
                   </p>
                 </div>
               )}

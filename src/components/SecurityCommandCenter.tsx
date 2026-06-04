@@ -18,10 +18,20 @@ import {
   AlertTriangle,
   RotateCcw,
   Sparkles,
-  X
+  X,
+  FileCode,
+  CheckCircle2,
+  AlertOctagon,
+  Fingerprint,
+  Radio,
+  History,
+  Terminal,
+  Cpu
 } from 'lucide-react';
 import { TacticalResponseRuleEngine } from './TacticalResponseRuleEngine';
+import { SovereignWAFSandbox } from './SovereignWAFSandbox';
 import { HighFidelityIcon } from './HighFidelityIcon';
+import { scanInput, SecurityStatus } from '../lib/securityShield';
 
 interface Threat {
   id: string;
@@ -42,7 +52,7 @@ export const SecurityCommandCenter = ({ onNotify }: { onNotify: (msg: string) =>
   const [threats, setThreats] = useState<Threat[]>(INITIAL_THREATS);
   const [showThreatDetails, setShowThreatDetails] = useState(false);
   const [showPolicies, setShowPolicies] = useState(false);
-  const [secTab, setSecTab] = useState<'overview' | 'rule-engine'>('overview');
+  const [secTab, setSecTab] = useState<'overview' | 'rule-engine' | 'waf'>('overview');
   
   // Policies active states triggering score updates
   const [policies, setPolicies] = useState([
@@ -130,14 +140,28 @@ export const SecurityCommandCenter = ({ onNotify }: { onNotify: (msg: string) =>
           onClick={() => setSecTab('rule-engine')}
           className={`pb-3 text-xs uppercase tracking-wider border-b-2 transition-all cursor-pointer flex items-center gap-2 ${secTab === 'rule-engine' ? 'border-orange-500 font-black text-white' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
         >
-          Tactical Response Rule Engine
+          Tactical Response Engine
           <span className="text-[8px] bg-orange-600/30 text-orange-400 font-extrabold border border-orange-500/30 px-1.5 py-0.5 rounded-full uppercase animate-pulse">ACTIVE</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setSecTab('waf')}
+          className={`pb-3 text-xs uppercase tracking-wider border-b-2 transition-all cursor-pointer flex items-center gap-2 ${secTab === 'waf' ? 'border-orange-500 font-black text-white' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+        >
+          Sovereign WAF Shield
+          <span className="text-[8px] bg-emerald-600/35 text-emerald-400 font-extrabold border border-emerald-500/30 px-1.5 py-0.5 rounded-full uppercase">SECURE</span>
         </button>
       </div>
 
-      {secTab === 'rule-engine' ? (
+      {secTab === 'rule-engine' && (
         <TacticalResponseRuleEngine onNotify={onNotify} />
-      ) : (
+      )}
+
+      {secTab === 'waf' && (
+        <SovereignWAFSandbox onNotify={onNotify} />
+      )}
+
+      {secTab === 'overview' && (
         <>
           {/* Row 1 Grid: Threat and Policy panels matched perfectly with Screenshot 5 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

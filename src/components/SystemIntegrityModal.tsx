@@ -23,7 +23,6 @@ import { auth, db } from '../firebase';
 import { collection, getDocs, query, limit } from 'firebase/firestore';
 import { HighFidelityIcon } from './HighFidelityIcon';
 import { cn } from '../lib/utils';
-import { useTranslation } from '../hooks/useTranslation';
 
 interface SystemIntegrityModalProps {
   isOpen: boolean;
@@ -50,7 +49,6 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
   socketConnected,
   language = 'FR'
 }) => {
-  const { t } = useTranslation();
   const [isRunning, setIsRunning] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
   const [activeCheckId, setActiveCheckId] = useState<string | null>(null);
@@ -60,63 +58,67 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
   const [checks, setChecks] = useState<DiagnosticItem[]>([
     {
       id: 'firebase_auth',
-      name: t('diagnostic.diag_firebase_auth_initialisation_s'),
+      name: language === 'FR' ? 'Initialisation & Session Firebase Auth' : 'Firebase Auth Initialisation & Session',
       category: 'AUTH',
-      description: t('diagnostic.diag_verify_secure_firebase_auth_co'),
+      description: language === 'FR' ? 'Vérifier la connexion sécurisée Firebase Auth et les jetons de session en cours.' : 'Verify secure Firebase Auth connectivity and active session tokens.',
       status: 'PENDING',
-      details: t('diagnostic.diag_awaiting_system_audit_executio'),
-      resolution: t('diagnostic.diag_if_this_test_fails_make_sure_y')
+      details: language === 'FR' ? 'En attente du lancement de l\'audit systeme.' : 'Awaiting system audit execution.',
+      resolution: language === 'FR' ? 'Si ce test échoue, vérifiez que votre configuration dans firebase-applet-config.json est correcte.' : 'If this test fails, make sure your firebase-applet-config.json configuration is correct.'
     },
     {
       id: 'firestore_db',
-      name: t('diagnostic.diag_cloud_firestore_enclave_reacha'),
+      name: language === 'FR' ? 'Accessibilité Cloud Firestore Enclave' : 'Cloud Firestore Enclave Reachability',
       category: 'DATABASE',
-      description: t('diagnostic.diag_perform_a_network_handshake_wi'),
+      description: language === 'FR' ? 'Faire un test de poignée de main réseau avec Firestore et mesurer la latence.' : 'Perform a network handshake with Firestore and measure latency.',
       status: 'PENDING',
-      details: t('diagnostic.diag_awaiting_system_audit_executio'),
-      resolution: t('diagnostic.diag_ensure_you_are_connected_to_th')
+      details: language === 'FR' ? 'En attente du lancement de l\'audit systeme.' : 'Awaiting system audit execution.',
+      resolution: language === 'FR' ? 'Assurez-vous d\'être connecté à internet et que vos règles de sécurité Firestore de la base ai-studio sont déployées.' : 'Ensure you are connected to the internet and your Firestore security rules for the ai-studio database are deployed.'
     },
     {
       id: 'api_reachability',
-      name: t('diagnostic.diag_rest_api_ingress_routing_port'),
+      name: language === 'FR' ? 'Routage API REST (Port 3000)' : 'REST API Ingress Routing (Port 3000)',
       category: 'NETWORK',
-      description: t('diagnostic.diag_verify_the_reachability_of_sta'),
+      description: language === 'FR' ? 'Vérifier l\'accessibilité des microservices du serveur Express autonome.' : 'Verify the reachability of stand-alone Express server microservices.',
       status: 'PENDING',
-      details: t('diagnostic.diag_awaiting_system_audit_executio'),
-      resolution: t('diagnostic.diag_the_backend_server_must_be_sta')
+      details: language === 'FR' ? 'En attente du lancement de l\'audit systeme.' : 'Awaiting system audit execution.',
+      resolution: language === 'FR' ? 'Le serveur backend doit être démarré sur le port 3000. Lancez "npm run dev" si vous êtes en local.' : 'The backend server must be started on port 3000. Launch "npm run dev" if running locally.'
     },
     {
       id: 'websocket_stream',
-      name: t('diagnostic.diag_socket_io_real_time_stream'),
+      name: language === 'FR' ? 'Canal en Temps Réel Socket.IO' : 'Socket.IO Real-Time Stream',
       category: 'NETWORK',
-      description: t('diagnostic.diag_verify_active_connectivity_of'),
+      description: language === 'FR' ? 'Vérifier la connectivité active du flux de télémétrie WebSocket.' : 'Verify active connectivity of the WebSocket telemetry stream.',
       status: 'PENDING',
-      details: t('diagnostic.diag_awaiting_system_audit_executio'),
-      resolution: t('diagnostic.diag_check_the_configuration_of_the')
+      details: language === 'FR' ? 'En attente du lancement de l\'audit systeme.' : 'Awaiting system audit execution.',
+      resolution: language === 'FR' ? 'Vérifiez la configuration du reverse proxy nginx ou l\'état du serveur node.' : 'Check the configuration of the nginx reverse proxy or the node server status.'
     },
     {
       id: 'local_storage',
-      name: t('diagnostic.diag_local_state_sandbox_quota'),
+      name: language === 'FR' ? 'Enclave de Données Locales (Quota)' : 'Local State Sandbox Quota',
       category: 'HARDWARE',
-      description: t('diagnostic.diag_verify_persistent_browser_cach'),
+      description: language === 'FR' ? 'Tester la lecture, l\'écriture et la limite de mémoire cache persistante du navigateur.' : 'Verify persistent browser cache storage read/write limits.',
       status: 'PENDING',
-      details: t('diagnostic.diag_awaiting_system_audit_executio'),
-      resolution: t('diagnostic.diag_free_some_browser_cache_disk_s')
+      details: language === 'FR' ? 'En attente du lancement de l\'audit systeme.' : 'Awaiting system audit execution.',
+      resolution: language === 'FR' ? 'Libérez de l\'espace disque sur votre navigateur ou autorisez les cookies tiers pour ce domaine.' : 'Free some browser cache disk space or allow third-party cookies for this domain.'
     },
     {
       id: 'gemini_config',
-      name: t('diagnostic.diag_gemini_2_0_ai_engine_integrati'),
+      name: language === 'FR' ? 'Intégration du Moteur d\'IA Gemini-2.0' : 'Gemini-2.0 AI Engine Integration',
       category: 'SECURITY',
-      description: t('diagnostic.diag_confirm_presence_and_validatio'),
+      description: language === 'FR' ? 'Vérifier la présence et la validation de la clé secrète GEMINI_API_KEY.' : 'Confirm presence and validation of secret GEMINI_API_KEY.',
       status: 'PENDING',
-      details: t('diagnostic.diag_awaiting_system_audit_executio'),
-      resolution: t('diagnostic.diag_add_gemini_api_key_into_your_e')
+      details: language === 'FR' ? 'En attente du lancement de l\'audit systeme.' : 'Awaiting system audit execution.',
+      resolution: language === 'FR' ? 'Ajoutez GEMINI_API_KEY dans votre fichier .env et relancez le serveur de développement.' : 'Add GEMINI_API_KEY into your .env file and restart the development server.'
     }
   ]);
 
   const addLog = (text: string) => {
     const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
     setLogs(prev => [...prev, `[${timestamp}] ${text}`]);
+  };
+
+  const log = (fr: string, en: string) => {
+    addLog(language === 'FR' ? fr : en);
   };
 
   useEffect(() => {
@@ -133,23 +135,23 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
     setExpandedCheckId(null);
     
     // Set all to scanning at the start
-    setChecks(prev => prev.map(c => ({ ...c, status: 'SCANNING', details: t('diagnostic.diag_audit_sequence_initiated') })));
+    setChecks(prev => prev.map(c => ({ ...c, status: 'SCANNING', details: language === 'FR' ? 'Séquence d\'audit démarrée...' : 'Audit sequence initiated...' })));
     
-    addLog('SYS_DIAG_ENGINE_START: Initialisation de la routine d\'audit d\'intégrité AuditAX...');
-    addLog('STRICT_ISOLATED_SANDBOX: Isolation de la session d\'audit en cours...');
+    log('SYS_DIAG_ENGINE_START: Initialisation de la routine d\'audit d\'intégrité AuditAX...', 'SYS_DIAG_ENGINE_START: Initializing AuditAX integrity audit routine...');
+    log('STRICT_ISOLATED_SANDBOX: Isolation de la session d\'audit en cours...', 'STRICT_ISOLATED_SANDBOX: Isolating audit session in progress...');
     await new Promise(r => setTimeout(r, 800));
 
     // CHECK 1: Firebase Auth Connection
     {
       const id = 'firebase_auth';
       setActiveCheckId(id);
-      addLog('SCANNING [AUTH]: Analyse de la session Firebase Auth...');
+      log('SCANNING [AUTH]: Analyse de la session Firebase Auth...', 'SCANNING [AUTH]: Analyzing Firebase Auth session...');
       await new Promise(r => setTimeout(r, 600));
       
       try {
         const currentUser = auth.currentUser;
         if (currentUser) {
-          addLog(`PASS [AUTH]: Jeton de session actif détecté pour l'officier: ${currentUser.email}`);
+          log(`PASS [AUTH]: Jeton de session actif détecté pour l'officier: ${currentUser.email}`, `PASS [AUTH]: Active session token detected for operator: ${currentUser.email}`);
           setChecks(prev => prev.map(c => c.id === id ? {
             ...c,
             status: 'PASS',
@@ -159,7 +161,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
             metadata: { uid: currentUser.uid, email: currentUser.email, verified: currentUser.emailVerified }
           } : c));
         } else {
-          addLog('WARN [AUTH]: Aucun officier identifié. Session locale invité anonyme active.');
+          log('WARN [AUTH]: Aucun officier identifié. Session locale invité anonyme active.', 'WARN [AUTH]: No operator identified. Offline guest session active.');
           setChecks(prev => prev.map(c => c.id === id ? {
             ...c,
             status: 'WARNING',
@@ -172,7 +174,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
           } : c));
         }
       } catch (err: any) {
-        addLog(`FAIL [AUTH]: Échec d'inspection des sessions d'authentification: ${err.message}`);
+        log(`FAIL [AUTH]: Échec d'inspection des sessions d'authentification: ${err.message}`, `FAIL [AUTH]: Auth session inspection failed: ${err.message}`);
         setChecks(prev => prev.map(c => c.id === id ? {
           ...c,
           status: 'FAIL',
@@ -185,7 +187,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
     {
       const id = 'firestore_db';
       setActiveCheckId(id);
-      addLog('SCANNING [DB]: Établissement de la poignée de main réseau Cloud Firestore...');
+      log('SCANNING [DB]: Établissement de la poignée de main réseau Cloud Firestore...', 'SCANNING [DB]: Establishing Cloud Firestore handshake...');
       await new Promise(r => setTimeout(r, 700));
       
       const startTime = Date.now();
@@ -195,7 +197,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
         await getDocs(riskQuery);
         const latency = Date.now() - startTime;
         
-        addLog(`PASS [DB]: Connexion Cloud Firestore établie avec succès. Latence: ${latency}ms`);
+        log(`PASS [DB]: Connexion Cloud Firestore établie avec succès. Latence: ${latency}ms`, `PASS [DB]: Cloud Firestore connection successfully established. Latency: ${latency}ms`);
         setChecks(prev => prev.map(c => c.id === id ? {
           ...c,
           status: 'PASS',
@@ -211,7 +213,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
         const isPermissionDenied = err.message?.includes('permissions') || err.code === 'permission-denied';
         
         if (isPermissionDenied) {
-          addLog(`PASS [DB]: Reachability validée (Sécurité ACL active). Latence: ${latency}ms.`)
+          log(`PASS [DB]: Reachability validée (Sécurité ACL active). Latence: ${latency}ms.`, `PASS [DB]: Reachability validated (ACL protection active). Latency: ${latency}ms.`)
           setChecks(prev => prev.map(c => c.id === id ? {
             ...c,
             status: 'PASS',
@@ -221,7 +223,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
               : `Enclave database responded in ${latency}ms. Zero-trust security directives verified (Access denied to unauthorized sessions by default).`
           } : c));
         } else {
-          addLog(`FAIL [DB]: Échec de connexion de transit à Firestore. Cause: ${err.message}`);
+          log(`FAIL [DB]: Échec de connexion de transit à Firestore. Cause: ${err.message}`, `FAIL [DB]: Firestore connection handshake failed. Cause: ${err.message}`);
           setChecks(prev => prev.map(c => c.id === id ? {
             ...c,
             status: 'FAIL',
@@ -238,7 +240,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
     {
       const id = 'api_reachability';
       setActiveCheckId(id);
-      addLog('SCANNING [NETWORK]: Test d\'impulsion API REST Express (Port 3000)...');
+      log('SCANNING [NETWORK]: Test d\'impulsion API REST Express (Port 3000)...', 'SCANNING [NETWORK]: Express REST API handshake test (Port 3000)...');
       await new Promise(r => setTimeout(r, 600));
       
       const startTime = Date.now();
@@ -248,7 +250,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
         const data = await res.json();
         const latency = Date.now() - startTime;
         
-        addLog(`PASS [NETWORK]: Serveur Express pleinement accessible. Latence d'API: ${latency}ms`);
+        log(`PASS [NETWORK]: Serveur Express pleinement accessible. Latence d'API: ${latency}ms`, `PASS [NETWORK]: Express server fully reachable. API Latency: ${latency}ms`);
         setChecks(prev => prev.map(c => c.id === id ? {
           ...c,
           status: 'PASS',
@@ -259,7 +261,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
           metadata: data
         } : c));
       } catch (err: any) {
-        addLog(`FAIL [NETWORK]: Tunnel API REST déconnecté ou port 3000 congestionné: ${err.message}`);
+        log(`FAIL [NETWORK]: Tunnel API REST déconnecté ou port 3000 congestionné: ${err.message}`, `FAIL [NETWORK]: REST API tunnel offline or port 3000 congested: ${err.message}`);
         setChecks(prev => prev.map(c => c.id === id ? {
           ...c,
           status: 'FAIL',
@@ -274,11 +276,11 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
     {
       const id = 'websocket_stream';
       setActiveCheckId(id);
-      addLog('SCANNING [NETWORK]: Écoute de l\'impulsion télémétrique Socket.IO...');
+      log('SCANNING [NETWORK]: Écoute de l\'impulsion télémétrique Socket.IO...', 'SCANNING [NETWORK]: Listening for Socket.IO telemetry pulse...');
       await new Promise(r => setTimeout(r, 550));
       
       if (socketConnected) {
-        addLog('PASS [NETWORK]: Flux bidirectionnel actif avec la console centrale.');
+        log('PASS [NETWORK]: Flux bidirectionnel actif avec la console centrale.', 'PASS [NETWORK]: Active bidirectional stream with the core console.');
         setChecks(prev => prev.map(c => c.id === id ? {
           ...c,
           status: 'PASS',
@@ -287,7 +289,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
             : 'Socket.IO live packet sync connection handshake verified. High priority signal queues active.'
         } : c));
       } else {
-        addLog('WARN [NETWORK]: Latence WebSocket ou socket hors-ligne. Utilisation des traceurs REST par défaut.');
+        log('WARN [NETWORK]: Latence WebSocket ou socket hors-ligne. Utilisation des traceurs REST par défaut.', 'WARN [NETWORK]: WebSocket latency or offline sockets. Defaulting to REST pollers.');
         setChecks(prev => prev.map(c => c.id === id ? {
           ...c,
           status: 'WARNING',
@@ -302,7 +304,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
     {
       const id = 'local_storage';
       setActiveCheckId(id);
-      addLog('SCANNING [HARDWARE]: Test cyclique de l\'enclave locale LocalStorage...');
+      log('SCANNING [HARDWARE]: Test cyclique de l\'enclave locale LocalStorage...', 'SCANNING [HARDWARE]: Cyclic test of the local LocalStorage sandbox...');
       await new Promise(r => setTimeout(r, 500));
       
       try {
@@ -314,7 +316,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
         
         if (retrieved === payload) {
           const estimatedSize = JSON.stringify(localStorage).length;
-          addLog(`PASS [HARDWARE]: Enclave locale disponible. Taille du cache utilisé: ${Math.round(estimatedSize / 1024)} KB`);
+          log(`PASS [HARDWARE]: Enclave locale disponible. Taille du cache utilisé: ${Math.round(estimatedSize / 1024)} KB`, `PASS [HARDWARE]: Local enclave sandbox responsive. Used cache capacity: ${Math.round(estimatedSize / 1024)} KB`);
           setChecks(prev => prev.map(c => c.id === id ? {
             ...c,
             status: 'PASS',
@@ -326,7 +328,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
           throw new Error('CORRUPTING_BIT_DISCREPANCY');
         }
       } catch (err: any) {
-        addLog(`FAIL [HARDWARE]: Cache local bloqué ou mémoire saturée: ${err.message}`);
+        log(`FAIL [HARDWARE]: Cache local bloqué ou mémoire saturée: ${err.message}`, `FAIL [HARDWARE]: Local sandbox storage blocked or cache saturated: ${err.message}`);
         setChecks(prev => prev.map(c => c.id === id ? {
           ...c,
           status: 'FAIL',
@@ -339,7 +341,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
     {
       const id = 'gemini_config';
       setActiveCheckId(id);
-      addLog('SCANNING [SECURITY]: Vérification de l\'authentification de l\'engin d\'IA Gemini...');
+      log('SCANNING [SECURITY]: Vérification de l\'authentification de l\'engin d\'IA Gemini...', 'SCANNING [SECURITY]: Checking Gemini AI engine authentication...');
       await new Promise(r => setTimeout(r, 650));
       
       try {
@@ -354,7 +356,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
           const active = data?.envCheck?.geminiApiKeyConfigured;
           
           if (active) {
-            addLog('PASS [SECURITY]: Clé d\'API GEMINI_API_KEY détectée et pré-enregistrée sur l\'hôte.');
+            log('PASS [SECURITY]: Clé d\'API GEMINI_API_KEY détectée et pré-enregistrée sur l\'hôte.', 'PASS [SECURITY]: GEMINI_API_KEY detected and registered on host.');
             setChecks(prev => prev.map(c => c.id === id ? {
               ...c,
               status: 'PASS',
@@ -363,7 +365,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
                 : 'Gemini-2.0-Flash artificial intelligence pipeline verified. Fully integrated on backend.'
             } : c));
           } else {
-            addLog('WARN [SECURITY]: Clé d\'API GEMINI_API_KEY non configurée dans l\'environnement.');
+            log('WARN [SECURITY]: Clé d\'API GEMINI_API_KEY non configurée dans l\'environnement.', 'WARN [SECURITY]: GEMINI_API_KEY API key not set in current host environment.');
             setChecks(prev => prev.map(c => c.id === id ? {
               ...c,
               status: 'WARNING',
@@ -376,7 +378,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
             } : c));
           }
         } else if (geminiActive) {
-          addLog('PASS [SECURITY]: Validation de la configuration d\'intelligence artificielle réussie.');
+          log('PASS [SECURITY]: Validation de la configuration d\'intelligence artificielle réussie.', 'PASS [SECURITY]: AI engine configuration successfully validated.');
           setChecks(prev => prev.map(c => c.id === id ? {
             ...c,
             status: 'PASS',
@@ -385,7 +387,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
               : 'AuditAX cognitive server (Gemini Core 2.0 Pipeline) is synchronized with variables on active node.'
           } : c));
         } else {
-          addLog('WARN [SECURITY]: Clé secrète GEMINI_API_KEY manquante sur le conteneur.');
+          log('WARN [SECURITY]: Clé secrète GEMINI_API_KEY manquante sur le conteneur.', 'WARN [SECURITY]: Secret GEMINI_API_KEY missing on host container.');
           setChecks(prev => prev.map(c => c.id === id ? {
             ...c,
             status: 'WARNING',
@@ -398,7 +400,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
           } : c));
         }
       } catch (err: any) {
-        addLog(`WARN [SECURITY]: Impossible de valider l'état Gemini. Cause: ${err.message}`);
+        log(`WARN [SECURITY]: Impossible de valider l'état Gemini. Cause: ${err.message}`, `WARN [SECURITY]: Could not validate Gemini status. Cause: ${err.message}`);
         setChecks(prev => prev.map(c => c.id === id ? {
           ...c,
           status: 'WARNING',
@@ -408,7 +410,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
     }
 
     setActiveCheckId(null);
-    addLog('SYS_DIAG_ENGINE_COMPLETE: La routine d\'audit est terminée. Synthèse des résultats générée.');
+    log('SYS_DIAG_ENGINE_COMPLETE: La routine d\'audit est terminée. Synthèse des résultats générée.', 'SYS_DIAG_ENGINE_COMPLETE: Audit routine successfully completed. Results summary generated.');
     setIsRunning(false);
   };
 
@@ -460,7 +462,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
             </HighFidelityIcon>
             <div className="text-left">
               <h2 className="text-lg font-black tracking-tight text-white uppercase flex items-center gap-2">
-                {t('diagnostic.diag_system_integrity_diagnostics')}
+                {language === 'FR' ? 'Diagnostic d\'Intégrité Système' : 'System Integrity Diagnostics'}
               </h2>
               <p className="text-[10px] font-mono font-bold tracking-[0.15em] text-[#0ea5e9]">
                 STATUS: {isRunning ? 'DIGITAL_SCAN_RUNNING' : stats.fail > 0 ? 'DIAL_COMPROMISED_ERR' : 'ACTIVE_SECURE_ENCLAVE'}
@@ -712,7 +714,7 @@ export const SystemIntegrityModal: React.FC<SystemIntegrityModalProps> = ({
             type="button"
             className="px-6 py-2.5 bg-slate-900 border border-[#1c2e46]/60 hover:bg-slate-800 hover:border-slate-600 rounded-xl text-xs font-semibold text-white transition-all focus:outline-none cursor-pointer"
           >
-            {t('diagnostic.diag_dismiss_integrity_console')}
+            {language === 'FR' ? 'Fermer la console' : 'Dismiss integrity console'}
           </button>
         </div>
       </motion.div>

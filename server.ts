@@ -5,13 +5,8 @@ import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import Stripe from "stripe";
 
 dotenv.config();
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "mock_key", {
-  apiVersion: "2025-01-27.acacia" as any,
-});
 
 const app = express();
 const httpServer = createServer(app);
@@ -115,160 +110,6 @@ app.get("/api/billing/webhook-logs", (req, res) => {
   res.json(dbWebhookLogs);
 });
 
-// --- Stripe Billing & Quota Ledger State ---
-interface UserBillingAccount {
-  plan: string;
-  tokenBalance: number;
-  status: string;
-}
-
-const userBillingAccounts: Record<string, UserBillingAccount> = {
-  "demo_user_123": {
-    plan: "Expert",
-    tokenBalance: 310,
-    status: "active"
-  }
-};
-
-function validateQuota(userId: string) {
-  const account = userBillingAccounts[userId] || { plan: 'Free', tokenBalance: 50, status: 'active' };
-  if (account.plan === 'Enterprise') return { allowed: true };
-  if (account.tokenBalance < 15) {
-    return { allowed: false, reason: 'INSUFFICIENT_TOKENS' };
-  }
-  return { allowed: true };
-}
-
-// 2. Stripe Checkout session route
-app.post("/api/billing/create-checkout", express.json(), async (req, res) => {
-  const { planId, userId } = req.body;
-
-  if (!process.env.STRIPE_SECRET_KEY) {
-    console.warn("⚠️ STRIPE_SECRET_KEY missing: Using Mock Mode");
-    return res.json({ 
-      url: `/mock-checkout?plan=${encodeURIComponent(planId)}&userId=${encodeURIComponent(userId || 'demo_user_123')}` 
-    });
-  }
-
-  const priceMap: Record<string, string> = {
-    "SaaS Expert": "price_123_expert",
-    "Corporate": "price_456_corp",
-    "Enterprise": "price_789_ent",
-  };
-
-  try {
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [{ price: priceMap[planId] || "price_123_expert", quantity: 1 }],
-      mode: 'subscription',
-      success_url: `http://localhost:3000/?success=true`,
-      cancel_url: `http://localhost:3000/?canceled=true`,
-      metadata: { userId: userId || 'demo_user_123', planId },
-    });
-    res.json({ url: session.url });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Mock Stripe Page
-app.get("/mock-checkout", (req, res) => {
-  const { plan, userId } = req.query;
-  res.send(`
-    <html>
-      <head>
-        <title>Stripe Checkout Simulation</title>
-        <style>
-          body { background: #f6f9fc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-          .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; width: 400px; }
-          h1 { color: #635bff; margin-top: 0; }
-          p { color: #425466; font-size: 14px; margin: 10px 0; }
-          .btn { background: #635bff; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 15px; margin-top: 20px; transition: background 0.15s ease; }
-          .btn:hover { background: #0a2540; }
-        </style>
-      </head>
-      <body>
-        <div class="card">
-          <h1>Stripe Mock</h1>
-          <p>Simulating secure checkout for <b>${plan}</b></p>
-          <p style="color:#727f96; font-size:12px;">User ID: ${userId}</p>
-          <form action="/api/billing/webhook-mock" method="POST">
-            <input type="hidden" name="userId" value="${userId}">
-            <input type="hidden" name="planId" value="${plan}">
-            <button type="submit" class="btn">Confirm Payment</button>
-          </form>
-        </div>
-      </body>
-    </html>
-  `);
-});
-
-app.post("/api/billing/webhook-mock", express.urlencoded({ extended: true }), (req, res) => {
-  const { planId, userId } = req.body;
-  const tokensToAdd = planId === "SaaS Expert" ? 500 : planId === "Corporate" ? 2000 : 99999;
-  
-  if (!userBillingAccounts[userId]) {
-    userBillingAccounts[userId] = { plan: planId, tokenBalance: 0, status: 'active' };
-  }
-  userBillingAccounts[userId].plan = planId;
-  userBillingAccounts[userId].tokenBalance += tokensToAdd;
-
-  const logId = `evt_mock_${Math.random().toString(36).substring(2, 11)}`;
-  const timestamp = new Date().toISOString();
-  
-  dbWebhookLogs.unshift({
-    id: logId,
-    timestamp,
-    eventType: "checkout.session.completed",
-    payloadSize: 512,
-    rawBodyValidated: true,
-    status: 'PROCESSED',
-    details: `Signature Stripe Validée (MOCK). Produit: ${planId}, +${tokensToAdd} jetons.`
-  });
-
-  io.emit("stripe-webhook-processed", {
-    eventId: logId,
-    eventType: "checkout.session.completed",
-    productId: planId === "SaaS Expert" ? "prod_Uc3qapaLfo84Oq" : planId === "Corporate" ? "prod_Uc3rO31IkGhY9v" : "prod_Uc3sIZJZhaUe2R",
-    planName: planId === "SaaS Expert" ? "Corporate" : planId === "Corporate" ? "Expert" : "Enterprise",
-    price: planId === "SaaS Expert" ? 99 : planId === "Corporate" ? 299 : 1450,
-    timestamp,
-    tokensAdded: tokensToAdd,
-    status: "Succeeded"
-  });
-
-  io.emit("token-balance-updated", {
-    userId,
-    tokenBalance: userBillingAccounts[userId].tokenBalance
-  });
-
-  res.send(`
-    <html>
-      <head>
-        <title>Payment Success</title>
-        <style>
-          body { background: #f6f9fc; font-family: -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-          .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; width: 400px; }
-          h1 { color: #22c55e; }
-        </style>
-      </head>
-      <body>
-        <div class="card">
-          <h1>Payment Succeeded!</h1>
-          <p>Your subscription is active: <b>${planId}</b></p>
-          <p>Tokens credited: <b>+${tokensToAdd}</b></p>
-          <p style="color:gray; font-size:12px;">Redirecting back to dashboard...</p>
-        </div>
-        <script>
-          setTimeout(() => {
-            window.location.href = "/";
-          }, 2000);
-        </script>
-      </body>
-    </html>
-  `);
-});
-
 app.use(express.json());
 
 const ai = new GoogleGenAI({
@@ -356,16 +197,7 @@ io.on("connection", (socket) => {
 app.post("/api/ai/generate", async (req, res) => {
   try {
     const { prompt, systemInstruction } = req.body;
-    const userId = req.body.userId || 'demo_user_123';
     
-    const quota = validateQuota(userId);
-    if (!quota.allowed) {
-      return res.status(402).json({ 
-        error: "Payment Required", 
-        message: quota.reason === 'INSUFFICIENT_TOKENS' ? "Your token balance is too low." : "Subscription required." 
-      });
-    }
-
     if (!process.env.GEMINI_API_KEY) {
       return res.status(500).json({ error: "GEMINI_API_KEY is not configured" });
     }
@@ -377,13 +209,6 @@ app.post("/api/ai/generate", async (req, res) => {
         systemInstruction: systemInstruction || "You are AuditAX Nexus Intelligence. Provide professional, concise risk analysis."
       }
     });
-
-    // Debit 15 tokens on success
-    const account = userBillingAccounts[userId];
-    if (account && account.plan !== 'Enterprise') {
-      account.tokenBalance = Math.max(0, account.tokenBalance - 15);
-      io.emit("token-balance-updated", { userId, tokenBalance: account.tokenBalance });
-    }
 
     res.json({ text: response.text });
   } catch (error: any) {
@@ -398,19 +223,6 @@ app.post("/api/ai/generate", async (req, res) => {
 app.post("/api/audit/harmonize", async (req, res) => {
   try {
     const { fields } = req.body;
-    const userId = req.body.userId || 'demo_user_123';
-    
-    const quota = validateQuota(userId);
-    if (!quota.allowed) {
-      return res.status(402).json({ 
-        error: "Payment Required", 
-        message: quota.reason === 'INSUFFICIENT_TOKENS' ? "Your token balance is too low." : "Subscription required." 
-      });
-    }
-
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ error: "GEMINI_API_KEY is not configured" });
-    }
     
     // Perform harmonization logic
     const response = await ai.models.generateContent({ 
@@ -418,13 +230,6 @@ app.post("/api/audit/harmonize", async (req, res) => {
       contents: `Harmonize the following data fields across SOC 2 and ISO 27001 standards: ${fields.join(", ")}. Provide a mapping table and identified gaps. Use a very technical, audit-approved tone.`
     });
     
-    // Debit 15 tokens on success
-    const account = userBillingAccounts[userId];
-    if (account && account.plan !== 'Enterprise') {
-      account.tokenBalance = Math.max(0, account.tokenBalance - 15);
-      io.emit("token-balance-updated", { userId, tokenBalance: account.tokenBalance });
-    }
-
     res.json({ 
       mapping: response.text,
       timestamp: new Date().toISOString(),
